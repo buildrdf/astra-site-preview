@@ -1,11 +1,17 @@
-# Astra — landing page (review copy)
+# Astra — landing page (temporary review copy)
 
-A byte-for-byte copy of `website/` from the Astra repo, published so it can be
-reviewed in an ordinary browser. Pure static: no build, no server, no keys.
+A short-lived, unlisted copy of the Astra landing page, published so it can be
+opened in an ordinary browser for review. It is **not** a launch, and it is
+excluded from search engines by `robots.txt` and a noindex meta tag.
 
-Serve it locally with any static server, e.g.
-    python3 -m http.server 4330 --bind 127.0.0.1
-then open http://127.0.0.1:4330/
+Pure static: no build, no server code, no API keys. The birth chart, tonight's
+sky and every number on the page are computed in the browser by the engine
+modules in `vendor/astro/`.
 
-The birth chart, the sky and every number on the page are computed in the browser
-by the engine modules in `vendor/astro/`.
+Run it locally with any static server, from inside this folder:
+
+    python3 -m http.server 8080
+
+then open http://localhost:8080/
+
+© Reality Distortion Field. Not for redistribution.
