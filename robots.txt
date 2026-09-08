@@ -1,0 +1,4 @@
+# Astra is App-Store-first: the site stays out of every index until launch day.
+# CLAUDE.md rule 6 — flip this at launch, not before.
+User-agent: *
+Disallow: /

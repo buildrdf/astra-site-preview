@@ -1,0 +1,712 @@
+{
+ "moment": {
+  "iso": "2093-09-10T23:00:40.000Z",
+  "name": "Ujjain",
+  "lat": 23.1765,
+  "lon": 75.7885,
+  "tz": "IST",
+  "local": "11 September 2093 · 04:30",
+  "ayanamsa": "Lahiri"
+ },
+ "lagna": {
+  "sign": 5,
+  "signName": "Leo",
+  "sanskrit": "Simha",
+  "deg": 0,
+  "lord": "Sun"
+ },
+ "houses": [
+  {
+   "house": 1,
+   "sign": 5,
+   "signName": "Leo",
+   "sanskrit": "Simha",
+   "lord": "Sun"
+  },
+  {
+   "house": 2,
+   "sign": 6,
+   "signName": "Virgo",
+   "sanskrit": "Kanya",
+   "lord": "Mercury"
+  },
+  {
+   "house": 3,
+   "sign": 7,
+   "signName": "Libra",
+   "sanskrit": "Tula",
+   "lord": "Venus"
+  },
+  {
+   "house": 4,
+   "sign": 8,
+   "signName": "Scorpio",
+   "sanskrit": "Vrischika",
+   "lord": "Mars"
+  },
+  {
+   "house": 5,
+   "sign": 9,
+   "signName": "Sagittarius",
+   "sanskrit": "Dhanu",
+   "lord": "Jupiter"
+  },
+  {
+   "house": 6,
+   "sign": 10,
+   "signName": "Capricorn",
+   "sanskrit": "Makara",
+   "lord": "Saturn"
+  },
+  {
+   "house": 7,
+   "sign": 11,
+   "signName": "Aquarius",
+   "sanskrit": "Kumbha",
+   "lord": "Saturn"
+  },
+  {
+   "house": 8,
+   "sign": 12,
+   "signName": "Pisces",
+   "sanskrit": "Meena",
+   "lord": "Jupiter"
+  },
+  {
+   "house": 9,
+   "sign": 1,
+   "signName": "Aries",
+   "sanskrit": "Mesha",
+   "lord": "Mars"
+  },
+  {
+   "house": 10,
+   "sign": 2,
+   "signName": "Taurus",
+   "sanskrit": "Vrishabha",
+   "lord": "Venus"
+  },
+  {
+   "house": 11,
+   "sign": 3,
+   "signName": "Gemini",
+   "sanskrit": "Mithuna",
+   "lord": "Mercury"
+  },
+  {
+   "house": 12,
+   "sign": 4,
+   "signName": "Cancer",
+   "sanskrit": "Karka",
+   "lord": "Moon"
+  }
+ ],
+ "rarity": {
+  "windowYears": 10000,
+  "daysScanned": 3652500,
+  "otherDays": 0,
+  "method": "All nine grahas in the same nakshatras, one day per step, five thousand years either side of this moment."
+ },
+ "planets": [
+  {
+   "graha": "Sun",
+   "lon": 143.865,
+   "sign": 5,
+   "signName": "Leo",
+   "sanskrit": "Simha",
+   "deg": 23.86,
+   "house": 1,
+   "nakshatra": "Purva Phalguni",
+   "pada": 4,
+   "retro": false,
+   "dignity": null
+  },
+  {
+   "graha": "Moon",
+   "lon": 34.902,
+   "sign": 2,
+   "signName": "Taurus",
+   "sanskrit": "Vrishabha",
+   "deg": 4.9,
+   "house": 10,
+   "nakshatra": "Krittika",
+   "pada": 3,
+   "retro": false,
+   "dignity": "exalted"
+  },
+  {
+   "graha": "Mars",
+   "lon": 213.691,
+   "sign": 8,
+   "signName": "Scorpio",
+   "sanskrit": "Vrischika",
+   "deg": 3.69,
+   "house": 4,
+   "nakshatra": "Anuradha",
+   "pada": 1,
+   "retro": false,
+   "dignity": null
+  },
+  {
+   "graha": "Mercury",
+   "lon": 168.459,
+   "sign": 6,
+   "signName": "Virgo",
+   "sanskrit": "Kanya",
+   "deg": 18.46,
+   "house": 2,
+   "nakshatra": "Hasta",
+   "pada": 3,
+   "retro": false,
+   "dignity": "exalted"
+  },
+  {
+   "graha": "Jupiter",
+   "lon": 332.623,
+   "sign": 12,
+   "signName": "Pisces",
+   "sanskrit": "Meena",
+   "deg": 2.62,
+   "house": 8,
+   "nakshatra": "Purva Bhadrapada",
+   "pada": 4,
+   "retro": true,
+   "dignity": null
+  },
+  {
+   "graha": "Venus",
+   "lon": 188.358,
+   "sign": 7,
+   "signName": "Libra",
+   "sanskrit": "Tula",
+   "deg": 8.36,
+   "house": 3,
+   "nakshatra": "Swati",
+   "pada": 1,
+   "retro": false,
+   "dignity": null
+  },
+  {
+   "graha": "Saturn",
+   "lon": 97.363,
+   "sign": 4,
+   "signName": "Cancer",
+   "sanskrit": "Karka",
+   "deg": 7.36,
+   "house": 12,
+   "nakshatra": "Pushya",
+   "pada": 2,
+   "retro": false,
+   "dignity": null
+  },
+  {
+   "graha": "Rahu",
+   "lon": 89.024,
+   "sign": 3,
+   "signName": "Gemini",
+   "sanskrit": "Mithuna",
+   "deg": 29.02,
+   "house": 11,
+   "nakshatra": "Punarvasu",
+   "pada": 3,
+   "retro": true,
+   "dignity": null
+  },
+  {
+   "graha": "Ketu",
+   "lon": 269.024,
+   "sign": 9,
+   "signName": "Sagittarius",
+   "sanskrit": "Dhanu",
+   "deg": 29.02,
+   "house": 5,
+   "nakshatra": "Uttara Ashadha",
+   "pada": 1,
+   "retro": true,
+   "dignity": null
+  }
+ ],
+ "dasha": {
+  "birthLord": "Sun",
+  "balanceYears": 2.29,
+  "mahadashas": [
+   {
+    "lord": "Sun",
+    "start": "2089-12-27",
+    "end": "2095-12-27",
+    "years": 6,
+    "antardashas": [
+     {
+      "lord": "Sun",
+      "start": "2089-12-27",
+      "end": "2090-04-15"
+     },
+     {
+      "lord": "Moon",
+      "start": "2090-04-15",
+      "end": "2090-10-15"
+     },
+     {
+      "lord": "Mars",
+      "start": "2090-10-15",
+      "end": "2091-02-20"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2091-02-20",
+      "end": "2092-01-15"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2092-01-15",
+      "end": "2092-11-02"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2092-11-02",
+      "end": "2093-10-15"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2093-10-15",
+      "end": "2094-08-21"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2094-08-21",
+      "end": "2094-12-27"
+     },
+     {
+      "lord": "Venus",
+      "start": "2094-12-27",
+      "end": "2095-12-27"
+     }
+    ]
+   },
+   {
+    "lord": "Moon",
+    "start": "2095-12-27",
+    "end": "2105-12-28",
+    "years": 10,
+    "antardashas": [
+     {
+      "lord": "Moon",
+      "start": "2095-12-27",
+      "end": "2096-10-27"
+     },
+     {
+      "lord": "Mars",
+      "start": "2096-10-27",
+      "end": "2097-05-28"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2097-05-28",
+      "end": "2098-11-27"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2098-11-27",
+      "end": "2100-03-29"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2100-03-29",
+      "end": "2101-10-28"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2101-10-28",
+      "end": "2103-03-29"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2103-03-29",
+      "end": "2103-10-29"
+     },
+     {
+      "lord": "Venus",
+      "start": "2103-10-29",
+      "end": "2105-06-28"
+     },
+     {
+      "lord": "Sun",
+      "start": "2105-06-28",
+      "end": "2105-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Mars",
+    "start": "2105-12-28",
+    "end": "2112-12-28",
+    "years": 7,
+    "antardashas": [
+     {
+      "lord": "Mars",
+      "start": "2105-12-28",
+      "end": "2106-05-26"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2106-05-26",
+      "end": "2107-06-14"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2107-06-14",
+      "end": "2108-05-19"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2108-05-19",
+      "end": "2109-06-28"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2109-06-28",
+      "end": "2110-06-25"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2110-06-25",
+      "end": "2110-11-22"
+     },
+     {
+      "lord": "Venus",
+      "start": "2110-11-22",
+      "end": "2112-01-22"
+     },
+     {
+      "lord": "Sun",
+      "start": "2112-01-22",
+      "end": "2112-05-29"
+     },
+     {
+      "lord": "Moon",
+      "start": "2112-05-29",
+      "end": "2112-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Rahu",
+    "start": "2112-12-28",
+    "end": "2130-12-28",
+    "years": 18,
+    "antardashas": [
+     {
+      "lord": "Rahu",
+      "start": "2112-12-28",
+      "end": "2115-09-10"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2115-09-10",
+      "end": "2118-02-02"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2118-02-02",
+      "end": "2120-12-09"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2120-12-09",
+      "end": "2123-06-29"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2123-06-29",
+      "end": "2124-07-16"
+     },
+     {
+      "lord": "Venus",
+      "start": "2124-07-16",
+      "end": "2127-07-17"
+     },
+     {
+      "lord": "Sun",
+      "start": "2127-07-17",
+      "end": "2128-06-10"
+     },
+     {
+      "lord": "Moon",
+      "start": "2128-06-10",
+      "end": "2129-12-10"
+     },
+     {
+      "lord": "Mars",
+      "start": "2129-12-10",
+      "end": "2130-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Jupiter",
+    "start": "2130-12-28",
+    "end": "2146-12-28",
+    "years": 16,
+    "antardashas": [
+     {
+      "lord": "Jupiter",
+      "start": "2130-12-28",
+      "end": "2133-02-14"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2133-02-14",
+      "end": "2135-08-29"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2135-08-29",
+      "end": "2137-12-04"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2137-12-04",
+      "end": "2138-11-09"
+     },
+     {
+      "lord": "Venus",
+      "start": "2138-11-09",
+      "end": "2141-07-10"
+     },
+     {
+      "lord": "Sun",
+      "start": "2141-07-10",
+      "end": "2142-04-29"
+     },
+     {
+      "lord": "Moon",
+      "start": "2142-04-29",
+      "end": "2143-08-29"
+     },
+     {
+      "lord": "Mars",
+      "start": "2143-08-29",
+      "end": "2144-08-04"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2144-08-04",
+      "end": "2146-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Saturn",
+    "start": "2146-12-28",
+    "end": "2165-12-28",
+    "years": 19,
+    "antardashas": [
+     {
+      "lord": "Saturn",
+      "start": "2146-12-28",
+      "end": "2149-12-31"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2149-12-31",
+      "end": "2152-09-09"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2152-09-09",
+      "end": "2153-10-19"
+     },
+     {
+      "lord": "Venus",
+      "start": "2153-10-19",
+      "end": "2156-12-18"
+     },
+     {
+      "lord": "Sun",
+      "start": "2156-12-18",
+      "end": "2157-11-30"
+     },
+     {
+      "lord": "Moon",
+      "start": "2157-11-30",
+      "end": "2159-07-02"
+     },
+     {
+      "lord": "Mars",
+      "start": "2159-07-02",
+      "end": "2160-08-10"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2160-08-10",
+      "end": "2163-06-17"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2163-06-17",
+      "end": "2165-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Mercury",
+    "start": "2165-12-28",
+    "end": "2182-12-28",
+    "years": 17,
+    "antardashas": [
+     {
+      "lord": "Mercury",
+      "start": "2165-12-28",
+      "end": "2168-05-26"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2168-05-26",
+      "end": "2169-05-23"
+     },
+     {
+      "lord": "Venus",
+      "start": "2169-05-23",
+      "end": "2172-03-23"
+     },
+     {
+      "lord": "Sun",
+      "start": "2172-03-23",
+      "end": "2173-01-27"
+     },
+     {
+      "lord": "Moon",
+      "start": "2173-01-27",
+      "end": "2174-06-29"
+     },
+     {
+      "lord": "Mars",
+      "start": "2174-06-29",
+      "end": "2175-06-26"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2175-06-26",
+      "end": "2178-01-12"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2178-01-12",
+      "end": "2180-04-19"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2180-04-19",
+      "end": "2182-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Ketu",
+    "start": "2182-12-28",
+    "end": "2189-12-28",
+    "years": 7,
+    "antardashas": [
+     {
+      "lord": "Ketu",
+      "start": "2182-12-28",
+      "end": "2183-05-26"
+     },
+     {
+      "lord": "Venus",
+      "start": "2183-05-26",
+      "end": "2184-07-25"
+     },
+     {
+      "lord": "Sun",
+      "start": "2184-07-25",
+      "end": "2184-11-30"
+     },
+     {
+      "lord": "Moon",
+      "start": "2184-11-30",
+      "end": "2185-07-01"
+     },
+     {
+      "lord": "Mars",
+      "start": "2185-07-01",
+      "end": "2185-11-27"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2185-11-27",
+      "end": "2186-12-16"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2186-12-16",
+      "end": "2187-11-22"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2187-11-22",
+      "end": "2188-12-31"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2188-12-31",
+      "end": "2189-12-28"
+     }
+    ]
+   },
+   {
+    "lord": "Venus",
+    "start": "2189-12-28",
+    "end": "2209-12-29",
+    "years": 20,
+    "antardashas": [
+     {
+      "lord": "Venus",
+      "start": "2189-12-28",
+      "end": "2193-04-28"
+     },
+     {
+      "lord": "Sun",
+      "start": "2193-04-28",
+      "end": "2194-04-29"
+     },
+     {
+      "lord": "Moon",
+      "start": "2194-04-29",
+      "end": "2195-12-28"
+     },
+     {
+      "lord": "Mars",
+      "start": "2195-12-28",
+      "end": "2197-02-27"
+     },
+     {
+      "lord": "Rahu",
+      "start": "2197-02-27",
+      "end": "2200-02-27"
+     },
+     {
+      "lord": "Jupiter",
+      "start": "2200-02-27",
+      "end": "2202-10-29"
+     },
+     {
+      "lord": "Saturn",
+      "start": "2202-10-29",
+      "end": "2205-12-29"
+     },
+     {
+      "lord": "Mercury",
+      "start": "2205-12-29",
+      "end": "2208-10-29"
+     },
+     {
+      "lord": "Ketu",
+      "start": "2208-10-29",
+      "end": "2209-12-29"
+     }
+    ]
+   }
+  ]
+ }
+}

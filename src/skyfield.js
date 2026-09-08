@@ -1,0 +1,223 @@
+/* ==========================================================================
+   Tonight's sky, drawn from the real thing.
+
+   The stars here are the twenty-seven nakshatras — the Vedic star groups, not
+   the Greek constellations — from the same verified catalogue the app's sky
+   view uses (right ascension, declination and magnitude per star, J2000).
+   Every star and every graha is placed by converting its real coordinates to
+   altitude and azimuth for this minute at the viewer's chosen place. Nothing
+   on this canvas is decorative: if a graha is below the horizon right now,
+   it is drawn below the horizon, and the label says so.
+
+   The camera is a gnomonic projection — the projection you get by holding a
+   flat plane against the sky and looking through it, which keeps straight
+   lines straight near the centre. Drag or use the arrow keys to turn.
+   ========================================================================== */
+import { ASTERISMS } from "../vendor/astro/asterisms.js";
+import { altAz, raDecToAltAz } from "../vendor/astro/sky.js";
+
+const D = Math.PI / 180;
+const COMPASS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+const norm360 = a => ((a % 360) + 360) % 360;
+const shortest = (from, to) => { let d = norm360(to - from); return d > 180 ? d - 360 : d; };
+
+export function createSkyField(canvas, opts = {}) {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ctx = canvas.getContext("2d");
+  let W = 0, H = 0, dpr = 1;
+  let place = opts.place ?? { name: "London", lat: 51.5074, lon: -0.1278 };
+  let when = opts.when ?? new Date();
+  let target = null;                       /* the graha being shown, if any */
+  let cam = { az: 180, alt: 24 }, aim = { az: 180, alt: 24 };
+  const fov = 74;                          /* degrees across the taller axis */
+  let raf = 0, dirty = true;
+
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dirty = true; kick();
+  }
+
+  /* gnomonic: sky point → screen, or null when it falls behind the camera */
+  function project(az, alt) {
+    const a0 = cam.alt * D, a1 = alt * D, dz = (az - cam.az) * D;
+    const cosc = Math.sin(a0) * Math.sin(a1) + Math.cos(a0) * Math.cos(a1) * Math.cos(dz);
+    if (cosc <= .12) return null;
+    const f = (H / 2) / Math.tan(fov / 2 * D);
+    const x = Math.cos(a1) * Math.sin(dz) / cosc;
+    const y = (Math.cos(a0) * Math.sin(a1) - Math.sin(a0) * Math.cos(a1) * Math.cos(dz)) / cosc;
+    return [W / 2 + x * f, H / 2 - y * f];
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    /* the ground: everything below altitude zero, so the horizon is real */
+    const horizon = [];
+    for (let a = 0; a <= 360; a += 2) { const p = project(a, 0); if (p) horizon.push(p); }
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+    if (horizon.length > 1) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(horizon[0][0], horizon[0][1]);
+      for (const p of horizon) ctx.lineTo(p[0], p[1]);
+      ctx.lineTo(horizon[horizon.length - 1][0], H + 40);
+      ctx.lineTo(horizon[0][0], H + 40);
+      ctx.closePath();
+      ctx.fillStyle = "#050506";
+      ctx.fill();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(horizon[0][0], horizon[0][1]);
+      for (const p of horizon) ctx.lineTo(p[0], p[1]);
+      ctx.strokeStyle = "rgba(255,255,255,.24)"; ctx.lineWidth = 1; ctx.stroke();
+    }
+
+    /* the compass, written on the horizon where it actually lies */
+    ctx.font = "500 11px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.4)";
+    for (let i = 0; i < 8; i++) {
+      const p = project(i * 45, 0);
+      if (p && p[0] > 14 && p[0] < W - 14) ctx.fillText(COMPASS[i], p[0], p[1] + 20);
+    }
+
+    /* the twenty-seven nakshatras */
+    for (const ast of ASTERISMS) {
+      const pts = ast.stars.map(s => {
+        const { alt, az } = raDecToAltAz(s.ra, s.dec, when, place.lat, place.lon);
+        return { p: project(az, alt), m: s.m, alt };
+      });
+      ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.lineWidth = 1;
+      for (const [i, j] of ast.lines) {
+        const a = pts[i]?.p, b = pts[j]?.p;
+        if (!a || !b) continue;
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      }
+      for (const s of pts) {
+        if (!s.p) continue;
+        const r = Math.max(.9, 3.1 - s.m * .42);
+        const dim = s.alt < 0 ? .22 : 1;
+        ctx.beginPath(); ctx.arc(s.p[0], s.p[1], r, 0, 7);
+        ctx.fillStyle = `rgba(255,255,255,${(.55 + (4.6 - s.m) * .11) * dim})`;
+        ctx.fill();
+      }
+      /* name the junction star's group, quietly */
+      const y = pts[ast.yogatara]?.p;
+      if (y && pts[ast.yogatara].alt > -2) {
+        ctx.font = "500 10.5px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,.3)";
+        ctx.fillText(ast.nak, y[0], y[1] - 11);
+      }
+    }
+
+    /* the graha under discussion */
+    if (target) {
+      const { alt, az } = altAz(target.graha, when, place.lat, place.lon);
+      const p = project(az, alt);
+      if (p) {
+        const img = target.img, s = 62;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(p[0], p[1], 46, 0, 7);
+        const glow = ctx.createRadialGradient(p[0], p[1], 2, p[0], p[1], 46);
+        glow.addColorStop(0, "rgba(255,255,255,.16)"); glow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = glow; ctx.fill();
+        if (img?.complete && img.naturalWidth) ctx.drawImage(img, p[0] - s / 2, p[1] - s / 2, s, s);
+        ctx.restore();
+        ctx.font = "600 14px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+        ctx.fillText(target.graha, p[0], p[1] + s / 2 + 22);
+        ctx.font = "500 11.5px ui-monospace, SFMono-Regular, Menlo, monospace";
+        ctx.fillStyle = "rgba(255,255,255,.6)";
+        const dir = COMPASS[Math.round(norm360(az) / 45) % 8];
+        ctx.fillText(alt >= 0 ? `${alt.toFixed(0)}° above the horizon · ${dir}`
+                              : `${Math.abs(alt).toFixed(0)}° below the horizon · ${dir}`, p[0], p[1] + s / 2 + 40);
+      }
+      opts.onReadout?.(readout());
+    }
+  }
+
+  function readout() {
+    if (!target) return null;
+    const { alt, az } = altAz(target.graha, when, place.lat, place.lon);
+    return { graha: target.graha, alt, az, up: alt >= 0,
+             compass: COMPASS[Math.round(norm360(az) / 45) % 8], place: place.name };
+  }
+
+  /* the camera eases toward what it was asked to look at */
+  function step() {
+    const da = shortest(cam.az, aim.az), dl = aim.alt - cam.alt;
+    if (Math.abs(da) < .05 && Math.abs(dl) < .05 && !dirty) { raf = 0; cam.az = aim.az; cam.alt = aim.alt; draw(); return; }
+    cam.az = norm360(cam.az + da * (reduce ? 1 : .12));
+    cam.alt += dl * (reduce ? 1 : .12);
+    dirty = false;
+    draw();
+    raf = requestAnimationFrame(step);
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
+
+  /* look at a graha: turn to it, and lift the eye if it sits low */
+  function show(graha, img) {
+    target = { graha, img };
+    const { alt, az } = altAz(graha, when, place.lat, place.lon);
+    aim.az = norm360(az);
+    aim.alt = Math.max(4, Math.min(72, alt));
+    if (reduce) { cam.az = aim.az; cam.alt = aim.alt; }
+    dirty = true; kick();
+    return readout();
+  }
+
+  /* drag, and arrow keys, both turning the same camera */
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => {
+    drag = { x: e.clientX, y: e.clientY, az: aim.az, alt: aim.alt };
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const k = fov / H;
+    aim.az = norm360(drag.az - (e.clientX - drag.x) * k);
+    aim.alt = Math.max(-28, Math.min(86, drag.alt + (e.clientY - drag.y) * k));
+    cam.az = aim.az; cam.alt = aim.alt;   /* dragging is direct, not eased */
+    dirty = true; kick();
+  });
+  const drop = () => { drag = null; };
+  canvas.addEventListener("pointerup", drop);
+  canvas.addEventListener("pointercancel", drop);
+  canvas.addEventListener("keydown", e => {
+    const step = e.shiftKey ? 12 : 5;
+    if (e.key === "ArrowLeft") aim.az = norm360(aim.az - step);
+    else if (e.key === "ArrowRight") aim.az = norm360(aim.az + step);
+    else if (e.key === "ArrowUp") aim.alt = Math.min(86, aim.alt + step);
+    else if (e.key === "ArrowDown") aim.alt = Math.max(-28, aim.alt - step);
+    else return;
+    e.preventDefault(); dirty = true; kick();
+  });
+
+  addEventListener("resize", resize, { passive: true });
+  resize();
+
+  /* Which graha stands highest over this place right now — the one worth opening
+     on, so the act does not land on something below the horizon. Rahu and Ketu are
+     excluded here: they are the Moon's orbital nodes, computed points with nothing
+     to see, and "now look up" pointing at one would be a small lie. They stay
+     pickable, and say what they are when picked. */
+  const VISIBLE = ["Jupiter", "Saturn", "Mars", "Venus", "Mercury", "Moon", "Sun"];
+  function highest() {
+    let best = null;
+    for (const g of VISIBLE) {
+      const { alt } = altAz(g, when, place.lat, place.lon);
+      if (!best || alt > best.alt) best = { graha: g, alt };
+    }
+    return best.graha;
+  }
+
+  return {
+    show, highest,
+    setPlace(p) { place = p; dirty = true; kick(); },
+    setWhen(d) { when = d; dirty = true; kick(); },
+    get readout() { return readout(); }
+  };
+}
