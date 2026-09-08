@@ -127,19 +127,24 @@ h3{font-size:clamp(21px,2vw,26px);letter-spacing:-.02em;line-height:1.2}
    headline sits on clean black above it, never on a bright map. */
 .earth{position:absolute;left:50%;top:68%;width:min(168vw,1580px);aspect-ratio:1;border-radius:50%;
   transform:translate(-50%,0);background-image:url("assets/earth/earth.jpg");background-size:cover;
-  background-position:center 18%;filter:brightness(.40) saturate(.7) contrast(1.06);
+  background-position:center 18%;filter:brightness(.55) saturate(.85) contrast(1.08);
   will-change:transform,opacity}
 .earth::after{content:"";position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.1) 14%,transparent 34%)}
-.earth::before{content:"";position:absolute;inset:-1px;border-radius:50%;
-  box-shadow:inset 0 2px 0 0 rgba(175,205,255,.5), 0 -2px 60px 6px rgba(120,165,255,.28)}
+  background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.05) 18%,transparent 40%)}
+.earth::before{content:"";position:absolute;inset:-2px;border-radius:50%;
+  box-shadow:inset 0 3px 2px -1px rgba(200,225,255,.85), inset 0 14px 34px -8px rgba(120,170,255,.35),
+             0 -4px 80px 10px rgba(110,160,255,.30)}
 
 .orbits{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .orbits ellipse{fill:none;stroke:rgba(255,255,255,.16);stroke-width:1;vector-effect:non-scaling-stroke}
 
 /* the nine grahas live in this layer for the whole stage */
 .bodies{position:absolute;inset:0}
-.body{position:absolute;left:0;top:0;will-change:transform;transform-origin:50% 50%}
+/* zero-sized until the stage sizes it, invisible until its image has landed: a
+   body can never be seen at the artwork's raw pixel size */
+.body{position:absolute;left:0;top:0;width:0;height:0;will-change:transform;transform-origin:50% 50%;
+  opacity:0;transition:opacity .7s var(--ease)}
+.body.in{opacity:1}
 .body img{width:100%;height:100%;filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
 
 /* the chart the planets fly into */
@@ -388,3 +393,48 @@ footer nav{display:flex;gap:20px}
   .stage{position:relative;height:auto;min-height:100svh}
   .cue{display:none}
 }
+
+
+/* ---------- light acts: the same components on white --------------------- */
+.act-light .scrub input[type=range]::-webkit-slider-runnable-track{background:rgba(0,0,0,.16)}
+.act-light .scrub input[type=range]::-webkit-slider-thumb{background:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.act-light .scrub input[type=range]::-moz-range-track{background:rgba(0,0,0,.16)}
+.act-light .scrub input[type=range]::-moz-range-thumb{background:var(--ink)}
+.act-light .readout span,.act-light .fact span,.act-light .ticks{color:var(--dim-lo)}
+.act-light .plate .who span,.act-light .plate .tech,.act-light .hintline{color:var(--dim-lo)}
+.act-light .hintline i{background:var(--ink);box-shadow:0 0 0 0 rgba(0,0,0,.3)}
+@keyframes ping-ink{70%{box-shadow:0 0 0 11px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.act-light .hintline i{animation-name:ping-ink}
+.act-light .river{border-color:var(--hair-ink);background:var(--paper-2)}
+.act-light .era{border-right-color:rgba(0,0,0,.07)}
+.act-light .era.on{background:rgba(0,0,0,.07)}
+.act-light .cursor{background:var(--ink);box-shadow:0 0 12px rgba(0,0,0,.25)}
+.act-light .k-planet{filter:drop-shadow(0 1.5px 3px rgba(0,0,0,.28))}
+.act-light .k-planet.lifted{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.act-light .k-planet.lifted .k-halo{fill:rgba(0,0,0,.06)}
+.act-light .k-planet:focus-visible .k-halo{fill:rgba(0,0,0,.1)}
+.act-light .k-retro,.act-light .k-sign,.act-light .k-asc{fill:var(--dim-lo)}
+
+.act-grey .field label,.act-grey .status,.act-grey .promise,.act-grey .fine,.act-grey .eyebrow,
+.act-grey .pl span,.act-grey .pl .h,.act-grey .fact span,.act-grey .empty,.act-grey .tag{color:var(--dim-lo)}
+.act-grey .field input{background:var(--paper);border-color:var(--hair-ink);color:var(--ink);color-scheme:light}
+.act-grey .field input:focus{border-color:rgba(0,0,0,.45)}
+.act-grey .suggest{background:var(--paper);border-color:var(--hair-ink);box-shadow:0 18px 50px rgba(0,0,0,.14)}
+.act-grey .suggest button:hover,.act-grey .suggest button:focus{background:var(--paper-2)}
+.act-grey .promise span::before{border-color:var(--dim-lo)}
+.act-grey .pl{border-color:var(--hair-ink);background:var(--paper)}
+.act-grey .pl:hover,.act-grey .pl.on{background:#ECECF0}
+.act-grey .pl .rr{color:var(--ink)}
+.act-grey .plain{color:var(--ink)}
+.act-grey .email{border-color:var(--hair-ink);background:var(--paper)}
+.act-grey .email input{background:var(--paper-2)!important;border-color:var(--hair-ink)!important;color:var(--ink)!important}
+.act-grey .empty{border-color:rgba(0,0,0,.18);background:var(--paper)}
+.act-grey .tag{border-color:rgba(0,0,0,.2)}
+.act-grey .facts,.act-grey .fact{border-color:var(--hair-ink)}
+.act-grey .k-line{stroke:rgba(0,0,0,.34)}
+.act-grey .k-sign,.act-grey .k-asc,.act-grey .k-retro{fill:var(--dim-lo)}
+.act-grey .k-cell.lit{fill:rgba(0,0,0,.06)}
+.act-grey .k-cell.seen{fill:rgba(0,0,0,.03)}
+.act-grey .k-planet{filter:drop-shadow(0 1.5px 3px rgba(0,0,0,.28))}
+.act-grey .k-planet.lifted .k-halo{fill:rgba(0,0,0,.06)}
+.act-grey .k-aspect{stroke:rgba(0,0,0,.4)}

@@ -58,12 +58,23 @@ export function buildStage(root, chart, opts = {}) {
   const beats = [...root.querySelectorAll(".beat")];
   const cue = root.querySelector(".cue");
 
-  /* the nine, as one img each — the same artwork the chart and the app use */
+  /* The nine, as one img each — the same artwork the chart and the app use.
+     Each body starts at zero size (see .body in the stylesheet) and shows itself
+     only once its own image has landed. The first build waited for all nine
+     before sizing anything, so on a phone network the artwork sat on screen at
+     its full 320px for seconds, and if one image stalled the opening never ran. */
   const el = {};
   for (const g of GRAHAS) {
     const d = document.createElement("div");
     d.className = "body";
-    const im = new Image(); im.src = asset(`${assets}/graha/${g.toLowerCase()}.png`); im.alt = ""; d.append(im);
+    const im = new Image();
+    im.alt = "";
+    im.decoding = "async";
+    const arrive = () => d.classList.add("in");
+    im.onload = arrive; im.onerror = arrive;
+    im.src = asset(`${assets}/graha/${g.toLowerCase()}.png`);
+    if (im.complete && im.naturalWidth) arrive();
+    d.append(im);
     bodies.append(d);
     el[g] = d;
   }
@@ -77,9 +88,10 @@ export function buildStage(root, chart, opts = {}) {
        the viewport — the band of open sky above the limb and below the headline.
        Sizing them off the Earth's true radius put every ring, and every graha on it,
        several hundred pixels below the fold: the opening frame was empty. */
-    const ocx = W / 2, ocy = H * 1.06;
-    const ringRY = i => H * (.30 + i * .035);
-    const ringRX = i => Math.min(ringRY(i) * 1.6, W * .48);
+    const phone = W < 640;
+    const ocx = W / 2, ocy = H * (phone ? 1.02 : 1.06);
+    const ringRY = i => H * (phone ? .24 + i * .046 : .30 + i * .035);
+    const ringRX = i => Math.min(ringRY(i) * (phone ? 1.25 : 1.6), W * (phone ? .46 : .48));
     const cx = ocx, cy = ocy;
     /* the chart sits in the lower two thirds, clear of the headline above it */
     const S = Math.min(H * .48, W * .70, 520);
@@ -88,7 +100,7 @@ export function buildStage(root, chart, opts = {}) {
     chartBox.style.left = chartCX + "px";
     chartBox.style.top = chartCY + "px";
     geom = { cx, cy, ringRX, ringRY, S, chartX: chartCX - S / 2, chartY: chartCY - S / 2,
-             disc: Math.max(30, Math.min(W, H) * .058) };
+             disc: phone ? 30 : Math.max(30, Math.min(W, H) * .058) };
     scaleDashes(S);
 
     orbits.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -138,14 +150,19 @@ export function buildStage(root, chart, opts = {}) {
   }
 
   let t = 0, shown = 0, raf = 0, idle = 0;
+  /* the opening, in seconds since the stage started: the Earth rises into the
+     frame and the grahas arrive one after another, with no scroll needed */
+  let born = 0;
 
   function frame() {
     const { cx, cy, ringRX, ringRY, S, chartX, chartY, disc } = geom;
+    const age = born ? (performance.now() - born) / 1000 : 9;
+    const rise = glide(age / 1.6);
 
-    /* Act one: the Earth holds the frame, then leaves it */
+    /* Act one: the Earth rises, holds the frame, then leaves it */
     const gone = smooth((t - .30) / .20);
     earth.style.opacity = (1 - gone).toFixed(3);
-    earth.style.transform = `translate(-50%,${(gone * 16).toFixed(2)}%)`;
+    earth.style.transform = `translate(-50%,${((1 - rise) * 14 + gone * 16).toFixed(2)}%)`;
     orbits.style.opacity = (1 - smooth((t - .26) / .18)).toFixed(3);
 
     /* the chart draws itself as the sky empties */
@@ -176,12 +193,13 @@ export function buildStage(root, chart, opts = {}) {
       const x = lerp(ox, sxp, k) + (-dy / len) * bulge;
       const y = lerp(oy, syp, k) + (dx / len) * bulge;
 
-      const size = disc * SIZE[g] * lerp(1, .40, k);
+      /* each graha arrives a beat after the last, growing from a point */
+      const born_k = glide((age - .35 - i * .11) / .9);
+      const size = disc * SIZE[g] * lerp(1, .40, k) * lerp(.2, 1, born_k);
       const spin = lerp(0, (i % 2 ? 8 : -8), k);
       const e = el[g];
       e.style.width = e.style.height = size.toFixed(1) + "px";
       e.style.transform = `translate(${(x - size / 2).toFixed(1)}px,${(y - size / 2).toFixed(1)}px) rotate(${spin.toFixed(2)}deg)`;
-      e.style.opacity = (1 - smooth((t - .95) / .05) * 0).toFixed(2);
     });
 
     /* the words: one line at a time, never two */
@@ -198,7 +216,8 @@ export function buildStage(root, chart, opts = {}) {
     t += Math.abs(d) < .0004 ? d : d * .13;
     frame();
     idle += .28;
-    raf = Math.abs(d) > .0004 || t < .30 ? requestAnimationFrame(tick) : 0;
+    const opening = born && performance.now() - born < 2400;
+    raf = Math.abs(d) > .0004 || t < .30 || opening ? requestAnimationFrame(tick) : 0;
   }
   function onScroll() {
     const r = root.getBoundingClientRect();
@@ -212,7 +231,7 @@ export function buildStage(root, chart, opts = {}) {
   function start() {
     measure();
     if (reduce) {                     /* the finished frame, with nothing in motion */
-      t = target = 1; idle = 0; frame();
+      t = target = 1; idle = 0; born = 0; frame();
       earth.style.display = "none";
       addEventListener("resize", () => { measure(); frame(); }, { passive: true });
       return;
@@ -222,12 +241,8 @@ export function buildStage(root, chart, opts = {}) {
     addEventListener("resize", () => { measure(); frame(); }, { passive: true });
   }
 
-  /* artwork decides the first frame, so wait for it rather than flashing */
-  const imgs = [...bodies.querySelectorAll("img")];
-  let left = imgs.length;
-  const ready = () => { if (--left <= 0) start(); };
-  imgs.forEach(i => i.complete ? ready() : (i.onload = i.onerror = ready));
-  if (!imgs.length) start();
+  born = performance.now();
+  start();
 
   return { get progress() { return t; } };
 }
