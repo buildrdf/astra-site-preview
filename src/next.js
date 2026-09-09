@@ -56,7 +56,8 @@ const lerp = (a,b,k) => a+(b-a)*k;
      nothing there to see — so they carry no orbit and begin outside the frame
      entirely, arriving only when the chart calls for them. */
   const RING  = { Moon:0, Mercury:1, Venus:2, Sun:3, Mars:4, Jupiter:5, Saturn:6 };
-  const ANGLE = { Moon:242, Mercury:200, Venus:318, Sun:268, Mars:225, Jupiter:340, Saturn:288 };
+  /* spread right across the frame, not bunched over the horizon */
+  const ANGLE = { Moon:250, Mercury:233, Venus:299, Sun:266, Mars:243, Jupiter:320, Saturn:286 };
   const FROM_OUTSIDE = { Rahu:{ x:-.22, y:.22 }, Ketu:{ x:1.22, y:.16 } };
 
   /* where each graha finally sits: its real house in this chart, sharing the seat
@@ -81,9 +82,11 @@ const lerp = (a,b,k) => a+(b-a)*k;
     disc = Math.max(30, Math.min(W, H) * .062);
     for (const l of lines) l.dataset.px = l.dataset.len * (S / 104);
 
-    ocx = W / 2; ocy = H * 1.02;
-    ringRY = i => H * (.26 + i * .036);
-    ringRX = i => Math.min(ringRY(i) * 2.4, W * .49);
+    /* The orbit centre sits well below the frame and the rings are large, so the
+       seven ride high across the whole sky instead of hugging the horizon. */
+    ocx = W / 2; ocy = H * 1.32;
+    ringRY = i => H * (.50 + i * .085);
+    ringRX = i => Math.min(ringRY(i) * 1.8, W * .54);
 
     orbitsSvg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     orbitsSvg.replaceChildren();
@@ -105,8 +108,8 @@ const lerp = (a,b,k) => a+(b-a)*k;
       return [W * n.x + px * 24, H * n.y + py * 16];
     }
     const i = RING[g];
-    const speed = 1 / (1 + i * .32);
-    const a = (ANGLE[g] + (drift * .3 + t * 24) * speed) * Math.PI / 180;
+    const speed = 1 / (1 + i * .32);          /* the outer ones move slower, as they do */
+    const a = (ANGLE[g] + (drift * .62 + t * 24) * speed) * Math.PI / 180;
     const depth = .4 + i * .12;
     return [ocx + ringRX(i) * Math.cos(a) + px * depth * 28,
             ocy + ringRY(i) * Math.sin(a) + py * depth * 20];
