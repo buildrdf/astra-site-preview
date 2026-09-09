@@ -33,70 +33,14 @@ const INSIGHT = dailyInsight(transitInto(new Date(), SAMPLE.lagna.sign), SAMPLE.
 const FOCUS = INSIGHT ? INSIGHT.house : 10;
 
 {
-  const svg = $("introChart"), box = $("introBox"), layer = $("introBodies");
-  renderChart(svg, SAMPLE, { assets: "assets" });
-  svg.querySelectorAll(".k-planet").forEach(p => p.remove());
-  const lines = [...svg.querySelectorAll(".k-line")];
-  const signs = [...svg.querySelectorAll(".k-sign,.k-asc")];
-  const cell = svg.querySelector(`.k-cell[data-house="${FOCUS}"]`);
-  for (const l of lines) l.dataset.len = l.getTotalLength?.() ?? 400;
-
-  const el = {};
-  for (const g of GRAHAS) {
-    const d = document.createElement("div"); d.className = "body";
-    const im = new Image(); im.src = asset(`assets/graha/${g.toLowerCase()}.png`); im.alt = "";
-    d.append(im); layer.append(d); el[g] = d;
-  }
-  const SIZE = { Sun:1.14, Moon:1, Mars:1, Mercury:.97, Jupiter:1.1, Venus:1, Saturn:1.22, Rahu:1.04, Ketu:1.04 };
-  const seatOf = {};
-  for (const p of SAMPLE.planets) {
-    const share = SAMPLE.planets.filter(q => q.house === p.house);
-    const i = share.indexOf(p), n = share.length;
-    const [sx, sy] = SEAT[p.house];
-    const off = n > 1 ? (i - (n-1)/2) * (n > 2 ? 7 : 8.5) : 0;
-    const along = p.house % 3 === 1 ? [1,0] : [.72,.69];
-    seatOf[p.graha] = [sx + along[0]*off, sy + along[1]*off*(p.house > 6 ? -1 : 1)];
-  }
-
-  let S = 0, disc = 0;
-  const measure = () => { S = box.clientWidth; disc = Math.max(24, S * .115);
-    for (const l of lines) l.dataset.px = l.dataset.len * (S / 104); };
-
-  /* one short sequence, on a timer rather than on scroll: this is the first
-     frame of the site and must never wait for a gesture */
-  let t0 = 0;
-  function frame(now) {
-    if (!t0) t0 = now;
-    const t = reduce ? 1 : clamp((now - t0) / 2600);
-    const drawn = smooth(t / .45);
-    for (const l of lines) l.style.strokeDashoffset = (l.dataset.px * (1 - drawn)).toFixed(1);
-    for (const s of signs) s.style.opacity = smooth((t - .45) / .18).toFixed(3);
-    GRAHAS.forEach((g, i) => {
-      const k = glide((t - .18 - i * .045) / .3);
-      const [tx, ty] = seatOf[g] ?? [50,50];
-      /* they come in from just outside the frame, each on its own line */
-      const a = (i * 40 + 200) * Math.PI / 180;
-      const ox = 50 + Math.cos(a) * 96, oy = 50 + Math.sin(a) * 96;
-      const x = lerp(ox, tx, k) / 100 * S, y = lerp(oy, ty, k) / 100 * S;
-      const size = disc * SIZE[g] * lerp(1.5, 1, k);
-      const e = el[g];
-      e.style.width = e.style.height = size.toFixed(1) + "px";
-      e.style.transform = `translate(${(x - size/2).toFixed(1)}px,${(y - size/2).toFixed(1)}px)`;
-      e.classList.toggle("in", k > .02);
-    });
-    if (cell) cell.classList.toggle("lit", t > .82);
-    if (t < 1) requestAnimationFrame(frame);
-  }
-  measure();
-  for (const l of lines) { l.style.strokeDasharray = l.dataset.px; l.style.strokeDashoffset = l.dataset.px; }
-  for (const s of signs) s.style.opacity = 0;
-  addEventListener("resize", () => { measure(); }, { passive: true });
-  requestAnimationFrame(frame);
-
-  $("stamp").textContent = `Example chart · ${SAMPLE.moment.local} ${SAMPLE.moment.tz} · ${SAMPLE.moment.name}`;
+  /* The hero shows the Earth the app itself draws — the sky view zoomed out to the
+     zodiac ring. It is a picture, so it costs nothing and cannot fail to load a
+     chart engine before the first frame. The interpretation beside it is still
+     computed, from today's real transits. */
+  $("stamp").textContent = `Astra, seen from above the Earth · ${SAMPLE.moment.name}`;
   if (INSIGHT) {
-    $("sayHead").textContent = `What a chart is for`;
-    $("sayBody").textContent = `${INSIGHT.line} That sentence came from three facts about this chart, and Astra will show you all three.`;
+    $("sayHead").textContent = "What a chart is for";
+    $("sayBody").textContent = `${INSIGHT.line} That sentence came from three facts about a chart, and Astra shows you all three.`;
   }
 }
 
@@ -107,33 +51,37 @@ const FEATURES = [
   { id:"day", tab:"Your day", head:"A day that reads differently for you.",
     a:"Your horoscope, the life areas it touches, the panchang beneath it, and the hours the tradition favours or cautions.",
     b:"Guidance first. The working that produced it, second.",
-    shots:["assets/app/app-today-horoscope.png","assets/app/app-today-panchang.png"],
-    note:"Today · horoscope and panchang" },
+    shots:["assets/app/day-rhythm.png","assets/app/day-areas.png"],
+    wide:[0,1],
+    note:"the day's rhythm, then the life areas it touches" },
   { id:"time", tab:"Your timeline", head:"Time contains time.",
     a:"Mahadasha, antardasha and pratyantardasha, each opening into the next, with Sade Sati shown as an overlay rather than an alarm.",
     b:"Your own life events sit on the same line.",
-    shots:["assets/app/app-timeline.png"], note:"Timeline · three nested periods" },
+    shots:["assets/app/timeline.png"], wide:[0],
+    note:"mahadasha, antardasha, pratyantardasha" },
   { id:"universe", tab:"Your universe", head:"Birth, today, and the sky above you.",
     a:"Switch the chart between the sky you were born under and the one overhead now. Touch a planet to open it.",
-    b:"Then find that same planet in tonight's sky, drawn with the twenty-seven nakshatras.",
-    shots:["assets/app/app-universe.png","assets/app/app-sky.png"],
-    note:"Universe · chart, then the sky" },
+    b:"Then raise the phone: the same planet, in tonight's real sky, among the twenty-seven nakshatras — and pinch out to see the whole zodiac from above the Earth.",
+    shots:["assets/app/universe.png","assets/app/sky.png","assets/app/earth.png"],
+    dark:[1,2],
+    note:"the chart, the sky above you, then the zodiac from orbit" },
   { id:"ask", tab:"Ask Astra", head:"Ask, and the chart answers.",
     a:"A question about your own chart, answered from your real placements and your current period, with the entities it used attached.",
-    b:"By text, or by voice with a live transcript.",
-    shots:["assets/app/app-guide.png"], note:"Guide · an answer with its sources" },
+    b:"Then hold the microphone and talk to it instead. The Moon listens, answers aloud, and stops the moment you speak.",
+    shots:["assets/app/guide.png","assets/app/voice.png"], wide:[1],
+    note:"an answer with its sources, then the same thing by voice" },
   { id:"moment", tab:"Find your moment", head:"Some things are better begun at one hour than another.",
     a:"Muhurta for a marriage, a venture, a home, a journey. Astra reads the window you give it and explains the score.",
     b:"For a birth it scores only inside the window your doctor has already set. That decision is never the app's.",
-    shots:["assets/app/app-muhurta.png"], note:"Find a good time · what it is for" },
+    shots:["assets/app/muhurta.png"], note:"what the window is for, and how it is scored" },
   { id:"you", tab:"You & your people", head:"Your details, and the people they connect to.",
     a:"One birth profile unlocks the depth: the full Kundali, your reports, and the periods that shaped your years.",
     b:"Add someone else and read the two charts together.",
-    shots:["assets/app/app-you.png"], note:"You · profile and people" }
+    shots:["assets/app/you.png"], note:"one profile, and the people it connects to" }
 ];
 
 {
-  const nav = $("tourNav"), phone = $("phone"), tour = $("tour");
+  const nav = $("tourNav"), panel = $("panel"), tour = $("tour");
   /* one screen-height of travel per feature, plus a little to settle */
   tour.style.height = (FEATURES.length * 88 + 30) + "vh";
 
@@ -144,7 +92,8 @@ const FEATURES = [
       const im = new Image();
       im.src = src; im.alt = ""; im.loading = i < 2 ? "eager" : "lazy";
       im.dataset.f = i; im.dataset.j = j;
-      phone.append(im); imgs.push(im);
+      if (f.dark?.includes(j)) im.classList.add("dark");
+      panel.append(im); imgs.push(im);
     });
   });
 
@@ -181,9 +130,14 @@ const FEATURES = [
       }
       shown = i;
     }
-    /* a feature with two screens shows its second one in its later half */
-    const j = f.shots.length > 1 && sub > .55 ? 1 : 0;
+    /* a feature's graphics are spread evenly across its own stretch of scroll,
+       so a tab with three screens shows all three on the way past */
+    const n = f.shots.length;
+    const j = Math.min(n - 1, Math.floor(sub * n));
     for (const im of imgs) im.classList.toggle("on", +im.dataset.f === i && +im.dataset.j === j);
+    panel.classList.toggle("is-dark", !!f.dark?.includes(j));
+    /* a wide graphic gets a wide panel instead of floating in a tall one */
+    panel.classList.toggle("is-wide", !!f.wide?.includes(j));
   }
 
   function onScroll() {
@@ -229,7 +183,7 @@ $("wlForm").addEventListener("submit", e => {
   document.querySelectorAll("[data-in]").forEach(el => io.observe(el));
 }
 {
-  const nav = $("nav"), lights = [...document.querySelectorAll(".shelf-act")];
+  const nav = $("nav"), lights = [...document.querySelectorAll(".tour,.shelf-act")];
   const f = () => { nav.classList.toggle("solid", scrollY > 50);
     nav.classList.toggle("light", lights.some(s => { const r = s.getBoundingClientRect(); return r.top < 48 && r.bottom > 48; })); };
   addEventListener("scroll", f, { passive: true }); f();

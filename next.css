@@ -12,7 +12,8 @@
    ========================================================================== */
 
 :root{
-  --deep:#080F20;          /* the ground everything sits on */
+  --deep:#04060D;          /* very nearly black: space, at the top of the page */
+  --deep-2:#080F20;        /* the midnight the black falls into */
   --ink-blue:#10213D;      /* the celestial surface */
   --depth:#29466F;         /* atmosphere, one step toward the light */
   --horizon:#A9CBE8;       /* the lit rim, and nothing else this bright */
@@ -31,9 +32,10 @@
 body.next{ background:var(--deep); color:var(--paper) }
 .next ::selection{ background:var(--accent); color:var(--deep) }
 
-/* the atmosphere behind everything: dark up top, a glow low down */
+/* Space, not a navy wall: near-black overhead, falling through midnight into a
+   lit blue only where the horizon is. The brightest light in the frame is the rim. */
 .sky-ground{ position:fixed; inset:0; z-index:-2; background:
-  radial-gradient(140% 80% at 50% 108%, #37598A 0%, var(--depth) 22%, var(--ink-blue) 48%, var(--deep) 78%) }
+  radial-gradient(150% 88% at 50% 112%, #3D6394 0%, #23406A 16%, var(--ink-blue) 34%, var(--deep-2) 58%, var(--deep) 82%) }
 .grain{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") }
 
@@ -61,10 +63,10 @@ body.next{ background:var(--deep); color:var(--paper) }
 .intro h1{ font-size:clamp(38px,5.2vw,74px); line-height:1.04; letter-spacing:-.03em }
 .intro-copy{ display:grid; gap:20px; justify-items:start }
 .intro .actions{ display:flex; gap:12px; flex-wrap:wrap; align-items:center }
-.intro-chart{ position:relative; display:grid; justify-items:center; gap:12px }
-.intro-chart .box{ position:relative; width:min(58vh,42vw); aspect-ratio:1 }
-.intro-chart svg{ width:100%; height:100%; overflow:visible }
-.intro-chart .bodies{ position:absolute; inset:0; pointer-events:none }
+.intro-chart{ position:relative; display:grid; justify-items:center; gap:10px }
+.intro-chart .earth{ width:min(100%,620px); height:auto; display:block;
+  mask-image:radial-gradient(78% 62% at 50% 46%, #000 58%, transparent 100%);
+  -webkit-mask-image:radial-gradient(78% 62% at 50% 46%, #000 58%, transparent 100%) }
 .body{ position:absolute; left:0; top:0; width:0; height:0; opacity:0; transform-origin:50% 50%;
   transition:opacity .7s var(--ease); will-change:transform }
 .body.in{ opacity:1 }
@@ -82,13 +84,21 @@ body.next{ background:var(--deep); color:var(--paper) }
 @media (max-width:900px){
   .intro-grid{ grid-template-columns:1fr; gap:26px; text-align:center }
   .intro-copy{ justify-items:center }
-  .intro-chart .box{ width:min(78vw,340px) }
+  .intro-chart .earth{ width:min(94vw,440px) }
 }
 
 /* ==========================================================================
    2 — the walkthrough
    ========================================================================== */
-.tour{ position:relative }
+.tour{ position:relative; background:var(--light); color:var(--ink) }
+.tour h2{ color:var(--ink) }
+.tour .tour-say p{ color:var(--dim-lo) }
+.tour .tour-nav button{ color:#8595AE }
+.tour .tour-nav button:hover{ color:var(--dim-lo) }
+.tour .tour-nav button[aria-current="true"]{ color:var(--ink); border-left-color:#8A7A55 }
+.tour .tour-say .skip{ color:var(--dim-lo) }
+.tour .tour-say .skip:hover{ color:var(--ink) }
+.tour .prod-note{ color:#8595AE }
 .tour-view{ position:sticky; top:0; height:100svh; overflow:hidden; display:grid; align-items:center }
 .tour-grid{ width:min(1300px,100% - 2*var(--gutter)); margin-inline:auto;
   display:grid; grid-template-columns:30% 1fr; gap:clamp(24px,4vw,64px); align-items:center }
@@ -110,14 +120,25 @@ body.next{ background:var(--deep); color:var(--paper) }
 
 /* right: the product stage — a real screen, lightly framed */
 .prod{ position:relative; display:grid; place-items:center; min-width:0 }
-.phone{ position:relative; height:min(74vh,760px); aspect-ratio:390/844;
-  border-radius:30px; overflow:hidden; background:#000;
-  box-shadow:0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(169,203,232,.22) }
-.phone img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top center;
-  opacity:0; transform:scale(1.015); transition:opacity .55s var(--ease), transform .7s var(--ease) }
-.phone img.on{ opacity:1; transform:none }
-.prod .halo{ position:absolute; width:72%; aspect-ratio:1; border-radius:50%; z-index:-1;
-  background:radial-gradient(circle, rgba(120,170,225,.24), transparent 68%); filter:blur(30px) }
+/* No device mockup. The graphic itself, as large as the panel allows, so the
+   reader can see how each screen actually looks. */
+.panel{ position:relative; width:100%; max-width:640px; height:min(74vh,720px);
+  border-radius:18px; overflow:hidden; background:#F7F8FB;
+  box-shadow:0 30px 70px -32px rgba(12,24,48,.45), 0 0 0 1px rgba(12,24,48,.08) }
+.panel img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+  object-position:center; background:#F7F8FB;
+  opacity:0; transform:scale(1.012); transition:opacity .5s var(--ease), transform .65s var(--ease) }
+.panel img.on{ opacity:1; transform:none }
+/* the two celestial screens are dark: let the panel match them */
+.panel img.dark{ background:#080F20 }
+.panel.is-dark{ background:#080F20 }
+/* the day's arc and the life-area cards are wide and short; a tall panel would
+   strand them in white space */
+.panel.is-wide{ height:auto; aspect-ratio:auto; max-height:min(74vh,720px) }
+.panel.is-wide img{ position:relative; height:auto }
+.panel.is-wide img:not(.on){ position:absolute; opacity:0 }
+.panel{ transition:height .4s var(--ease), background .5s var(--ease) }
+.prod .halo{ display:none }
 .prod-note{ position:absolute; bottom:-32px; left:0; right:0; text-align:center;
   font-family:var(--fm); font-size:11px; color:var(--dim-lo); letter-spacing:.04em }
 
@@ -138,7 +159,7 @@ body.next{ background:var(--deep); color:var(--paper) }
   .tour-say h2{ font-size:clamp(23px,6.4vw,30px) }
   .tour-say p{ max-width:36ch; font-size:15px }
   .tour-say .skip{ justify-self:center }
-  .phone{ height:min(46vh,400px); border-radius:22px }
+  .panel{ height:min(48vh,420px); border-radius:14px; max-width:none }
   .prod-note{ bottom:-24px; font-size:10.5px }
 }
 
