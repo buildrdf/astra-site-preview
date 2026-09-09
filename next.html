@@ -8,6 +8,9 @@
 <title>Astra</title>
 <meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that explains its reasoning.">
 <link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="next.css">
 <script>document.documentElement.className = "js"</script>
@@ -34,6 +37,7 @@
   <div class="hero-view">
     <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
     <div class="earth" aria-hidden="true"></div>
+    <svg class="orbits" id="orbits" aria-hidden="true" preserveAspectRatio="none"></svg>
     <div class="hero-chart" aria-hidden="true"><svg id="heroChart"></svg></div>
     <div class="bodies" id="heroBodies" aria-hidden="true"></div>
 
@@ -45,7 +49,7 @@
       </div>
       <div class="beat" data-on="0">
         <h2>Then find out<br>where they stood.</h2>
-        <p class="lede">Nine grahas, at the exact minute you arrived, over the exact place.</p>
+        <p class="lede">Seven grahas, at the exact minute you arrived, over the exact place.</p>
       </div>
       <div class="beat" data-on="0">
         <h2>That is your chart.</h2>
@@ -55,7 +59,7 @@
 
     <div class="hero-foot">
       <div class="hero-do">
-        <a class="btn" href="#free">Create my Kundali</a>
+        <a class="btn" href="index.html#free">Create my Kundali</a>
         <a class="btn line" href="#tour">See the app</a>
       </div>
       <p class="stamp" id="stamp"></p>
@@ -65,22 +69,20 @@
 </section>
 
 <!-- ============ 2 — the app walkthrough ============================== -->
-<section class="tour" id="tour" aria-labelledby="tourHead">
+<section class="tour" id="tour" aria-labelledby="tourSectionHead">
   <div class="tour-view">
+    <p class="tour-heading" id="tourSectionHead">Everything your birth chart can tell you.</p>
     <div class="tour-grid">
-      <div>
-        <div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
-        <div class="tour-say">
-          <h2 id="tourHead">&nbsp;</h2>
+      <div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
+      <div class="tour-main">
+        <div class="prod">
+          <div class="panel" id="panel"></div>
+        </div>
+        <div class="tour-desc">
+          <h3 id="tourHead">&nbsp;</h3>
           <p id="tourLine1">&nbsp;</p>
-          <p id="tourLine2">&nbsp;</p>
           <a class="skip" href="#reports">Skip to the reports</a>
         </div>
-      </div>
-      <div class="prod">
-        <div class="halo" aria-hidden="true"></div>
-        <div class="panel" id="panel"></div>
-        <p class="prod-note" id="stageNote"></p>
       </div>
     </div>
   </div>
@@ -93,14 +95,21 @@
       <p class="eyebrow" data-in>Reports</p>
       <h2 id="h-rep" data-in>Something to keep.</h2>
       <p class="lede" data-in>Each one computed from your chart and written in plain language. The first is free, and always will be.</p>
+      <div class="head-actions" data-in>
+        <a class="btn" href="index.html#free">Get my free Kundali</a>
+        <span class="btn line" aria-disabled="true">Download the app · Soon</span>
+      </div>
     </div>
+
+    <div class="flipbook" id="flipbook" aria-hidden="true"></div>
+
     <div class="shelf" id="shelf">
       <article class="book" data-in>
         <div class="cover"><img src="assets/covers/essential.png" alt="Cover of the Essential Vedic Kundali"></div>
         <h3>Essential Vedic Kundali</h3>
         <p>Your birth chart, planetary placements, houses and their Vedic significance.</p>
         <div class="price">Free <span>· no sign-up, no card</span></div>
-        <a class="btn" href="#free">Get mine</a>
+        <a class="btn" href="index.html#free">Get mine</a>
       </article>
       <article class="book" data-in>
         <div class="cover"><img src="assets/covers/complete.png" alt="Cover of the Complete Vedic Kundali Analysis"></div>
@@ -123,7 +132,6 @@
 
 <!-- ============ 4 — the close ======================================== -->
 <section class="act close-act" id="close" aria-labelledby="h-close">
-  <div class="rim" aria-hidden="true"></div>
   <div class="shell">
     <p class="eyebrow" data-in>Coming to iPhone and Android</p>
     <h2 id="h-close" data-in>Your sky, explained.</h2>
@@ -134,6 +142,10 @@
       <button class="btn" type="submit">Join</button>
     </form>
     <p class="status" id="wlStatus"></p>
+    <div class="close-actions" data-in>
+      <a class="btn line" href="index.html#free">Get my free Kundali</a>
+      <span class="btn line" aria-disabled="true">Download the app · Soon</span>
+    </div>
   </div>
 </section>
 

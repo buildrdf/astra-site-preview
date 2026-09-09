@@ -1,14 +1,13 @@
 /* ==========================================================================
    Astra — the four-section site.
 
-     1  a short introduction to your Kundali
-     2  the app walkthrough, which carries most of the experience
-     3  three reports on a shelf
-     4  a compact close
+     1  a short introduction to your Kundali (dark)
+     2  the app walkthrough, which carries most of the experience (light)
+     3  three reports on a shelf (light)
+     4  a compact close (light)
 
-   Colour: midnight blue with depth and a lit horizon, not a flat navy. The
-   brightest light stays near the horizon or the active product; behind text
-   the ground goes quiet and dark.
+   Only the first section is dark. Everything else is white, so the one dark
+   moment at the top does the emotional work and the rest reads clean and calm.
    ========================================================================== */
 
 :root{
@@ -17,30 +16,31 @@
   --ink-blue:#10213D;      /* the celestial surface */
   --depth:#29466F;         /* atmosphere, one step toward the light */
   --horizon:#A9CBE8;       /* the lit rim, and nothing else this bright */
-  --paper:#F3F5FA;         /* main text */
+  --paper:#F3F5FA;         /* main text on dark */
   --accent:#CBB995;        /* champagne, used sparingly */
 
   --dim:#8FA3C4;           /* secondary on dark */
   --dim-lo:#5C6F90;        /* secondary on light */
   --hair:rgba(169,203,232,.16);
   --hair-2:rgba(169,203,232,.28);
-  --light:#EEF2F8;
-  --light-2:#E3EAF4;
+  --light:#FFFFFF;
+  --light-2:#F1F3F8;
   --ink:#0C1830;           /* text on light */
+
+  --fd:"Fraunces",ui-serif,"New York",Georgia,"Times New Roman",serif;
 }
 
-body.next{ background:var(--deep); color:var(--paper) }
+body.next{ background:var(--light); color:var(--ink) }
 .next ::selection{ background:var(--accent); color:var(--deep) }
 
-/* Space, not a navy wall: near-black overhead, falling through midnight into a
-   lit blue only where the horizon is. The brightest light in the frame is the rim. */
-.sky-ground{ position:fixed; inset:0; z-index:-2; background:
+/* the space gradient behind the hero only — everything past it is plain white */
+.sky-ground{ position:fixed; inset:0; z-index:-2; height:100svh; background:
   radial-gradient(150% 88% at 50% 112%, #3D6394 0%, #23406A 16%, var(--ink-blue) 34%, var(--deep-2) 58%, var(--deep) 82%) }
-.grain{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+.grain{ position:fixed; inset:0 0 auto 0; height:100svh; z-index:-1; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") }
 
 .next .nav.solid{ background:rgba(8,15,32,.72); border-bottom-color:var(--hair) }
-.next .nav.solid.light{ background:rgba(238,242,248,.82); color:var(--ink); border-bottom-color:rgba(12,24,48,.1) }
+.next .nav.solid.light{ background:rgba(255,255,255,.86); color:var(--ink); border-bottom-color:rgba(12,24,48,.1) }
 .next .nav .cta{ background:var(--paper); color:var(--deep) }
 .next .nav.solid.light .cta{ background:var(--ink); color:var(--paper) }
 .next .lede{ color:var(--dim) }
@@ -48,35 +48,37 @@ body.next{ background:var(--deep); color:var(--paper) }
 .next .eyebrow::before{ background:var(--accent) }
 .next .btn{ background:var(--paper); color:var(--deep) }
 .next .btn.line{ background:transparent; border:1px solid var(--hair-2); color:var(--paper) }
+.next h1,.next h2,.next .tour-heading{ font-family:var(--fd) }
 
 /* ==========================================================================
    1 — the sky you were born under
-
-   A pinned stage. The Earth is a real limb, composited from the app's own Earth
-   imagery. The nine grahas hang in the sky above it, and on scroll they come
-   down into the chart as it draws. Centre-aligned, so the composition is the
-   same shape on a phone and on a desk.
    ========================================================================== */
 .hero{ position:relative; height:340vh }
 .hero-view{ position:sticky; top:0; height:100svh; overflow:hidden; background:#03060E }
 .hero-view .starfield{ position:absolute; inset:0; width:100%; height:100% }
-.earth{ position:absolute; left:50%; bottom:0; width:max(160vw,1700px); aspect-ratio:2400/1400;
+
+/* the Earth itself — one image, nothing around it */
+.earth{ position:absolute; left:50%; bottom:0; width:max(150vw,1600px); aspect-ratio:2400/1500;
   transform:translate(-50%,0); background:url("assets/earth-horizon.jpg") center bottom/cover no-repeat;
   will-change:transform,opacity }
+
+/* dotted orbits for the seven classical grahas — Rahu and Ketu are lunar
+   nodes, not physical bodies, so they carry no ring */
+.orbits{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.orbits ellipse{ fill:none; stroke:rgba(200,220,255,.32); stroke-width:1; stroke-dasharray:1 7;
+  stroke-linecap:round; vector-effect:non-scaling-stroke }
 
 .hero-say{ position:absolute; inset:clamp(72px,11vh,120px) 0 auto 0; display:grid; justify-items:center;
   text-align:center; padding:0 var(--gutter); pointer-events:none }
 .hero-say > *{ grid-area:1/1; align-self:start }
-/* max-width in ch here measured against the 17px body font, not the 88px
-   headline, so every line broke after one word */
 .hero-say .beat{ display:grid; gap:13px; justify-items:center; align-content:start;
   width:min(880px,88vw);
   transition:opacity .5s var(--ease), transform .5s var(--ease) }
 .hero-say .beat[data-on="0"]{ opacity:0; transform:translateY(12px) }
 .hero-say .beat[data-on="1"]{ opacity:1; transform:none }
-.hero h1{ font-size:clamp(36px,5.4vw,74px); line-height:1.04; letter-spacing:-.03em }
-.hero-say h2{ font-size:clamp(30px,4.2vw,56px); line-height:1.05; letter-spacing:-.03em }
-.hero-say .lede{ max-width:38ch }
+.hero h1{ font-weight:500; font-size:clamp(36px,5.6vw,80px); line-height:1.04; letter-spacing:-.01em }
+.hero-say h2{ font-family:var(--fd); font-weight:500; font-size:clamp(30px,4.4vw,60px); line-height:1.06; letter-spacing:-.01em }
+.hero-say .lede{ max-width:38ch; font-size:clamp(16px,1.4vw,19px) }
 
 .hero-chart{ position:absolute; left:50%; top:63%; transform:translate(-50%,-50%);
   width:min(46vh,66vw,420px); aspect-ratio:1 }
@@ -87,7 +89,6 @@ body.next{ background:var(--deep); color:var(--paper) }
 .body.in{ opacity:1 }
 .body img{ width:100%; height:100%; filter:drop-shadow(0 6px 16px rgba(0,0,0,.6)) }
 
-/* one column, so the actions and the caption can never land on each other */
 .hero-foot{ position:absolute; left:0; right:0; bottom:clamp(40px,6vh,64px); display:grid; gap:12px;
   justify-items:center; padding:0 var(--gutter) }
 .hero-do{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap }
@@ -103,8 +104,6 @@ body.next{ background:var(--deep); color:var(--paper) }
 
 @media (max-width:900px){
   .hero{ height:300vh }
-  /* one column for the actions, and room under them, or the two pills land on
-     top of each other and on the stamp */
   .hero-foot{ bottom:clamp(38px,5.5vh,58px); gap:10px }
   .hero-do{ flex-direction:column; align-items:center; gap:10px; width:100% }
   .hero-do .btn{ width:min(280px,80vw) }
@@ -116,7 +115,6 @@ body.next{ background:var(--deep); color:var(--paper) }
   .hero-say .lede{ font-size:15px; max-width:30ch }
   .hero-chart{ top:62%; width:min(70vw,280px) }
   .earth{ width:max(210vw,1200px) }
-  .hero-do{ bottom:clamp(46px,7vh,72px) }
 }
 @media (prefers-reduced-motion:reduce){
   .hero{ height:auto }
@@ -127,79 +125,64 @@ body.next{ background:var(--deep); color:var(--paper) }
 }
 
 /* ==========================================================================
-   2 — the walkthrough
+   2 — the walkthrough (white; a top heading, a pure nav rail, no boxed panel)
    ========================================================================== */
 .tour{ position:relative; background:var(--light); color:var(--ink) }
-.tour h2{ color:var(--ink) }
-.tour .tour-say p{ color:var(--dim-lo) }
-.tour .tour-nav button{ color:#8595AE }
-.tour .tour-nav button:hover{ color:var(--dim-lo) }
-.tour .tour-nav button[aria-current="true"]{ color:var(--ink); border-left-color:#8A7A55 }
-.tour .tour-say .skip{ color:var(--dim-lo) }
-.tour .tour-say .skip:hover{ color:var(--ink) }
-.tour .prod-note{ color:#8595AE }
-.tour-view{ position:sticky; top:0; height:100svh; overflow:hidden; display:grid; align-items:center }
-.tour-grid{ width:min(1300px,100% - 2*var(--gutter)); margin-inline:auto;
-  display:grid; grid-template-columns:30% 1fr; gap:clamp(24px,4vw,64px); align-items:center }
+.tour h2,.tour h3{ color:var(--ink) }
+.tour-view{ position:sticky; top:0; height:100svh; overflow:hidden;
+  display:grid; grid-template-rows:auto 1fr; padding:clamp(78px,11vh,110px) 0 clamp(24px,4vh,40px) }
+.tour-heading{ margin:0; text-align:center; font-weight:500; letter-spacing:-.01em;
+  font-size:clamp(24px,2.6vw,38px); color:var(--ink); padding:0 var(--gutter) }
+
+.tour-grid{ width:min(1300px,100% - 2*var(--gutter)); margin-inline:auto; height:100%;
+  display:grid; grid-template-columns:200px 1fr; gap:clamp(24px,4vw,64px); align-items:center }
 .tour-grid > *{ min-width:0 }
 
-/* left: the feature list, the active headline and two lines */
-.tour-nav{ display:grid; gap:2px; align-content:center }
+/* left: PURE navigation. No description text lives here any more. */
+.tour-nav{ display:grid; gap:2px; align-content:center; align-self:center }
 .tour-nav button{ display:block; width:100%; text-align:left; background:none; border:0; cursor:pointer;
-  padding:9px 0 9px 16px; border-left:2px solid transparent; color:var(--dim-lo);
+  padding:9px 0 9px 16px; border-left:2px solid transparent; color:#8595AE;
   font-size:15px; font-weight:500; transition:color .35s var(--ease), border-color .35s var(--ease) }
-.tour-nav button:hover{ color:var(--dim) }
-.tour-nav button[aria-current="true"]{ color:var(--paper); border-left-color:var(--accent) }
-.tour-say{ margin-top:26px; display:grid; gap:12px; min-height:200px; align-content:start }
-.tour-say h2{ font-size:clamp(26px,2.6vw,38px); line-height:1.08; letter-spacing:-.025em }
-.tour-say p{ margin:0; color:var(--dim); font-size:16px; line-height:1.5; max-width:34ch }
-.tour-say .skip{ margin-top:4px; font-size:13.5px; color:var(--dim); text-decoration:underline;
-  text-underline-offset:3px; justify-self:start }
-.tour-say .skip:hover{ color:var(--paper) }
+.tour-nav button:hover{ color:var(--dim-lo) }
+.tour-nav button[aria-current="true"]{ color:var(--ink); border-left-color:#8A7A55 }
 
-/* right: the product stage — a real screen, lightly framed */
-.prod{ position:relative; display:grid; place-items:center; min-width:0 }
-/* No device mockup. The graphic itself, as large as the panel allows, so the
-   reader can see how each screen actually looks. */
-.panel{ position:relative; width:100%; max-width:640px; height:min(74vh,720px);
-  border-radius:18px; overflow:hidden; background:#F7F8FB;
-  box-shadow:0 30px 70px -32px rgba(12,24,48,.45), 0 0 0 1px rgba(12,24,48,.08) }
+/* right: the product, centred, description text sitting quietly under it */
+.tour-main{ display:grid; justify-items:center; gap:18px; align-content:center; height:100%; padding:8px 0 }
+.prod{ position:relative; display:grid; place-items:center; width:100%; min-width:0; flex:1;
+  min-height:0 }
+/* no card: the graphic sits directly on the white page */
+.panel{ position:relative; width:100%; max-width:620px; height:min(58vh,600px) }
 .panel img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
-  object-position:center; background:#F7F8FB;
-  opacity:0; transform:scale(1.012); transition:opacity .5s var(--ease), transform .65s var(--ease) }
+  object-position:center; opacity:0; transform:scale(1.012);
+  transition:opacity .5s var(--ease), transform .65s var(--ease) }
 .panel img.on{ opacity:1; transform:none }
-/* the two celestial screens are dark: let the panel match them */
-.panel img.dark{ background:#080F20 }
-.panel.is-dark{ background:#080F20 }
-/* the day's arc and the life-area cards are wide and short; a tall panel would
-   strand them in white space */
-.panel.is-wide{ height:auto; aspect-ratio:auto; max-height:min(74vh,720px) }
+.panel.is-dark{ background:var(--ink-blue); border-radius:20px; box-shadow:0 30px 70px -32px rgba(12,24,48,.35) }
+.panel.is-wide{ height:auto; max-height:min(58vh,600px) }
 .panel.is-wide img{ position:relative; height:auto }
 .panel.is-wide img:not(.on){ position:absolute; opacity:0 }
 .panel{ transition:height .4s var(--ease), background .5s var(--ease) }
-.prod .halo{ display:none }
-.prod-note{ position:absolute; bottom:-32px; left:0; right:0; text-align:center;
-  font-family:var(--fm); font-size:11px; color:var(--dim-lo); letter-spacing:.04em }
+
+.tour-desc{ display:grid; justify-items:center; gap:8px; text-align:center; max-width:52ch }
+.tour-desc h3{ margin:0; font-family:var(--fd); font-weight:500; font-size:clamp(21px,2vw,28px);
+  letter-spacing:-.01em }
+.tour-desc p{ margin:0; color:var(--dim-lo); font-size:15.5px; line-height:1.5 }
+.tour-desc .skip{ margin-top:2px; font-size:13px; color:#8595AE; text-decoration:underline; text-underline-offset:3px }
+.tour-desc .skip:hover{ color:var(--ink) }
 
 @media (max-width:900px){
-  .tour-view{ align-items:start; padding-top:clamp(62px,8.5vh,90px) }
-  .tour-grid{ grid-template-columns:1fr; gap:12px }
-  /* the sidebar becomes a rail that stays visible while you scroll */
-  .tour-nav{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+  .tour-view{ padding:clamp(64px,9vh,88px) 0 20px; grid-template-rows:auto auto 1fr }
+  .tour-heading{ font-size:clamp(20px,5.6vw,26px) }
+  .tour-grid{ grid-template-columns:1fr; gap:10px; align-content:start }
+  .tour-nav{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; align-self:start;
     margin-inline:calc(-1 * var(--gutter)); padding-inline:var(--gutter) }
   .tour-nav::-webkit-scrollbar{ display:none }
   .tour-nav button{ flex:none; width:auto; padding:7px 14px; border-left:0; border-radius:999px;
-    border:1px solid var(--hair); font-size:13.5px; white-space:nowrap }
-  .tour-nav button[aria-current="true"]{ background:var(--paper); color:var(--deep); border-color:transparent }
-  .tour-say{ margin-top:10px; min-height:92px; text-align:center; justify-items:center; gap:9px }
-  /* one short headline, one explanation, a large app view — the second line
-     is desktop-only so the product gets the room on a phone */
-  .tour-say #tourLine2{ display:none }
-  .tour-say h2{ font-size:clamp(23px,6.4vw,30px) }
-  .tour-say p{ max-width:36ch; font-size:15px }
-  .tour-say .skip{ justify-self:center }
-  .panel{ height:min(48vh,420px); border-radius:14px; max-width:none }
-  .prod-note{ bottom:-24px; font-size:10.5px }
+    border:1px solid rgba(12,24,48,.14); font-size:13.5px; white-space:nowrap }
+  .tour-nav button[aria-current="true"]{ background:var(--ink); color:#fff; border-color:transparent }
+  .tour-main{ gap:10px }
+  .panel{ height:min(42vh,380px) }
+  .tour-desc h3{ font-size:19px }
+  .tour-desc p{ font-size:14px }
 }
 
 /* ==========================================================================
@@ -207,13 +190,45 @@ body.next{ background:var(--deep); color:var(--paper) }
    ========================================================================== */
 .shelf-act{ background:var(--light); color:var(--ink); padding:clamp(80px,11vh,150px) 0; position:relative }
 .shelf-act h2,.shelf-act h3{ color:var(--ink) }
+.shelf-act h2{ font-family:var(--fd); font-weight:500 }
 .shelf-act .lede{ color:var(--dim-lo) }
 .shelf-act .eyebrow{ color:#8A7A55 }
 .shelf-act .eyebrow::before{ background:#8A7A55 }
+.head-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px }
+.shelf-act .head-actions .btn{ background:var(--ink); color:#fff }
+.shelf-act .head-actions .btn.line{ background:transparent; border:1px solid rgba(12,24,48,.22); color:var(--ink) }
+
+/* the flip-book: a small stack of real pages, cycling on its own */
+.flipbook{ width:min(340px,70vw); aspect-ratio:210/297; margin:0 auto clamp(48px,7vh,80px);
+  position:relative; perspective:1800px }
+.flipbook .fp-page{ position:absolute; inset:0; background:#FBFAF6; border-radius:6px;
+  box-shadow:0 18px 40px -18px rgba(12,24,48,.35), 0 1px 0 rgba(12,24,48,.06);
+  transform-origin:left center; transition:transform .9s cubic-bezier(.6,.05,.3,1), opacity .5s;
+  padding:7% 8%; box-sizing:border-box; overflow:hidden; display:grid; align-content:start; gap:6%;
+  font-family:var(--fd) }
+.flipbook .fp-page.behind{ z-index:1 } .flipbook .fp-page.front{ z-index:3; }
+.flipbook .fp-page.turning{ transform:rotateY(-165deg); }
+.fp-tag{ font-family:var(--fm); font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:#8A7A55; font-family:-apple-system,BlinkMacSystemFont,sans-serif }
+.fp-title{ font-size:15px; font-weight:500; color:var(--ink); margin:0 }
+.fp-index{ display:grid; gap:4%; font-size:9.5px; color:var(--dim-lo); font-family:-apple-system,BlinkMacSystemFont,sans-serif }
+.fp-index div{ display:flex; justify-content:space-between; border-bottom:1px dotted rgba(12,24,48,.14); padding-bottom:2% }
+.fp-chart{ width:70%; aspect-ratio:1; margin:4% auto 0 }
+.fp-chart svg{ width:100%; height:100% }
+.fp-dash{ display:grid; gap:3%; font-size:9px; font-family:-apple-system,BlinkMacSystemFont,sans-serif; color:var(--dim-lo) }
+.fp-dash div{ display:flex; justify-content:space-between; align-items:center }
+.fp-dash b{ color:var(--ink); font-weight:600 }
+.fp-lock{ position:absolute; inset:0; border-radius:6px; background:rgba(251,250,246,.94);
+  display:grid; place-items:center; text-align:center; gap:8px; padding:14%; opacity:0; pointer-events:none;
+  transition:opacity .5s }
+.fp-lock.on{ opacity:1 }
+.fp-lock b{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; font-size:12px; color:var(--ink) }
+.fp-lock span{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; font-size:10.5px; color:var(--dim-lo) }
+.fp-pages-total{ text-align:center; font-size:12px; color:var(--dim-lo); margin-top:10px }
+
 .shelf{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(22px,3vw,48px);
   width:min(1240px,100% - 2*var(--gutter)); margin-inline:auto }
 .book{ display:grid; gap:13px; justify-items:start; align-content:start }
-/* the cover IS the object: no card around it */
 .book .cover{ width:100%; aspect-ratio:2/3; border-radius:8px; overflow:hidden;
   box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12);
   transform:perspective(1100px) rotateY(0deg) translateY(0);
@@ -221,12 +236,6 @@ body.next{ background:var(--deep); color:var(--paper) }
 .book:hover .cover{ transform:perspective(1100px) rotateY(-5deg) translateY(-7px);
   box-shadow:0 34px 60px -18px rgba(12,24,48,.5), 0 3px 8px rgba(12,24,48,.14) }
 .book .cover img{ width:100%; height:100%; object-fit:cover }
-.book .cover.pair{ background:var(--light-2); display:grid; place-items:center; position:relative }
-.book .cover.pair svg{ position:absolute; width:56%; height:56%; transition:transform .8s var(--ease) }
-.book .cover.pair svg:first-of-type{ transform:translate(-17%,-6%) rotate(-4deg) }
-.book .cover.pair svg:last-of-type{ transform:translate(17%,6%) rotate(4deg) }
-.book:hover .cover.pair svg:first-of-type{ transform:translate(-9%,-3%) rotate(-2deg) }
-.book:hover .cover.pair svg:last-of-type{ transform:translate(9%,3%) rotate(2deg) }
 .book h3{ font-size:19px; font-weight:600; letter-spacing:-.015em }
 .book p{ margin:0; font-size:14.5px; line-height:1.45; color:var(--dim-lo) }
 .book .price{ font-size:16px; font-weight:600; color:var(--ink) }
@@ -235,31 +244,33 @@ body.next{ background:var(--deep); color:var(--paper) }
 .shelf-act .btn.line{ background:transparent; border:1px solid rgba(12,24,48,.24); color:var(--ink) }
 .shelf-dots{ display:none }
 @media (max-width:900px){
-  /* a shelf you swipe, with the next cover peeking */
   .shelf{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory;
     margin-inline:calc(-1 * var(--gutter)); padding:4px var(--gutter) 10px; scrollbar-width:none }
   .shelf::-webkit-scrollbar{ display:none }
   .book{ flex:0 0 76%; scroll-snap-align:center }
   .shelf-dots{ display:flex; gap:7px; justify-content:center; margin-top:18px }
-  .shelf-dots i{ width:7px; height:7px; border-radius:50%; background:rgba(12,24,48,.2);
-    transition:background .3s }
+  .shelf-dots i{ width:7px; height:7px; border-radius:50%; background:rgba(12,24,48,.2); transition:background .3s }
   .shelf-dots i.on{ background:var(--ink) }
 }
 
 /* ==========================================================================
-   4 — the close
+   4 — the close (white, matching the rest — only the hero stays dark)
    ========================================================================== */
-.close-act{ position:relative; overflow:hidden; text-align:center;
+.close-act{ position:relative; overflow:hidden; text-align:center; background:var(--light-2);
   padding:clamp(84px,12vh,160px) 0 clamp(60px,9vh,110px) }
-.close-act .rim{ position:absolute; left:50%; top:96%; width:min(190vw,1900px); aspect-ratio:1;
-  border-radius:50%; transform:translate(-50%,0); pointer-events:none;
-  background:radial-gradient(120% 120% at 50% 6%, #2B4870 0%, rgba(20,39,70,0) 62%);
-  box-shadow: inset 0 3px 1px -1px rgba(169,203,232,.7), 0 -6px 100px 10px rgba(90,140,205,.22) }
-.close-act .shell{ display:grid; gap:22px; justify-items:center; position:relative; z-index:1 }
-.next footer{ background:transparent; border-top:1px solid var(--hair); color:var(--dim-lo) }
-.next footer a:hover{ color:var(--paper) }
+.close-act h2{ color:var(--ink); font-family:var(--fd); font-weight:500 }
+.close-act .eyebrow{ color:#8A7A55 } .close-act .eyebrow::before{ background:#8A7A55 }
+.close-act .lede{ color:var(--dim-lo) }
+.close-act .shell{ display:grid; gap:20px; justify-items:center; position:relative; z-index:1 }
+.close-act .wl input{ border:1px solid rgba(12,24,48,.18); background:#fff; color:var(--ink) }
+.close-act .wl .btn{ background:var(--ink); color:#fff }
+.close-act .status{ color:var(--dim-lo) }
+.close-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px }
+.close-actions .btn.line{ border:1px solid rgba(12,24,48,.22); color:var(--ink) }
+.next footer{ background:var(--light); border-top:1px solid rgba(12,24,48,.08); color:var(--dim-lo) }
+.next footer a:hover{ color:var(--ink) }
 
-/* reveals: present at rest, script only adds the arrival */
+/* reveals */
 [data-in]{ opacity:1 }
 .js [data-in]{ opacity:0; transform:translateY(18px) }
 .js [data-in].shown{ opacity:1; transform:none;
@@ -269,62 +280,96 @@ body.next{ background:var(--deep); color:var(--paper) }
   *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.001ms!important }
   .js [data-in]{ opacity:1; transform:none }
   .tour-view{ position:relative; height:auto; padding:8vh 0 }
-  .phone img{ opacity:1 }
 }
 
 /* ==========================================================================
-   The live pieces on the walkthrough stage.
-   These are the app's elements rebuilt, not pictures of them, so they need
-   real controls: pressable windows, openable periods, a draggable sky.
+   The live pieces on the walkthrough stage — no boxed cards, minimal chrome
    ========================================================================== */
-.lv{ display:grid; gap:14px; align-content:start; width:100%; height:100%;
-  padding:clamp(18px,2.4vw,30px); box-sizing:border-box; overflow:auto; scrollbar-width:none }
+.lv{ display:grid; gap:16px; align-content:start; justify-items:center; width:100%; height:100%;
+  padding:4px; box-sizing:border-box; overflow:auto; scrollbar-width:none }
 .lv::-webkit-scrollbar{ display:none }
 .lv-kicker{ margin:0; font-size:13px; font-weight:600; letter-spacing:.01em; color:var(--ink) }
-.lv-foot{ margin:0; font-size:12.5px; color:#8595AE }
+.lv-foot{ margin:0; font-size:12.5px; color:#8595AE; text-align:center }
 .lv-note{ margin:0; color:var(--dim-lo) }
 .lv-thin{ color:#8595AE; font-size:13px; margin:0 }
-.lv-say{ display:grid; gap:5px; min-height:86px; align-content:start }
+.lv-say{ display:grid; gap:5px; min-height:74px; align-content:start; text-align:center; justify-items:center;
+  max-width:46ch }
 .lv-say b{ font-size:15.5px; font-weight:600; color:var(--ink) }
 .lv-say p{ margin:0; font-size:14.5px; line-height:1.5; color:var(--dim-lo) }
+.lv-full{ width:100% }
 
 /* the day's bar */
-.lv-bar{ position:relative; height:56px; border-radius:12px; background:#E4E9F2; overflow:hidden }
+.lv-bar{ position:relative; height:52px; border-radius:12px; background:#EFF2F7; overflow:hidden; width:100% }
 .lv-band{ position:absolute; top:0; bottom:0; border:0; cursor:pointer; padding:0;
   transition:filter .3s, box-shadow .3s }
 .lv-band.good{ background:var(--ink) }
 .lv-band.hold{ background:repeating-linear-gradient(45deg,#C3CBDA 0 6px,#D8DEE9 6px 12px) }
+.lv-band.warn{ background:#C97B4A }
 .lv-band.on{ box-shadow:0 0 0 2px #8A7A55; z-index:2 }
 .lv-band:hover{ filter:brightness(1.08) }
 .lv-now{ position:absolute; top:-4px; bottom:-4px; width:2px; background:#8A7A55; border-radius:2px; z-index:3 }
-.lv-scale{ display:flex; justify-content:space-between; font-family:var(--fm); font-size:11px; color:#8595AE }
-.lv-moon{ display:flex; gap:13px; align-items:center; border-top:1px solid rgba(12,24,48,.1); padding-top:13px }
-.lv-moon img{ width:44px; height:44px; flex:none }
-.lv-moon b{ display:block; font-size:14.5px; color:var(--ink) }
-.lv-moon span{ display:block; font-size:13px; color:var(--dim-lo); margin-top:2px }
+.lv-scale{ display:flex; justify-content:space-between; font-family:var(--fm); font-size:11px; color:#8595AE; width:100% }
+.lv-legend{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-size:12px; color:var(--dim-lo) }
+.lv-legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:5px; vertical-align:middle }
+.lv-legend i.good{ background:var(--ink) } .lv-legend i.hold{ background:#D8DEE9 } .lv-legend i.warn{ background:#C97B4A }
+
+.lv-datebar{ display:flex; align-items:center; gap:10px; width:100% }
+.lv-datebar button{ width:30px; height:30px; border-radius:50%; border:1px solid rgba(12,24,48,.16);
+  background:#fff; cursor:pointer; display:grid; place-items:center; color:var(--ink); flex:none }
+.lv-datebar button:hover{ background:#F4F6FA }
+.lv-datebar .lv-kicker{ flex:1; text-align:center }
+.lv-today{ font-size:11.5px; color:#8595AE; text-decoration:underline; text-underline-offset:2px;
+  background:none; border:0; cursor:pointer; flex:none }
+
+.lv-summary{ display:grid; gap:4px; text-align:center }
+.lv-summary .verdict{ display:inline-flex; align-items:center; gap:7px; font-size:14px; font-weight:600 }
+.lv-summary .verdict i{ width:8px; height:8px; border-radius:50%; display:inline-block }
+.lv-summary .verdict i.good{ background:#3E8E5C } .lv-summary .verdict i.mixed{ background:#B8862A } .lv-summary .verdict i.hold{ background:#B0472F }
+.lv-summary p{ margin:0; font-size:13px; color:var(--dim-lo) }
+
+/* the moving life-area pills — decorative, never interactive */
+.lv-pills-wrap{ width:100%; overflow:hidden; -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent) }
+.lv-pills{ display:flex; gap:10px; width:max-content; animation:pillscroll 22s linear infinite }
+.lv-pills.reduce-static{ animation:none }
+@keyframes pillscroll{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+.lv-pill{ display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 14px; border-radius:999px;
+  border:1px solid rgba(12,24,48,.12); font-size:13px; color:var(--dim-lo); white-space:nowrap; background:#fff }
+.lv-pill i{ width:7px; height:7px; border-radius:50%; flex:none }
+.lv-pill i.good{ background:#3E8E5C } .lv-pill i.mixed{ background:#B8862A } .lv-pill i.hold{ background:#B0472F }
+.lv-pills-cap{ font-size:12px; color:#8595AE; text-align:center }
+
+.lv-moon{ display:flex; gap:13px; align-items:center; width:100% }
+.lv-moon img{ width:40px; height:40px; flex:none }
+.lv-moon b{ display:block; font-size:14px; color:var(--ink) }
+.lv-moon span{ display:block; font-size:12.5px; color:var(--dim-lo); margin-top:1px }
 
 /* the nested periods */
-.lv-crumb{ display:flex; align-items:center; gap:7px; flex-wrap:wrap }
+.lv-crumb{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; justify-content:center }
 .lv-crumb-b{ background:none; border:0; padding:0; cursor:pointer; font-size:13.5px; color:#8595AE }
 .lv-crumb-b.on{ color:var(--ink); font-weight:600 }
 .lv-crumb-b:hover{ color:var(--ink) }
 .lv-sep{ color:#B4BFD0; font-size:13px }
 .lv-track{ position:relative; display:flex; height:64px; border-radius:12px; overflow:hidden;
-  border:1px solid rgba(12,24,48,.12) }
+  border:1px solid rgba(12,24,48,.12); width:100%; cursor:grab; touch-action:pan-y }
+.lv-track:active{ cursor:grabbing }
+.lv-track:focus-visible{ outline:2px solid #8A7A55; outline-offset:2px }
 .lv-seg{ position:relative; height:100%; min-width:0; border:0; border-right:1px solid rgba(12,24,48,.08);
-  background:#EDF1F7; cursor:pointer; display:grid; place-items:center; padding:0; transition:background .3s }
+  background:#EDF1F7; cursor:pointer; display:grid; place-items:center; padding:0; transition:background .3s;
+  pointer-events:none }
 .lv-seg:last-child{ border-right:0 }
 .lv-seg img{ width:26px; height:26px; opacity:.5; transition:opacity .3s, transform .35s var(--ease) }
-.lv-seg:hover{ background:#E2E8F2 }
 .lv-seg.running{ background:#DCE4F1 }
-.lv-seg.running img{ opacity:1; transform:scale(1.2) }
+.lv-seg.running img,.lv-seg.focus img{ opacity:1; transform:scale(1.2) }
+.lv-seg.focus{ background:#E4EAF5 }
+.lv-scrub-hint{ font-size:11.5px; color:#8595AE; text-align:center }
 
 /* the chart */
-.lv-seg2{ display:inline-flex; padding:3px; border-radius:999px; background:rgba(12,24,48,.07); justify-self:start }
+.lv-seg2{ display:inline-flex; padding:3px; border-radius:999px; background:rgba(12,24,48,.07) }
 .lv-seg2 button{ border:0; background:none; border-radius:999px; padding:7px 16px; cursor:pointer;
   font-size:13.5px; font-weight:500; color:var(--dim-lo) }
 .lv-seg2 button.on{ background:var(--ink); color:var(--paper) }
-.lv-chartbox{ width:min(100%,340px); aspect-ratio:1; margin-inline:auto }
+.lv-chartbox{ width:min(100%,320px); aspect-ratio:1 }
 .lv-chartbox svg{ width:100%; height:100%; overflow:visible }
 .lv-chart .k-line{ stroke:rgba(12,24,48,.34) }
 .lv-chart .k-sign,.lv-chart .k-asc,.lv-chart .k-retro{ fill:#8595AE }
@@ -333,46 +378,79 @@ body.next{ background:var(--deep); color:var(--paper) }
 .lv-chart .k-planet{ filter:drop-shadow(0 1.5px 3px rgba(12,24,48,.3)) }
 .lv-chart .k-planet.lifted .k-halo{ fill:rgba(12,24,48,.07) }
 .lv-chart .k-aspect{ stroke:rgba(12,24,48,.4) }
+.lv-yearslider{ width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:2px;
+  background:rgba(12,24,48,.14); outline:none }
+.lv-yearslider::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--ink); cursor:pointer; box-shadow:0 1px 4px rgba(12,24,48,.4) }
+.lv-yearslider::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:var(--ink); border:0; cursor:pointer }
 
-/* the sky */
-.lv-sky{ background:#080F20; border-radius:inherit; gap:10px }
-.lv-sky canvas{ width:100%; flex:1; min-height:min(46vh,340px); border-radius:12px; touch-action:pan-y; display:block }
+/* the sky (dark, matches the panel's dark surface) */
+.lv-sky{ background:transparent; gap:10px }
+.lv-sky canvas{ width:100%; flex:1; min-height:min(42vh,320px); border-radius:12px; touch-action:pan-y; display:block }
 .lv-sky .lv-say b{ color:var(--paper) } .lv-sky .lv-say p{ color:#8FA3C4 }
 .lv-sky .lv-foot{ color:#5C6F90 }
-.lv-picks{ display:flex; gap:7px; flex-wrap:wrap }
+.lv-picks{ display:flex; gap:7px; flex-wrap:wrap; justify-content:center }
 .lv-pick{ display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 11px; border-radius:999px;
   border:1px solid rgba(169,203,232,.24); background:transparent; color:#F3F5FA; font-size:12.5px; cursor:pointer }
 .lv-pick img{ width:16px; height:16px }
 .lv-pick[aria-pressed="true"]{ background:#F3F5FA; color:#080F20; border-color:transparent }
 
-/* ask */
-.lv-qs{ display:grid; gap:7px }
-.lv-q-b{ text-align:left; background:none; border:1px solid rgba(12,24,48,.14); border-radius:12px;
-  padding:9px 13px; font-size:13.5px; color:var(--dim-lo); cursor:pointer; transition:background .3s,color .3s }
-.lv-q-b:hover{ background:rgba(12,24,48,.04) }
-.lv-q-b.on{ background:var(--ink); color:var(--paper); border-color:transparent }
-.lv-thread{ display:grid; gap:9px }
-.lv-q{ justify-self:end; background:var(--ink); color:var(--paper); border-radius:14px 14px 4px 14px;
-  padding:9px 13px; font-size:13.5px; max-width:86% }
-.lv-a{ background:#F7F8FB; border:1px solid rgba(12,24,48,.1); border-radius:14px 14px 14px 4px;
-  padding:13px; display:grid; gap:8px }
-.lv-a small{ font-family:var(--fm); font-size:10px; letter-spacing:.14em; color:#8A7A55 }
-.lv-a p{ margin:0; font-size:14px; line-height:1.5; color:var(--ink) }
-.lv-chips{ display:flex; gap:6px; flex-wrap:wrap }
-.lv-chip{ border:1px solid rgba(12,24,48,.14); border-radius:999px; padding:4px 10px; font-size:11.5px; color:var(--dim-lo) }
+/* ask — no boxes, just the orb and the words */
+.lv-ask{ gap:22px }
+.lv-orb{ width:88px; height:88px; border-radius:50%; position:relative;
+  background:radial-gradient(circle at 34% 30%, #EAF0FB, #B9C8E4 45%, #7C93BE 100%);
+  box-shadow:0 8px 26px -8px rgba(12,24,48,.4); transition:transform .5s var(--ease), box-shadow .5s }
+.lv-orb::after{ content:""; position:absolute; inset:-14px; border-radius:50%;
+  background:radial-gradient(circle, rgba(138,122,85,.22), transparent 70%); opacity:0; transition:opacity .5s }
+.lv-orb.think{ transform:scale(1.08) }
+.lv-orb.think::after{ opacity:1; animation:orbpulse 1.6s ease-in-out infinite }
+@keyframes orbpulse{ 0%,100%{ transform:scale(.94) } 50%{ transform:scale(1.12) } }
+.lv-thread{ display:grid; gap:14px; width:100%; max-width:52ch }
+.lv-q{ justify-self:center; text-align:center; font-size:15.5px; color:var(--dim-lo); font-style:italic;
+  font-family:var(--fd); opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s }
+.lv-q.on{ opacity:1; transform:none }
+.lv-a{ text-align:center; display:grid; gap:8px; justify-items:center; opacity:0; transition:opacity .6s }
+.lv-a.on{ opacity:1 }
+.lv-a p{ margin:0; font-size:15.5px; line-height:1.55; color:var(--ink) }
+.lv-chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center }
+.lv-chip{ font-size:12px; color:#8A7A55 }
+.lv-chip:not(:last-child)::after{ content:"·"; margin-left:8px; color:#B4BFD0 }
+
+/* relationship matching — live, no boxes */
+.lv-match{ gap:18px }
+.lv-pair{ display:flex; align-items:center; justify-content:center; gap:0; width:100% }
+.lv-pchart{ width:min(38%,150px); aspect-ratio:1 }
+.lv-pchart svg{ width:100%; height:100% }
+.lv-pchart.b{ margin-left:-6%; opacity:.92 }
+.lv-linklabel{ font-size:26px; color:#B4BFD0; padding:0 6px }
+.lv-calc{ height:42px; padding:0 22px; border-radius:999px; background:var(--ink); color:#fff; border:0;
+  font-size:14px; font-weight:500; cursor:pointer }
+.lv-calc:disabled{ opacity:.5; cursor:default }
+.lv-score{ display:grid; justify-items:center; gap:4px }
+.lv-score b{ font-family:var(--fd); font-size:44px; font-weight:500; line-height:1; color:var(--ink) }
+.lv-score span{ font-size:13px; color:var(--dim-lo) }
+.lv-kootas{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px 14px; width:100%; max-width:440px }
+.lv-koota{ display:grid; gap:3px; text-align:center; opacity:0; transform:translateY(6px);
+  transition:opacity .4s, transform .4s }
+.lv-koota.on{ opacity:1; transform:none }
+.lv-koota .name{ font-size:10.5px; color:#8595AE; text-transform:uppercase; letter-spacing:.03em }
+.lv-koota .val{ font-size:15px; font-weight:600; color:var(--ink) }
+.lv-koota .val.zero{ color:#B0472F }
 
 @media (max-width:900px){
-  .lv{ padding:14px; gap:11px }
-  .lv-say{ min-height:74px } .lv-say p{ font-size:13.5px }
-  .lv-bar{ height:44px } .lv-track{ height:54px }
-  .lv-chartbox{ width:min(100%,260px) }
-  .lv-sky canvas{ min-height:min(34vh,240px) }
+  .lv{ gap:12px }
+  .lv-say{ min-height:0 }
+  .lv-bar{ height:42px } .lv-track{ height:52px }
+  .lv-chartbox{ width:min(100%,240px) }
+  .lv-sky canvas{ min-height:min(30vh,220px) }
+  .lv-orb{ width:68px; height:68px }
+  .lv-score b{ font-size:34px }
+  .lv-kootas{ grid-template-columns:repeat(4,1fr); gap:6px 10px }
 }
 
 /* the stage holds live elements and pictures alike; only one is shown */
 .panel .surface{ position:absolute; inset:0; opacity:0; pointer-events:none;
   transition:opacity .45s var(--ease) }
 .panel .surface.on{ opacity:1; pointer-events:auto }
-.panel .livehost{ width:100%; height:100%; overflow:hidden; display:grid }
-.panel .livehost.dark{ background:#080F20 }
-.panel img.shot{ object-fit:contain; background:#F7F8FB }
+.panel .livehost{ width:100%; height:100%; overflow:hidden; display:grid; align-content:center }
+.panel img.shot{ object-fit:contain }

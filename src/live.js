@@ -2,104 +2,151 @@
    The walkthrough's live pieces.
 
    Not screenshots. Each of these is the actual element, rebuilt on the page and
-   driven by the same engine the app uses, so a visitor can take hold of it:
-   press a time window and it explains itself, open a life period and find the
-   periods inside it, touch a planet and the chart answers, drag the sky.
+   driven by the same engine the app uses: scrub a date and the day recomputes,
+   drag a period open and the periods inside it appear, touch a planet and the
+   chart answers, drag the sky, calculate a real match between two charts.
 
-   Everything here computes. Nothing is written into the markup.
+   Everything here computes. Nothing is written into the markup as a guess.
    ========================================================================== */
 import { renderChart, focusPlanet, clearFocus, aspectsOf } from "./chart.js";
-import { transitInto, PLAIN, fmtDeg, fmtDate } from "./kundali.js";
-import { dayShape, moonAt, lunarMonth } from "./today.js";
+import { transitInto, castChart, PLAIN, fmtDeg, fmtDate } from "./kundali.js";
+import { dayShape, moonAt } from "./today.js";
 import { HOUSE_THEME } from "./insight.js";
 import { vimshottari } from "../vendor/astro/dasha3.js";
+import { ashtakoota } from "../vendor/astro/match.js";
 import { createSkyField } from "./skyfield.js";
 import { asset } from "./asset.js";
 
 const ORD = n => n + (["th","st","nd","rd"][(n % 100 - 20) % 10] || ["th","st","nd","rd"][n % 100] || "th");
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls;
   if (text != null) n.textContent = text; return n; };
-const hhmm = (d, tz) => d.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit", hour12:false, timeZone:tz });
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ==========================================================================
-   THE DAY'S RHYTHM — a real bar for a real place, with windows you can press
+   THE DAY'S RHYTHM — scrub the date, get a verdict, watch the areas of life
    ========================================================================== */
-export function dayRhythm(host, place) {
-  const now = new Date();
-  const d = dayShape(now, place);
+const LIFE_AREAS = [
+  { name: "Career", houses: [10, 6, 2] },
+  { name: "Wealth", houses: [2, 11] },
+  { name: "Relationships", houses: [7, 5] },
+  { name: "Wellbeing", houses: [1, 6] },
+  { name: "Growth", houses: [9, 5] }
+];
+/* a slow graha crossing a life-area's houses reads as that area's weather for
+   the day; the same house-theme table the "Ask Astra" reading uses */
+function areaState(transits, houses) {
+  const heavy = ["Saturn", "Rahu", "Mars"];
+  const hit = transits.find(p => houses.includes(p.house) && heavy.includes(p.graha));
+  if (hit) return { cls: hit.graha === "Saturn" ? "hold" : "mixed", why: `${hit.graha} is crossing here` };
+  const soft = transits.find(p => houses.includes(p.house) && ["Jupiter","Venus","Moon"].includes(p.graha));
+  if (soft) return { cls: "good", why: `${soft.graha} is crossing here` };
+  return { cls: "mixed", why: "no strong crossing today" };
+}
+
+export function dayRhythm(host, place, sample) {
+  let offset = 0;                                   /* days from today, scrubbed */
   host.replaceChildren();
   const wrap = el("div", "lv lv-day");
 
-  if (d.polar) { wrap.append(el("p", "lv-note", d.polar)); host.append(wrap); return; }
+  const datebar = el("div", "lv-datebar");
+  const prev = el("button", null, "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous day");
+  const next = el("button", null, "›"); next.type = "button"; next.setAttribute("aria-label", "Next day");
+  const kicker = el("p", "lv-kicker");
+  const today = el("button", "lv-today", "Today"); today.type = "button"; today.hidden = true;
+  datebar.append(prev, kicker, next, today);
 
-  wrap.append(el("p", "lv-kicker", now.toLocaleDateString("en-GB",
-    { weekday:"long", day:"numeric", month:"long", timeZone:place.tz }) + " · " + place.name));
-
-  /* the bar: sunrise to sunset, with the two named windows laid on it */
   const bar = el("div", "lv-bar");
-  const band = (w, cls, label) => {
-    const b = el("button", "lv-band " + cls);
-    b.style.left = w.left + "%"; b.style.width = Math.max(w.width, 2.5) + "%";
-    b.type = "button"; b.setAttribute("aria-label", `${label}, ${w.text}`);
-    b.dataset.k = cls;
-    bar.append(b); return b;
-  };
-  band(d.abhijit, "good", "Abhijit");
-  band(d.rahu, "hold", "Rahu Kalam");
-  if (d.nowPct != null) { const n = el("i", "lv-now"); n.style.left = d.nowPct + "%"; bar.append(n); }
-  wrap.append(bar);
-
+  const legend = el("div", "lv-legend");
+  const legGood = el("span"); legGood.append(el("i", "good"), document.createTextNode("Favoured"));
+  const legHold = el("span"); legHold.append(el("i", "hold"), document.createTextNode("Held back"));
+  legend.append(legGood, legHold);
   const scale = el("div", "lv-scale");
-  scale.append(el("span", null, d.riseText + " sunrise"), el("span", null, d.setText + " sunset"));
-  wrap.append(scale);
-
-  /* pressing a window explains it — the whole point of the element */
-  const say = el("div", "lv-say");
-  const LINES = {
-    good: [`Abhijit · ${d.abhijit.text}`,
-      "The eighth of the day's fifteen muhurtas, the one that straddles local noon. Traditionally the steadiest hour of the day for beginning something."],
-    hold: [`Rahu Kalam · ${d.rahu.text}`,
-      `Daylight cut into eight; this is the ${ORD(d.vara.rk)} part, which the classical table assigns to ${d.vara.day}. Traditionally kept for routine rather than for launches.`]
-  };
-  const pick = k => {
-    const [h, b] = LINES[k];
-    say.replaceChildren(el("b", null, h), el("p", null, b));
-    bar.querySelectorAll(".lv-band").forEach(x => x.classList.toggle("on", x.dataset.k === k));
-  };
-  bar.addEventListener("click", e => { const b = e.target.closest(".lv-band"); if (b) pick(b.dataset.k); });
-  wrap.append(say);
-
-  /* the Moon, computed, with the phase image that is actually tonight's */
-  const m = moonAt(now);
+  const summary = el("div", "lv-summary");
+  const pillsWrap = el("div", "lv-pills-wrap");
+  const pills = el("div", "lv-pills" + (reduce ? " reduce-static" : ""));
+  pillsWrap.append(pills);
+  const pillsCap = el("p", "lv-pills-cap", "How your day reads across every area of life.");
   const moon = el("div", "lv-moon");
-  const mi = new Image(); mi.src = asset(m.file); mi.alt = "";
-  const mt = el("div");
-  mt.append(el("b", null, `${m.name} · ${Math.round(m.illum * 100)}% lit`),
-            el("span", null, `${m.paksha} ${m.tithi} — from the Moon's distance ahead of the Sun right now.`));
-  moon.append(mi, mt);
-  wrap.append(moon);
+  const foot = el("p", "lv-foot", "Drag the days. Everything here is computed for where you are.");
 
-  wrap.append(el("p", "lv-foot", "Press either window. Everything here is computed for where you are."));
+  wrap.append(datebar, bar, legend, scale, summary, pillsWrap, pillsCap, moon, foot);
   host.append(wrap);
-  pick("good");
+
+  function render() {
+    const date = new Date(Date.now() + offset * 864e5);
+    const d = dayShape(date, place);
+    const isToday = offset === 0;
+    today.hidden = isToday;
+    kicker.textContent = (isToday ? "" : offset > 0 ? "In " + offset + " day" + (offset > 1 ? "s" : "") + " · " : offset + " day" + (offset < -1 ? "s" : "") + " ago · ")
+      + date.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone: place.tz });
+
+    if (d.polar) {
+      bar.replaceChildren(); scale.replaceChildren(); summary.replaceChildren(el("p", null, d.polar));
+      pillsWrap.hidden = true; moon.replaceChildren();
+      return;
+    }
+    pillsWrap.hidden = false;
+
+    bar.replaceChildren();
+    const good = el("div", "lv-band good"); good.style.left = d.abhijit.left + "%"; good.style.width = Math.max(d.abhijit.width, 2.5) + "%";
+    good.title = "Abhijit " + d.abhijit.text;
+    const hold = el("div", "lv-band hold"); hold.style.left = d.rahu.left + "%"; hold.style.width = Math.max(d.rahu.width, 2.5) + "%";
+    hold.title = "Rahu Kalam " + d.rahu.text;
+    bar.append(good, hold);
+    if (isToday && d.nowPct != null) { const n = el("i", "lv-now"); n.style.left = d.nowPct + "%"; bar.append(n); }
+
+    scale.replaceChildren(el("span", null, d.riseText + " sunrise"), el("span", null, d.setText + " sunset"));
+
+    /* the day's verdict: the weekday's own ruler, plus whether the crossing
+       slow grahas favour or caution today across the life areas */
+    const transits = transitInto(date, sample.lagna.sign);
+    const states = LIFE_AREAS.map(a => ({ ...a, ...areaState(transits, a.houses) }));
+    const bad = states.filter(s => s.cls === "hold").length, goodN = states.filter(s => s.cls === "good").length;
+    const verdictCls = bad >= 3 ? "hold" : goodN >= 3 ? "good" : "mixed";
+    const verdictWord = verdictCls === "good" ? "A favourable day" : verdictCls === "hold" ? "A day to hold steady" : "A mixed day";
+    const career = states.find(s => s.name === "Career");
+    summary.replaceChildren(
+      (() => { const v = el("div", "verdict"); v.append(el("i", verdictCls), document.createTextNode(verdictWord)); return v; })(),
+      el("p", null, `${d.vara.day} is traditionally ruled by ${d.vara.lord}. Career reads ${career.cls === "good" ? "favourable" : career.cls === "hold" ? "held back" : "mixed"} today — ${career.why}.`)
+    );
+
+    pills.replaceChildren();
+    const build = () => states.forEach(s => {
+      const p = el("span", "lv-pill"); p.append(el("i", s.cls), document.createTextNode(s.name)); pills.append(p);
+    });
+    build(); build();      /* doubled, so the marquee loop has no seam */
+
+    const m = moonAt(date);
+    moon.replaceChildren();
+    const mi = new Image(); mi.src = asset(m.file); mi.alt = "";
+    const mt = el("div");
+    mt.append(el("b", null, `${m.name} · ${Math.round(m.illum * 100)}% lit`),
+              el("span", null, `${m.paksha} ${m.tithi}`));
+    moon.append(mi, mt);
+  }
+
+  prev.onclick = () => { offset -= 1; render(); };
+  next.onclick = () => { offset += 1; render(); };
+  today.onclick = () => { offset = 0; render(); };
+  render();
 }
 
 /* ==========================================================================
-   TIME CONTAINS TIME — open a period and find the periods inside it
+   TIME CONTAINS TIME — open a period, or drag / arrow through the line
    ========================================================================== */
 export function dashaStack(host, sample) {
   const moon = sample.planets.find(p => p.graha === "Moon");
   const cycle = vimshottari(moon.lon, new Date(sample.moment.iso));
   const now = Date.now();
-  let path = [];                       /* [] · [maha] · [maha, antar] */
+  let path = [];
 
   host.replaceChildren();
   const wrap = el("div", "lv lv-time");
   const crumb = el("div", "lv-crumb");
-  const rows = el("div", "lv-rows");
+  const rows = el("div", "lv-rows lv-full");
   const say = el("div", "lv-say");
-  wrap.append(crumb, rows, say, el("p", "lv-foot",
-    "Press a period to open the periods inside it. Three levels, each computed from the Moon's exact place at birth."));
+  const hint = el("p", "lv-scrub-hint", "Drag the line, or focus it and use the arrow keys.");
+  wrap.append(crumb, rows, say, hint);
   host.append(wrap);
 
   const levelOf = () => {
@@ -108,9 +155,10 @@ export function dashaStack(host, sample) {
     return { list: path[1].pratyantardashas || [], label: "Pratyantardasha", of: path[1].lord + " antardasha" };
   };
 
+  let track = null, focusI = 0, list = [];
+
   function draw() {
-    const { list, label, of } = levelOf();
-    /* the breadcrumb, which is also the way back up */
+    const lvl = levelOf(); list = lvl.list;
     crumb.replaceChildren();
     const root = el("button", "lv-crumb-b" + (path.length ? "" : " on"), "Your life");
     root.type = "button"; root.onclick = () => { path = []; draw(); };
@@ -126,61 +174,80 @@ export function dashaStack(host, sample) {
 
     const t0 = +new Date(list[0].start), t1 = +new Date(list.at(-1).end);
     rows.replaceChildren();
-    const track = el("div", "lv-track");
-    list.forEach(p => {
+    track = el("div", "lv-track"); track.tabIndex = 0;
+    track.setAttribute("role", "slider"); track.setAttribute("aria-label", `${lvl.label} timeline`);
+    const segEls = [];
+    list.forEach((p, i) => {
       const s = +new Date(p.start), e = +new Date(p.end);
-      const seg = el("button", "lv-seg");
-      seg.type = "button";
+      const seg = el("div", "lv-seg");
       seg.style.width = ((e - s) / (t1 - t0) * 100) + "%";
       const running = now >= s && now < e;
       if (running) seg.classList.add("running");
       const im = new Image(); im.src = asset(`assets/graha/${p.lord.toLowerCase()}.png`); im.alt = "";
       seg.append(im);
-      seg.setAttribute("aria-label", `${p.lord} ${label}, ${fmtDate(p.start)} to ${fmtDate(p.end)}`);
-      seg.onclick = () => {
-        if (path.length < 2) { path = [...path, p]; draw(); }
-        else tell(p, label, of);
-      };
-      seg.onmouseenter = () => tell(p, label, of);
-      track.append(seg);
-      if (running) { const n = el("i", "lv-now");
-        n.style.left = ((now - t0) / (t1 - t0) * 100) + "%"; track.append(n); }
+      track.append(seg); segEls.push(seg);
+      if (running) { const n = el("i", "lv-now"); n.style.left = ((now - t0) / (t1 - t0) * 100) + "%"; track.append(n); }
     });
     rows.append(track);
-    /* a hundred years wants years; two months wants months, or both ends read 2026 */
+
     const span = t1 - t0, yr = 365.25 * 864e5;
     const fmt = t => new Date(t).toLocaleDateString("en-GB", span > 3 * yr
-      ? { year: "numeric" } : span > 60 * 864e5 ? { month: "short", year: "numeric" }
-      : { day: "numeric", month: "short", year: "numeric" });
+      ? { year: "numeric" } : span > 60 * 864e5 ? { month: "short", year: "numeric" } : { day: "numeric", month: "short", year: "numeric" });
     const ticks = el("div", "lv-scale");
     ticks.append(el("span", null, fmt(t0)), el("span", null, fmt(t1)));
     rows.append(ticks);
 
-    const run = list.find(p => now >= +new Date(p.start) && now < +new Date(p.end)) || list[0];
-    tell(run, label, of);
+    focusI = Math.max(0, list.findIndex(p => now >= +new Date(p.start) && now < +new Date(p.end)));
+    focusOn(focusI, segEls);
+
+    /* opening a level: click a segment; scrubbing: drag along the track */
+    let dragging = false;
+    const segAt = clientX => {
+      const r = track.getBoundingClientRect();
+      const frac = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+      return Math.min(list.length - 1, Math.floor(frac * list.length));
+    };
+    const onMove = x => { const i = segAt(x); if (i !== focusI) focusOn(i, segEls); };
+    track.addEventListener("pointerdown", e => { dragging = true; track.setPointerCapture(e.pointerId); onMove(e.clientX); });
+    track.addEventListener("pointermove", e => { if (dragging) onMove(e.clientX); });
+    track.addEventListener("pointerup", e => { if (dragging) { dragging = false;
+      if (path.length < 2) { path = [...path, list[focusI]]; draw(); } } });
+    track.addEventListener("click", () => { if (path.length < 2) { path = [...path, list[focusI]]; draw(); } });
+    track.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") { focusOn(Math.min(list.length - 1, focusI + 1), segEls); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { focusOn(Math.max(0, focusI - 1), segEls); e.preventDefault(); }
+      else if (e.key === "Enter" && path.length < 2) { path = [...path, list[focusI]]; draw(); }
+    });
+  }
+
+  function focusOn(i, segEls) {
+    focusI = i;
+    segEls.forEach((s, k) => s.classList.toggle("focus", k === i));
+    const lvl = levelOf();
+    tell(list[i], lvl.label, lvl.of);
   }
 
   function tell(p, label, of) {
     const s = +new Date(p.start), e = +new Date(p.end);
+    const running = now >= s && now < e;
     const pct = Math.round((Math.min(Math.max(now, s), e) - s) / (e - s) * 100);
     say.replaceChildren(
       el("b", null, `${p.lord} ${label.toLowerCase()}`),
       el("p", null, `${fmtDate(p.start)} → ${fmtDate(p.end)}${p.years ? ` · ${p.years} years` : ""} · within ${of}.`),
-      el("p", "lv-thin", now >= s && now < e ? `Running now, ${pct}% through.`
-        : path.length < 2 ? "Press it to see the periods inside." : "")
+      el("p", "lv-thin", running ? `Running now, ${pct}% through.` : path.length < 2 ? "Press or press Enter to open it." : "")
     );
   }
   draw();
 }
 
 /* ==========================================================================
-   THE CHART — birth and today, and a planet you can pick up
+   THE CHART — birth, today, and a slider across the years between
    ========================================================================== */
 export function chartPanel(host, sample) {
   host.replaceChildren();
   const wrap = el("div", "lv lv-chart");
   const seg = el("div", "lv-seg2");
-  const bBirth = el("button", "on", "Birth"), bNow = el("button", null, "Today's sky");
+  const bBirth = el("button", null, "Birth"), bNow = el("button", "on", "Today's sky");
   bBirth.type = bNow.type = "button";
   seg.append(bBirth, bNow);
   const hold = el("div", "lv-chartbox");
@@ -188,11 +255,16 @@ export function chartPanel(host, sample) {
   svg.setAttribute("role", "group");
   svg.setAttribute("aria-label", "An example birth chart. Each planet is a button.");
   hold.append(svg);
+  const slider = el("input", "lv-yearslider lv-full");
+  slider.type = "range"; slider.min = "0"; slider.max = "1000"; slider.value = "1000";
+  slider.setAttribute("aria-label", "Move through the years since birth");
   const say = el("div", "lv-say");
-  wrap.append(seg, hold, say, el("p", "lv-foot", "Touch a planet. Switch between the sky at birth and the sky today."));
+  wrap.append(seg, hold, slider, say, el("p", "lv-foot", "Touch a planet, or drag the slider through the years."));
   host.append(wrap);
 
-  let mode = "birth";
+  const birthT = +new Date(sample.moment.iso), nowT = Date.now();
+  let mode = "now";
+
   const read = p => {
     focusPlanet(svg, p);
     say.replaceChildren(
@@ -203,17 +275,22 @@ export function chartPanel(host, sample) {
         + ` · aspects the ${aspectsOf(p.graha, p.house).map(ORD).join(", ")}`)
     );
   };
-  const paint = () => {
-    const planets = mode === "birth" ? sample.planets : transitInto(new Date(), sample.lagna.sign);
+  function paint(when) {
+    const planets = mode === "birth" ? sample.planets : transitInto(when, sample.lagna.sign);
     renderChart(svg, { ...sample, planets }, { assets:"assets", interactive:true, onSelect:read });
     bBirth.classList.toggle("on", mode === "birth");
     bNow.classList.toggle("on", mode === "now");
     read(planets.find(p => p.graha === "Saturn") ?? planets[0]);
-  };
-  bBirth.onclick = () => { mode = "birth"; paint(); };
-  bNow.onclick   = () => { mode = "now";   paint(); };
+  }
+  bBirth.onclick = () => { mode = "birth"; slider.value = "0"; paint(new Date(birthT)); };
+  bNow.onclick   = () => { mode = "now";   slider.value = "1000"; paint(new Date(nowT)); };
+  slider.addEventListener("input", () => {
+    mode = "now";
+    const f = +slider.value / 1000;
+    paint(new Date(birthT + f * (nowT - birthT)));
+  });
   svg.addEventListener("click", e => { if (e.target === svg) clearFocus(svg); });
-  paint();
+  paint(new Date(nowT));
 }
 
 /* ==========================================================================
@@ -221,7 +298,7 @@ export function chartPanel(host, sample) {
    ========================================================================== */
 export function skyPanel(host, place) {
   host.replaceChildren();
-  const wrap = el("div", "lv lv-sky");
+  const wrap = el("div", "lv lv-sky lv-full");
   const cv = document.createElement("canvas");
   cv.tabIndex = 0;
   cv.setAttribute("aria-label", "Tonight's sky. Drag or use the arrow keys to look around.");
@@ -252,7 +329,7 @@ export function skyPanel(host, place) {
 }
 
 /* ==========================================================================
-   ASK — a real question, answered from the chart in front of you
+   ASK — real answers, playing on their own on a loop
    ========================================================================== */
 export function askPanel(host, sample) {
   const T = transitInto(new Date(), sample.lagna.sign);
@@ -270,39 +347,95 @@ export function askPanel(host, sample) {
         const s = tr("Saturn");
         const [theme] = HOUSE_THEME[s.house];
         return { text: `Saturn is crossing your ${ORD(s.house)} house — ${theme}. `
-          + `Within Vedic tradition a passage like this is read as a long, slow emphasis rather than an event: `
-          + `it asks for patience with whatever that house covers.`,
+          + `Within Vedic tradition a passage like this is read as a long, slow emphasis rather than an event.`,
           chips: ["Saturn transit", `${ORD(s.house)} house`, s.signName] }; } },
     { q: "Where is the Moon today, and does it touch my chart?", build: () => {
         const m = tr("Moon"), nm = nat("Moon");
         return { text: `The Moon is in ${m.signName} today, in ${m.nakshatra}, crossing your ${ORD(m.house)} house. `
-          + `You were born with it in ${nm.signName}, in ${nm.nakshatra} — so today's Moon is `
+          + `You were born with it in ${nm.signName} — so today's Moon is `
           + `${m.house === nm.house ? "back over its own natal house" : `${ORD(((m.house - nm.house + 12) % 12) + 1)} from where it began`}.`,
           chips: ["Moon", m.nakshatra, `${ORD(m.house)} house`] }; } }
   ];
 
   host.replaceChildren();
   const wrap = el("div", "lv lv-ask");
-  const row = el("div", "lv-qs");
+  const orb = el("div", "lv-orb");
   const thread = el("div", "lv-thread");
-  wrap.append(row, thread, el("p", "lv-foot",
-    "Pick a question. Every answer is assembled from the chart on this page, and names what it used."));
+  const q = el("div", "lv-q"); const a = el("div", "lv-a");
+  const ap = el("p"); const chips = el("div", "lv-chips");
+  a.append(ap, chips);
+  thread.append(q, a);
+  wrap.append(orb, thread, el("p", "lv-foot", "Playing on its own — every answer is assembled from the chart in front of you."));
   host.append(wrap);
 
-  const answer = i => {
-    const { q, build } = QS[i];
-    const { text, chips } = build();
-    thread.replaceChildren();
-    thread.append(el("div", "lv-q", q));
-    const a = el("div", "lv-a");
-    a.append(el("small", null, "ASTRA"), el("p", null, text));
-    const cs = el("div", "lv-chips");
-    chips.forEach(c => cs.append(el("span", "lv-chip", c)));
-    a.append(cs);
-    thread.append(a);
-    row.querySelectorAll("button").forEach((b, k) => b.classList.toggle("on", k === i));
+  let i = 0, cancelled = false, started = false;
+  async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function loop() {
+    while (!cancelled) {
+      const { q: question, build } = QS[i];
+      q.classList.remove("on"); a.classList.remove("on");
+      await wait(400);
+      q.textContent = question; q.classList.add("on");
+      orb.classList.add("think");
+      await wait(reduce ? 200 : 1400);
+      const { text, chips: cs } = build();
+      ap.textContent = text;
+      chips.replaceChildren(...cs.map(c => el("span", "lv-chip", c)));
+      orb.classList.remove("think");
+      a.classList.add("on");
+      await wait(reduce ? 800 : 5200);
+      i = (i + 1) % QS.length;
+    }
+  }
+  return { start(){ if (!started) { started = true; loop(); } }, stop(){ cancelled = true; } };
+}
+
+/* ==========================================================================
+   RELATIONSHIP MATCHING — two real charts, calculated live
+   ========================================================================== */
+export function matchPanel(host, sample) {
+  host.replaceChildren();
+  const wrap = el("div", "lv lv-match");
+  const pair = el("div", "lv-pair");
+  const chartA = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const link = el("span", "lv-linklabel", "＋");
+  const chartB = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const wrapA = el("div", "lv-pchart"); wrapA.append(chartA);
+  const wrapB = el("div", "lv-pchart b"); wrapB.append(chartB);
+  pair.append(wrapA, link, wrapB);
+  const calc = el("button", null, "Calculate compatibility"); calc.type = "button"; calc.className = "lv-calc";
+  const resultWrap = el("div", "lv-full");
+  wrap.append(pair, calc, resultWrap, el("p", "lv-foot", "A second, real chart — born in Delhi, twelve hours later — read against yours."));
+  host.append(wrap);
+
+  renderChart(chartA, sample, { assets:"assets", size:"small" });
+  /* the partner: a genuinely different, independently cast chart, not a copy — a
+     real Delhi birth twelve hours on, so the koota reading is a real calculation
+     between two distinct charts, not a demo dressed up */
+  const partnerUTC = new Date(+new Date(sample.moment.iso) + 12 * 3600e3);
+  const partner = castChart(partnerUTC, 28.6139, 77.2090);
+  renderChart(chartB, partner, { assets:"assets", size:"small" });
+
+  let calculated = false;
+  calc.onclick = () => {
+    if (calculated) return;
+    calculated = true; calc.disabled = true; calc.textContent = "Calculating…";
+    const moonA = sample.planets.find(p => p.graha === "Moon");
+    const moonB = partner.planets.find(p => p.graha === "Moon");
+    setTimeout(() => {
+      const result = ashtakoota({ moonL: moonA.lon }, { moonL: moonB.lon });
+      calc.textContent = "Calculated";
+      const score = el("div", "lv-score");
+      score.append(el("b", null, `${result.total} / 36`), el("span", null, result.verdict));
+      const kootas = el("div", "lv-kootas");
+      resultWrap.replaceChildren(score, kootas);
+      result.kootas.forEach((k, i) => {
+        const c = el("div", "lv-koota");
+        c.append(el("div", "name", k.name), el("div", "val" + (k.got === 0 ? " zero" : ""), `${k.got}/${k.max}`));
+        kootas.append(c);
+        setTimeout(() => c.classList.add("on"), i * 90);
+      });
+    }, reduce ? 50 : 900);
   };
-  QS.forEach((x, i) => { const b = el("button", "lv-q-b", x.q); b.type = "button";
-    b.onclick = () => answer(i); row.append(b); });
-  answer(0);
 }
