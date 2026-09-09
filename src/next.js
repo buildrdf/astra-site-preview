@@ -15,6 +15,8 @@ import { SEAT, renderChart } from "./chart.js";
 import { transitInto } from "./kundali.js";
 import { dailyInsight, HOUSE_THEME } from "./insight.js";
 import { asset } from "./asset.js";
+import { dayRhythm, dashaStack, chartPanel, skyPanel, askPanel } from "./live.js";
+import { guessPlace } from "./kundali.js";
 
 const SAMPLE = await fetch("src/sample.json").then(r => r.json());
 const $ = id => document.getElementById(id);
@@ -47,37 +49,44 @@ const FOCUS = INSIGHT ? INSIGHT.house : 10;
 /* ==========================================================================
    2 — the walkthrough
    ========================================================================== */
+const HERE = guessPlace();
+
+/* A feature either MOUNTS a live element — the app's own thing rebuilt here, so it
+   can be pressed, opened and dragged — or, where its engine is not on this page,
+   shows a real screenshot of the running app and says which it is. */
 const FEATURES = [
   { id:"day", tab:"Your day", head:"A day that reads differently for you.",
-    a:"Your horoscope, the life areas it touches, the panchang beneath it, and the hours the tradition favours or cautions.",
-    b:"Guidance first. The working that produced it, second.",
-    shots:["assets/app/day-rhythm.png","assets/app/day-areas.png"],
-    wide:[0,1],
-    note:"the day's rhythm, then the life areas it touches" },
+    a:"The hours the tradition favours and the hours it cautions, computed for where you are, with the Moon's real phase tonight.",
+    b:"Press either window and it explains itself.",
+    live: host => dayRhythm(host, HERE), note:"live · computed for your own place" },
+
   { id:"time", tab:"Your timeline", head:"Time contains time.",
-    a:"Mahadasha, antardasha and pratyantardasha, each opening into the next, with Sade Sati shown as an overlay rather than an alarm.",
-    b:"Your own life events sit on the same line.",
-    shots:["assets/app/timeline.png"], wide:[0],
-    note:"mahadasha, antardasha, pratyantardasha" },
+    a:"A hundred and twenty years handed to one graha at a time. Open a period and the periods inside it appear; open one of those and you are three levels down.",
+    b:"Mahadasha, antardasha, pratyantardasha — all from the Moon's exact place at birth.",
+    live: host => dashaStack(host, SAMPLE), note:"live · press a period to open it" },
+
   { id:"universe", tab:"Your universe", head:"Birth, today, and the sky above you.",
-    a:"Switch the chart between the sky you were born under and the one overhead now. Touch a planet to open it.",
-    b:"Then raise the phone: the same planet, in tonight's real sky, among the twenty-seven nakshatras — and pinch out to see the whole zodiac from above the Earth.",
-    shots:["assets/app/universe.png","assets/app/sky.png","assets/app/earth.png"],
-    dark:[1,2],
-    note:"the chart, the sky above you, then the zodiac from orbit" },
+    a:"Switch between the sky you were born under and the one overhead now. Touch any planet and the chart answers.",
+    b:"Then look up: the same sky over your city, with the twenty-seven nakshatras, and you can drag it.",
+    live: host => chartPanel(host, SAMPLE),
+    live2: host => skyPanel(host, HERE),
+    note:"live · touch a planet, then drag the sky" },
+
   { id:"ask", tab:"Ask Astra", head:"Ask, and the chart answers.",
-    a:"A question about your own chart, answered from your real placements and your current period, with the entities it used attached.",
-    b:"Then hold the microphone and talk to it instead. The Moon listens, answers aloud, and stops the moment you speak.",
-    shots:["assets/app/guide.png","assets/app/voice.png"], wide:[1],
-    note:"an answer with its sources, then the same thing by voice" },
+    a:"Every answer is assembled from the chart on this page — your real placements, today's transits — and names what it used.",
+    b:"In the app the same thing happens by voice, with the Moon listening and a live transcript.",
+    live: host => askPanel(host, SAMPLE),
+    shots:["assets/app/voice.png"], note:"live · pick a question" },
+
   { id:"moment", tab:"Find your moment", head:"Some things are better begun at one hour than another.",
-    a:"Muhurta for a marriage, a venture, a home, a journey. Astra reads the window you give it and explains the score.",
+    a:"Muhurta for a marriage, a venture, a home, a journey. Astra reads the window you give it and shows its score with reasons.",
     b:"For a birth it scores only inside the window your doctor has already set. That decision is never the app's.",
-    shots:["assets/app/muhurta.png"], note:"what the window is for, and how it is scored" },
+    shots:["assets/app/muhurta.png"], note:"a screenshot — this engine is not on the website" },
+
   { id:"you", tab:"You & your people", head:"Your details, and the people they connect to.",
     a:"One birth profile unlocks the depth: the full Kundali, your reports, and the periods that shaped your years.",
     b:"Add someone else and read the two charts together.",
-    shots:["assets/app/you.png"], note:"one profile, and the people it connects to" }
+    shots:["assets/app/you.png"], note:"a screenshot of the app" }
 ];
 
 {
@@ -85,15 +94,18 @@ const FEATURES = [
   /* one screen-height of travel per feature, plus a little to settle */
   tour.style.height = (FEATURES.length * 88 + 30) + "vh";
 
-  /* every screenshot exists from the start; only opacity changes */
-  const imgs = [];
+  /* every surface is built once and kept — a live element must not lose the
+     period you opened just because you scrolled past and came back */
+  const surfaces = [];                       /* [{f, j, node, dark, wide, start}] */
   FEATURES.forEach((f, i) => {
-    f.shots.forEach((src, j) => {
-      const im = new Image();
-      im.src = src; im.alt = ""; im.loading = i < 2 ? "eager" : "lazy";
-      im.dataset.f = i; im.dataset.j = j;
-      if (f.dark?.includes(j)) im.classList.add("dark");
-      panel.append(im); imgs.push(im);
+    const add = node => { node.dataset.f = i; node.dataset.j = surfaces.filter(s => s.f === i).length;
+      node.classList.add("surface"); panel.append(node); surfaces.push({ f:i, node }); return node; };
+    if (f.live)  { const h = document.createElement("div"); h.className = "livehost"; add(h); f.live(h); }
+    if (f.live2) { const h = document.createElement("div"); h.className = "livehost dark"; const n = add(h);
+      const api = f.live2(h); n.dataset.startable = "1"; n._start = api?.start; }
+    (f.shots || []).forEach(src => {
+      const im = new Image(); im.src = src; im.alt = ""; im.loading = i < 2 ? "eager" : "lazy";
+      im.classList.add("shot"); add(im);
     });
   });
 
@@ -130,14 +142,23 @@ const FEATURES = [
       }
       shown = i;
     }
-    /* a feature's graphics are spread evenly across its own stretch of scroll,
-       so a tab with three screens shows all three on the way past */
-    const n = f.shots.length;
+    /* a feature's surfaces are spread across its own stretch of scroll */
+    const mine = surfaces.filter(s => s.f === i);
+    const n = mine.length;
     const j = Math.min(n - 1, Math.floor(sub * n));
-    for (const im of imgs) im.classList.toggle("on", +im.dataset.f === i && +im.dataset.j === j);
-    panel.classList.toggle("is-dark", !!f.dark?.includes(j));
-    /* a wide graphic gets a wide panel instead of floating in a tall one */
-    panel.classList.toggle("is-wide", !!f.wide?.includes(j));
+    let darkOn = false;
+    for (const s of surfaces) {
+      const on = s.f === i && +s.node.dataset.j === j;
+      s.node.classList.toggle("on", on);
+      if (on) {
+        darkOn = s.node.classList.contains("dark");
+        if (on && s.node.dataset.startable && !s.node.dataset.started) {
+          s.node.dataset.started = "1"; s.node._start?.();
+        }
+      }
+    }
+    panel.classList.toggle("is-dark", darkOn);
+    panel.classList.remove("is-wide");
   }
 
   function onScroll() {
