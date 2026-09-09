@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
-<title>Astra — one chart</title>
-<meta name="description" content="Rebuild preview: one birth chart that stays alive from the sky, through today's transits, into a daily reading.">
+<meta name="theme-color" content="#080F20">
+<title>Astra</title>
+<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that explains its reasoning.">
 <link rel="icon" href="assets/icon.png">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="next.css">
@@ -14,83 +14,118 @@
 </head>
 <body class="next">
 
+<div class="sky-ground" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
 <header class="nav" id="nav">
   <div class="shell">
     <a class="brand" href="#top">Astra</a>
-    <span class="stagetag">Rebuild preview · scenes 1–3</span>
-    <a class="cta" href="/astra-site-preview/">Current page</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#tour">The app</a><a href="#reports">Reports</a>
+    </nav>
+    <a class="cta" href="#close">Join the waitlist</a>
   </div>
 </header>
 
 <main id="top">
 
-<!-- ==========================================================================
-     ONE STAGE. One chart element, one set of nine grahas, from the sky through
-     today's transits into a reading. Nothing here is torn down and rebuilt.
-     ========================================================================== -->
-<section class="story" id="story" aria-labelledby="h1">
-  <div class="story-view">
-    <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
-    <div class="horizon" aria-hidden="true"></div>
-
-    <!-- the nine natal grahas and the nine transiting ones. Positioned in VIEW space,
-         because they start out in the open sky and end inside the chart. -->
-    <div class="bodies" id="bodies" aria-hidden="true"></div>
-
-    <div class="story-grid">
-      <!-- the words: they change, the chart does not -->
-      <div class="story-say">
-       <div class="beats">
-        <div class="beat" data-beat="0">
-          <p class="eyebrow">Personal Vedic astrology</p>
-          <h1 id="h1">The sky at<br>your beginning.</h1>
-          <p class="lede">Every chart on this page is computed, not drawn.</p>
-        </div>
-        <div class="beat" data-beat="1">
-          <h2>A moment.<br>A pattern. Yours.</h2>
-          <p class="lede">The nine grahas take the houses they held that minute.</p>
-        </div>
-        <div class="beat" data-beat="2">
-          <h2>Every house<br>means something.</h2>
-          <p class="lede" id="houseLede">&nbsp;</p>
-        </div>
-        <div class="beat" data-beat="3">
-          <h2>The sky moves.<br>Your chart does not.</h2>
-          <p class="lede">Today's grahas cross the houses you were born with. The outer marks are today. The inner ones are yours.</p>
-        </div>
-        <div class="beat" data-beat="4">
-          <h2>Which is why today<br>reads differently<br>for you.</h2>
-        </div>
-       </div>
-
-        <!-- the reading arrives last, under the words, and names its own reason -->
-        <aside class="reading" id="reading" aria-live="polite">
-          <p class="eyebrow" id="readWhen">Today</p>
-          <p class="read-line" id="readLine"></p>
-          <button class="why" id="whyBtn" aria-expanded="false" aria-controls="whyList">Why this reading?</button>
-          <ul class="why-list" id="whyList" hidden></ul>
-        </aside>
+<!-- ============ 1 — your Kundali, briefly ============================ -->
+<section class="intro" id="intro" aria-labelledby="h1">
+  <div class="rim" aria-hidden="true"></div>
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p class="eyebrow">Personal Vedic astrology</p>
+      <h1 id="h1">Your birth<br>made legible.</h1>
+      <p class="lede">A date, a time and a place become a chart, a reading, and guidance you can act on. Computed by our own engine, never guessed.</p>
+      <div class="saying" id="saying">
+        <b id="sayHead">&nbsp;</b>
+        <p id="sayBody">&nbsp;</p>
       </div>
-
-      <!-- the chart: created once, alive for the whole section -->
-      <div class="story-chart">
-        <div class="chart-box" id="chartBox">
-          <svg id="oneChart" aria-hidden="true"></svg>
-        </div>
-        <p class="stamp" id="stamp"></p>
+      <div class="actions">
+        <a class="btn" href="#free">Create my Kundali</a>
+        <a class="btn line" href="#tour">See the app</a>
       </div>
     </div>
-
-    <div class="cue" id="cue" aria-hidden="true"><i></i>Scroll</div>
+    <div class="intro-chart">
+      <div class="box" id="introBox">
+        <svg id="introChart" aria-hidden="true"></svg>
+        <div class="bodies" id="introBodies" aria-hidden="true"></div>
+      </div>
+      <p class="stamp" id="stamp"></p>
+    </div>
   </div>
 </section>
 
-<section class="act act-light" aria-labelledby="h-end">
-  <div class="shell" style="display:grid;gap:22px;justify-items:center;text-align:center">
-    <p class="eyebrow" data-in>End of the rebuilt slice</p>
-    <h2 id="h-end" data-in>Three scenes, one chart.</h2>
-    <p class="lede" data-in>Scenes four to eight — the day's shape, nested life periods, the question, the second chart, the moment — extend this same object rather than replacing it. This preview stops here on purpose, so the continuity can be judged before more is built on top of it.</p>
-    <a class="btn" href="/astra-site-preview/" data-in>See the current page</a>
+<!-- ============ 2 — the app walkthrough ============================== -->
+<section class="tour" id="tour" aria-labelledby="tourHead">
+  <div class="tour-view">
+    <div class="tour-grid">
+      <div>
+        <div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
+        <div class="tour-say">
+          <h2 id="tourHead">&nbsp;</h2>
+          <p id="tourLine1">&nbsp;</p>
+          <p id="tourLine2">&nbsp;</p>
+          <a class="skip" href="#reports">Skip to the reports</a>
+        </div>
+      </div>
+      <div class="prod">
+        <div class="halo" aria-hidden="true"></div>
+        <div class="phone" id="phone"></div>
+        <p class="prod-note" id="stageNote"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 — three reports ==================================== -->
+<section class="act shelf-act" id="reports" aria-labelledby="h-rep">
+  <div class="wide">
+    <div class="act-head">
+      <p class="eyebrow" data-in>Reports</p>
+      <h2 id="h-rep" data-in>Something to keep.</h2>
+      <p class="lede" data-in>Each one computed from your chart and written in plain language. The first is free, and always will be.</p>
+    </div>
+    <div class="shelf" id="shelf">
+      <article class="book" data-in>
+        <div class="cover"><img src="assets/covers/kundali-free.png" alt="Cover of the Vedic Kundali report"></div>
+        <h3>Kundali Report</h3>
+        <p>Your chart, your nine placements, your house lords and the full period ladder. Sixteen pages.</p>
+        <div class="price">Free <span>· no sign-up, no card</span></div>
+        <a class="btn" href="#free">Get mine</a>
+      </article>
+      <article class="book" data-in>
+        <div class="cover"><img src="assets/covers/kundali-pro.png" alt="Cover of the Vedic Kundali Pro report"></div>
+        <h3>Kundali Pro</h3>
+        <p>Every yoga your chart forms, each life area, and every period read in sequence. English or Hindi.</p>
+        <div class="price">₹499 <span>· $14.99</span></div>
+        <span class="btn line" aria-disabled="true">At launch</span>
+      </article>
+      <article class="book" data-in>
+        <div class="cover pair" aria-hidden="true"><svg id="pairA"></svg><svg id="pairB"></svg></div>
+        <h3>Relationship Report</h3>
+        <p>Two charts read together. The eight kootas, each explained, with the placements that cause them.</p>
+        <div class="price">₹399 <span>· $11.99</span></div>
+        <span class="btn line" aria-disabled="true">At launch</span>
+      </article>
+    </div>
+    <div class="shelf-dots" id="shelfDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  </div>
+</section>
+
+<!-- ============ 4 — the close ======================================== -->
+<section class="act close-act" id="close" aria-labelledby="h-close">
+  <div class="rim" aria-hidden="true"></div>
+  <div class="shell">
+    <p class="eyebrow" data-in>Coming to iPhone and Android</p>
+    <h2 id="h-close" data-in>Your sky, explained.</h2>
+    <p class="lede" data-in style="max-width:38ch">One email on launch day. Nothing else, ever.</p>
+    <form class="wl" id="wlForm" data-in>
+      <label class="sr" for="wlEmail">Email</label>
+      <input id="wlEmail" type="email" placeholder="you@example.com" required>
+      <button class="btn" type="submit">Join</button>
+    </form>
+    <p class="status" id="wlStatus"></p>
   </div>
 </section>
 
@@ -98,7 +133,8 @@
 
 <footer>
   <div class="shell">
-    <span>© 2026 Reality Distortion Field · Astra · rebuild preview</span>
+    <span>© 2026 Reality Distortion Field · Astra</span>
+    <nav aria-label="More"><a href="#tour">The app</a><a href="#reports">Reports</a></nav>
   </div>
 </footer>
 

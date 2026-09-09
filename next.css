@@ -1,119 +1,213 @@
 /* ==========================================================================
-   Rebuild preview — the continuity stage.
+   Astra — the four-section site.
 
-   Only what the one-chart stage needs; everything else is inherited from
-   styles.css so the two pages cannot drift apart typographically.
+     1  a short introduction to your Kundali
+     2  the app walkthrough, which carries most of the experience
+     3  three reports on a shelf
+     4  a compact close
 
-   The composition answers two of the audit's findings directly. The chart is
-   no longer a small object floating in a lot of black: on desktop it takes
-   the right half at 62% of viewport height, with the words offset left so
-   neither has to shrink for the other. On a phone the words sit above and the
-   chart takes 88% of the width.
+   Colour: midnight blue with depth and a lit horizon, not a flat navy. The
+   brightest light stays near the horizon or the active product; behind text
+   the ground goes quiet and dark.
    ========================================================================== */
 
-body.next { background: var(--black); }
-.nav .stagetag{ font-family:var(--fm); font-size:11px; letter-spacing:.06em; color:var(--dim);
-  border:1px solid var(--hair); border-radius:999px; padding:4px 10px }
-@media (max-width:700px){ .nav .stagetag{ display:none } }
+:root{
+  --deep:#080F20;          /* the ground everything sits on */
+  --ink-blue:#10213D;      /* the celestial surface */
+  --depth:#29466F;         /* atmosphere, one step toward the light */
+  --horizon:#A9CBE8;       /* the lit rim, and nothing else this bright */
+  --paper:#F3F5FA;         /* main text */
+  --accent:#CBB995;        /* champagne, used sparingly */
 
-/* ---------- the stage ------------------------------------------------ */
-.story{ position:relative; height:720vh }                 /* travel, not section height */
-.story-view{ position:sticky; top:0; height:100svh; overflow:hidden; background:var(--black) }
-.story-view .starfield{ position:absolute; inset:0; width:100%; height:100% }
-
-/* the horizon: a lit rim low in the frame, never a bright map behind type */
-.horizon{ position:absolute; left:50%; top:74%; width:min(190vw,1800px); aspect-ratio:1;
-  border-radius:50%; transform:translate(-50%,0);
-  background:radial-gradient(120% 120% at 50% 8%, #22304d 0%, #101827 34%, #05070d 66%, #000 100%);
-  will-change:transform,opacity }
-.horizon::before{ content:""; position:absolute; inset:-2px; border-radius:50%;
-  box-shadow: inset 0 3px 2px -1px rgba(200,225,255,.9),
-              inset 0 18px 44px -10px rgba(120,170,255,.34),
-              0 -6px 90px 12px rgba(105,155,255,.30) }
-
-/* ---------- layout: words left, chart right -------------------------- */
-.story-grid{ position:absolute; inset:0; display:grid; align-items:center;
-  grid-template-columns: 1fr 1fr; gap:clamp(24px,4vw,64px);
-  padding:0 var(--gutter); pointer-events:none }
-.story-say{ display:grid; align-content:center; justify-items:start; text-align:left; gap:22px }
-.beats{ display:grid; min-height:clamp(200px,26vh,270px); align-content:center; width:100% }
-.beats > *{ grid-area:1/1; align-self:center }
-.story-say h1{ font-size:clamp(40px,5.6vw,82px) }
-.story-say h2{ font-size:clamp(30px,4vw,58px) }
-.story-say .lede{ max-width:30ch }
-.beat{ display:grid; gap:14px; justify-items:start; align-content:center;
-  transition:opacity .45s var(--ease), transform .45s var(--ease) }
-.beat[data-on="0"]{ opacity:0; transform:translateY(12px); pointer-events:none }
-.beat[data-on="1"]{ opacity:1; transform:none }
-
-.story-chart{ display:grid; justify-items:center; gap:14px }
-.chart-box{ position:relative; width:min(62vh,46vw); aspect-ratio:1 }
-.chart-box svg{ width:100%; height:100%; overflow:visible }
-.stamp{ font-family:var(--fm); font-size:11px; letter-spacing:.05em; color:var(--dim);
-  text-align:center; margin:0; opacity:0; transition:opacity .6s var(--ease) }
-.stamp.on{ opacity:1 }
-
-/* the nine, one element each, alive for the whole stage */
-.bodies{ position:absolute; inset:0; pointer-events:none }
-.bodies .body{ position:absolute; left:0; top:0; width:0; height:0; opacity:0;
-  transform-origin:50% 50%; transition:opacity .6s var(--ease); will-change:transform }
-.bodies .body.in{ opacity:1 }
-.bodies .body img{ width:100%; height:100%; filter:drop-shadow(0 6px 16px rgba(0,0,0,.6)) }
-
-/* today's grahas: smaller, ringed, on the outer edge of the cell they cross,
-   so the eye can never confuse them with the natal placements inside */
-.bodies .body.transit img{ filter:drop-shadow(0 2px 6px rgba(0,0,0,.7)) saturate(.55) brightness(1.05) }
-.bodies .body.transit::after{ content:""; position:absolute; inset:-22%; border-radius:50%;
-  border:1px solid rgba(255,255,255,.45) }
-
-/* the chart's own lines, brighter here than on the current page */
-.story .k-line{ stroke:rgba(255,255,255,.55); stroke-width:1.15 }
-.story .k-sign{ fill:var(--dim); font-size:3.1px; transition:opacity .5s }
-.story .k-asc{ fill:rgba(255,255,255,.72); font-size:2.7px; letter-spacing:.3em }
-.story .k-cell{ fill:transparent; transition:fill .55s var(--ease) }
-.story .k-cell.lit{ fill:rgba(255,255,255,.11) }
-
-/* ---------- the reading ---------------------------------------------- */
-.reading{ width:min(460px,100%); display:grid; gap:9px; justify-items:start; pointer-events:auto;
-  opacity:0; transform:translateY(12px); transition:opacity .6s var(--ease), transform .6s var(--ease) }
-.reading.on{ opacity:1; transform:none }
-.read-line{ margin:0; font-size:clamp(16px,1.35vw,19px); line-height:1.45; color:var(--paper);
-  letter-spacing:-.015em }
-.why{ justify-self:start; background:none; border:0; padding:0; cursor:pointer;
-  font-size:13.5px; color:var(--dim); text-decoration:underline; text-underline-offset:3px }
-.why:hover{ color:var(--paper) }
-.why-list{ margin:0; padding:0; list-style:none; display:grid; gap:6px;
-  border-left:1px solid var(--hair); padding-left:12px }
-.why-list li{ font-size:13px; line-height:1.5; color:var(--dim) }
-
-.cue{ position:absolute; left:50%; bottom:22px; transform:translateX(-50%); display:grid; gap:8px;
-  justify-items:center; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
-  transition:opacity .5s }
-.cue i{ width:1px; height:24px; background:linear-gradient(var(--dim),transparent) }
-
-/* ---------- phone ----------------------------------------------------- */
-@media (max-width:860px){
-  .story{ height:640vh }
-  .story-grid{ grid-template-columns:1fr; grid-template-rows:auto auto; align-content:start;
-    padding:clamp(66px,9vh,92px) var(--gutter) 0; gap:clamp(12px,2.4vh,22px) }
-  .story-say{ justify-items:center; text-align:center }
-  .story-say h1{ font-size:clamp(34px,9vw,46px) }
-  .story-say h2{ font-size:clamp(27px,7.4vw,38px) }
-  .story-say .lede{ font-size:16px; max-width:32ch }
-  .beat{ justify-items:center }
-  .chart-box{ width:min(72vw,300px) }
-  .reading{ width:100%; max-width:min(560px,88vw); margin-inline:auto;
-    text-align:center; justify-items:center }
-  .reading .why-list{ text-align:left }
-  .beats{ min-height:clamp(150px,22vh,200px) }
-  .story-grid{ overflow:visible }
+  --dim:#8FA3C4;           /* secondary on dark */
+  --dim-lo:#5C6F90;        /* secondary on light */
+  --hair:rgba(169,203,232,.16);
+  --hair-2:rgba(169,203,232,.28);
+  --light:#EEF2F8;
+  --light-2:#E3EAF4;
+  --ink:#0C1830;           /* text on light */
 }
 
+body.next{ background:var(--deep); color:var(--paper) }
+.next ::selection{ background:var(--accent); color:var(--deep) }
+
+/* the atmosphere behind everything: dark up top, a glow low down */
+.sky-ground{ position:fixed; inset:0; z-index:-2; background:
+  radial-gradient(140% 80% at 50% 108%, #37598A 0%, var(--depth) 22%, var(--ink-blue) 48%, var(--deep) 78%) }
+.grain{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") }
+
+.next .nav.solid{ background:rgba(8,15,32,.72); border-bottom-color:var(--hair) }
+.next .nav.solid.light{ background:rgba(238,242,248,.82); color:var(--ink); border-bottom-color:rgba(12,24,48,.1) }
+.next .nav .cta{ background:var(--paper); color:var(--deep) }
+.next .nav.solid.light .cta{ background:var(--ink); color:var(--paper) }
+.next .lede{ color:var(--dim) }
+.next .eyebrow{ color:var(--accent) }
+.next .eyebrow::before{ background:var(--accent) }
+.next .btn{ background:var(--paper); color:var(--deep) }
+.next .btn.line{ background:transparent; border:1px solid var(--hair-2); color:var(--paper) }
+
+/* ==========================================================================
+   1 — the introduction
+   ========================================================================== */
+.intro{ position:relative; min-height:100svh; display:grid; align-content:center;
+  padding:clamp(96px,14vh,150px) 0 clamp(40px,8vh,90px); overflow:hidden }
+.intro .rim{ position:absolute; left:50%; top:82%; width:min(200vw,2000px); aspect-ratio:1;
+  border-radius:50%; transform:translate(-50%,0); pointer-events:none;
+  background:radial-gradient(120% 120% at 50% 6%, #2E4E7C 0%, #15294A 38%, #08101F 70%, transparent 74%);
+  box-shadow: inset 0 3px 1px -1px rgba(169,203,232,.85), 0 -8px 120px 14px rgba(90,140,205,.28) }
+.intro-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,72px); align-items:center;
+  width:min(1240px,100% - 2*var(--gutter)); margin-inline:auto; position:relative; z-index:1 }
+.intro h1{ font-size:clamp(38px,5.2vw,74px); line-height:1.04; letter-spacing:-.03em }
+.intro-copy{ display:grid; gap:20px; justify-items:start }
+.intro .actions{ display:flex; gap:12px; flex-wrap:wrap; align-items:center }
+.intro-chart{ position:relative; display:grid; justify-items:center; gap:12px }
+.intro-chart .box{ position:relative; width:min(58vh,42vw); aspect-ratio:1 }
+.intro-chart svg{ width:100%; height:100%; overflow:visible }
+.intro-chart .bodies{ position:absolute; inset:0; pointer-events:none }
+.body{ position:absolute; left:0; top:0; width:0; height:0; opacity:0; transform-origin:50% 50%;
+  transition:opacity .7s var(--ease); will-change:transform }
+.body.in{ opacity:1 }
+.body img{ width:100%; height:100%; filter:drop-shadow(0 5px 14px rgba(0,0,0,.55)) }
+.stamp{ font-family:var(--fm); font-size:11px; letter-spacing:.05em; color:var(--dim-lo); margin:0; text-align:center }
+
+/* the one interpretation, so a visitor learns what a chart is FOR */
+.saying{ border-left:2px solid var(--accent); padding-left:14px; display:grid; gap:6px; max-width:46ch; text-align:left }
+.saying b{ font-weight:600; font-size:15px; color:var(--paper) }
+.saying p{ margin:0; font-size:15.5px; line-height:1.5; color:var(--dim) }
+.next .intro .k-line{ stroke:rgba(169,203,232,.5); stroke-width:1.1 }
+.next .intro .k-sign{ fill:var(--dim-lo); font-size:3px }
+.next .intro .k-asc{ fill:var(--accent); font-size:2.6px; letter-spacing:.3em }
+.next .intro .k-cell.lit{ fill:rgba(203,185,149,.12) }
+@media (max-width:900px){
+  .intro-grid{ grid-template-columns:1fr; gap:26px; text-align:center }
+  .intro-copy{ justify-items:center }
+  .intro-chart .box{ width:min(78vw,340px) }
+}
+
+/* ==========================================================================
+   2 — the walkthrough
+   ========================================================================== */
+.tour{ position:relative }
+.tour-view{ position:sticky; top:0; height:100svh; overflow:hidden; display:grid; align-items:center }
+.tour-grid{ width:min(1300px,100% - 2*var(--gutter)); margin-inline:auto;
+  display:grid; grid-template-columns:30% 1fr; gap:clamp(24px,4vw,64px); align-items:center }
+.tour-grid > *{ min-width:0 }
+
+/* left: the feature list, the active headline and two lines */
+.tour-nav{ display:grid; gap:2px; align-content:center }
+.tour-nav button{ display:block; width:100%; text-align:left; background:none; border:0; cursor:pointer;
+  padding:9px 0 9px 16px; border-left:2px solid transparent; color:var(--dim-lo);
+  font-size:15px; font-weight:500; transition:color .35s var(--ease), border-color .35s var(--ease) }
+.tour-nav button:hover{ color:var(--dim) }
+.tour-nav button[aria-current="true"]{ color:var(--paper); border-left-color:var(--accent) }
+.tour-say{ margin-top:26px; display:grid; gap:12px; min-height:200px; align-content:start }
+.tour-say h2{ font-size:clamp(26px,2.6vw,38px); line-height:1.08; letter-spacing:-.025em }
+.tour-say p{ margin:0; color:var(--dim); font-size:16px; line-height:1.5; max-width:34ch }
+.tour-say .skip{ margin-top:4px; font-size:13.5px; color:var(--dim); text-decoration:underline;
+  text-underline-offset:3px; justify-self:start }
+.tour-say .skip:hover{ color:var(--paper) }
+
+/* right: the product stage — a real screen, lightly framed */
+.prod{ position:relative; display:grid; place-items:center; min-width:0 }
+.phone{ position:relative; height:min(74vh,760px); aspect-ratio:390/844;
+  border-radius:30px; overflow:hidden; background:#000;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(169,203,232,.22) }
+.phone img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top center;
+  opacity:0; transform:scale(1.015); transition:opacity .55s var(--ease), transform .7s var(--ease) }
+.phone img.on{ opacity:1; transform:none }
+.prod .halo{ position:absolute; width:72%; aspect-ratio:1; border-radius:50%; z-index:-1;
+  background:radial-gradient(circle, rgba(120,170,225,.24), transparent 68%); filter:blur(30px) }
+.prod-note{ position:absolute; bottom:-32px; left:0; right:0; text-align:center;
+  font-family:var(--fm); font-size:11px; color:var(--dim-lo); letter-spacing:.04em }
+
+@media (max-width:900px){
+  .tour-view{ align-items:start; padding-top:clamp(62px,8.5vh,90px) }
+  .tour-grid{ grid-template-columns:1fr; gap:12px }
+  /* the sidebar becomes a rail that stays visible while you scroll */
+  .tour-nav{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+    margin-inline:calc(-1 * var(--gutter)); padding-inline:var(--gutter) }
+  .tour-nav::-webkit-scrollbar{ display:none }
+  .tour-nav button{ flex:none; width:auto; padding:7px 14px; border-left:0; border-radius:999px;
+    border:1px solid var(--hair); font-size:13.5px; white-space:nowrap }
+  .tour-nav button[aria-current="true"]{ background:var(--paper); color:var(--deep); border-color:transparent }
+  .tour-say{ margin-top:10px; min-height:92px; text-align:center; justify-items:center; gap:9px }
+  /* one short headline, one explanation, a large app view — the second line
+     is desktop-only so the product gets the room on a phone */
+  .tour-say #tourLine2{ display:none }
+  .tour-say h2{ font-size:clamp(23px,6.4vw,30px) }
+  .tour-say p{ max-width:36ch; font-size:15px }
+  .tour-say .skip{ justify-self:center }
+  .phone{ height:min(46vh,400px); border-radius:22px }
+  .prod-note{ bottom:-24px; font-size:10.5px }
+}
+
+/* ==========================================================================
+   3 — the reports shelf
+   ========================================================================== */
+.shelf-act{ background:var(--light); color:var(--ink); padding:clamp(80px,11vh,150px) 0; position:relative }
+.shelf-act h2,.shelf-act h3{ color:var(--ink) }
+.shelf-act .lede{ color:var(--dim-lo) }
+.shelf-act .eyebrow{ color:#8A7A55 }
+.shelf-act .eyebrow::before{ background:#8A7A55 }
+.shelf{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(22px,3vw,48px);
+  width:min(1240px,100% - 2*var(--gutter)); margin-inline:auto }
+.book{ display:grid; gap:13px; justify-items:start; align-content:start }
+/* the cover IS the object: no card around it */
+.book .cover{ width:100%; aspect-ratio:2/3; border-radius:8px; overflow:hidden;
+  box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12);
+  transform:perspective(1100px) rotateY(0deg) translateY(0);
+  transition:transform .55s var(--ease), box-shadow .55s var(--ease) }
+.book:hover .cover{ transform:perspective(1100px) rotateY(-5deg) translateY(-7px);
+  box-shadow:0 34px 60px -18px rgba(12,24,48,.5), 0 3px 8px rgba(12,24,48,.14) }
+.book .cover img{ width:100%; height:100%; object-fit:cover }
+.book .cover.pair{ background:var(--light-2); display:grid; place-items:center; position:relative }
+.book .cover.pair svg{ position:absolute; width:56%; height:56%; transition:transform .8s var(--ease) }
+.book .cover.pair svg:first-of-type{ transform:translate(-17%,-6%) rotate(-4deg) }
+.book .cover.pair svg:last-of-type{ transform:translate(17%,6%) rotate(4deg) }
+.book:hover .cover.pair svg:first-of-type{ transform:translate(-9%,-3%) rotate(-2deg) }
+.book:hover .cover.pair svg:last-of-type{ transform:translate(9%,3%) rotate(2deg) }
+.book h3{ font-size:19px; font-weight:600; letter-spacing:-.015em }
+.book p{ margin:0; font-size:14.5px; line-height:1.45; color:var(--dim-lo) }
+.book .price{ font-size:16px; font-weight:600; color:var(--ink) }
+.book .price span{ font-weight:400; color:var(--dim-lo) }
+.shelf-act .btn{ background:var(--ink); color:var(--paper) }
+.shelf-act .btn.line{ background:transparent; border:1px solid rgba(12,24,48,.24); color:var(--ink) }
+.shelf-dots{ display:none }
+@media (max-width:900px){
+  /* a shelf you swipe, with the next cover peeking */
+  .shelf{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory;
+    margin-inline:calc(-1 * var(--gutter)); padding:4px var(--gutter) 10px; scrollbar-width:none }
+  .shelf::-webkit-scrollbar{ display:none }
+  .book{ flex:0 0 76%; scroll-snap-align:center }
+  .shelf-dots{ display:flex; gap:7px; justify-content:center; margin-top:18px }
+  .shelf-dots i{ width:7px; height:7px; border-radius:50%; background:rgba(12,24,48,.2);
+    transition:background .3s }
+  .shelf-dots i.on{ background:var(--ink) }
+}
+
+/* ==========================================================================
+   4 — the close
+   ========================================================================== */
+.close-act{ position:relative; overflow:hidden; text-align:center;
+  padding:clamp(84px,12vh,160px) 0 clamp(60px,9vh,110px) }
+.close-act .rim{ position:absolute; left:50%; top:96%; width:min(190vw,1900px); aspect-ratio:1;
+  border-radius:50%; transform:translate(-50%,0); pointer-events:none;
+  background:radial-gradient(120% 120% at 50% 6%, #2B4870 0%, rgba(20,39,70,0) 62%);
+  box-shadow: inset 0 3px 1px -1px rgba(169,203,232,.7), 0 -6px 100px 10px rgba(90,140,205,.22) }
+.close-act .shell{ display:grid; gap:22px; justify-items:center; position:relative; z-index:1 }
+.next footer{ background:transparent; border-top:1px solid var(--hair); color:var(--dim-lo) }
+.next footer a:hover{ color:var(--paper) }
+
+/* reveals: present at rest, script only adds the arrival */
+[data-in]{ opacity:1 }
+.js [data-in]{ opacity:0; transform:translateY(18px) }
+.js [data-in].shown{ opacity:1; transform:none;
+  transition:opacity .8s var(--ease), transform .8s var(--ease) }
+
 @media (prefers-reduced-motion:reduce){
-  .story{ height:auto }
-  .story-view{ position:relative; height:auto; min-height:100svh; padding-bottom:8vh }
-  .cue{ display:none }
-  .beat[data-on="0"]{ opacity:1; transform:none; position:static }
-  .story-say > *{ grid-area:auto }
-  .story-say{ gap:26px }
+  *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.001ms!important }
+  .js [data-in]{ opacity:1; transform:none }
+  .tour-view{ position:relative; height:auto; padding:8vh 0 }
+  .phone img{ opacity:1 }
 }
