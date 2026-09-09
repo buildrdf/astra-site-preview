@@ -287,7 +287,68 @@ const FEATURES = [
 }
 
 /* ==========================================================================
-   3 — the reports.  Press a cover and the book opens; the pages turn.
+   3 — the bento.
+
+   Six screens got the walkthrough; this is the rest of the app in one glance.
+   Every tile is something that exists, and the numbers are counted out of the
+   engine — 81 yogas in the catalogue, 27 lessons, the vargas from D1 to D60 —
+   never rounded up for the sake of a nicer tile.
+   ========================================================================== */
+{
+  const TILES = [
+    { big:"81", unit:"yogas", sub:"Each one named, with the rule that formed it", cls:"w2 h2", art:"jupiter" },
+    { b:"Divisional charts", sub:"D1 through D60, Parashari rules" },
+    { b:"Ashtakavarga", sub:"The bindu count, house by house" },
+    { b:"Shadbala", sub:"Six-fold planetary strength" },
+    { b:"Sade Sati", sub:"Saturn's seven and a half years", art:"saturn" },
+    { big:"27", unit:"nakshatras", sub:"With pada, lord and yogatara", cls:"w2" },
+    { b:"Yogini dasha", sub:"A second timing system beside Vimshottari" },
+    { b:"Festivals & vrats", sub:"Amanta months, adhika included" },
+    { big:"30", unit:"moon phases", sub:"Tonight's is the true one", art:"moon" },
+    { b:"Panchang, in full", sub:"Tithi, nakshatra, yoga, karana, vara" },
+    { b:"Point it at the sky", sub:"The chart follows where you turn" },
+    { big:"27", unit:"lessons", sub:"Learn the craft, three levels deep", cls:"w2" },
+    { b:"Glossary", sub:"38 terms, in plain language" },
+    { b:"Your people", sub:"More than one chart, side by side" },
+    { b:"Life events", sub:"Mark what happened, see where it falls" },
+    { b:"Remedies", sub:"Traditional, and never sold on fear", cls:"accent" },
+    { b:"Reports in Hindi", sub:"The whole thing, not a summary" },
+    { b:"Transits, live", sub:"Where the grahas stand over you now" },
+    { b:"Lahiri ayanamsa", sub:"And the app says so, on every screen" }
+  ];
+  /* 19 tiles at 24 grid cells — six full rows of four, no hole at the end */
+
+  const bento = $("bento");
+  for (const t of TILES) {
+    const d = document.createElement("div");
+    d.className = "bt" + (t.cls ? " " + t.cls : "");
+    if (t.art) { const im = new Image(); im.className = "art";
+      im.src = asset(`assets/graha/${t.art}.png`); im.alt = ""; d.append(im); }
+    if (t.big) {
+      const n = document.createElement("p"); n.className = "big";
+      n.append(document.createTextNode(t.big));
+      const u = document.createElement("em"); u.textContent = t.unit; n.append(u);
+      d.append(n);
+    } else {
+      const b = document.createElement("b"); b.textContent = t.b; d.append(b);
+    }
+    const s = document.createElement("span"); s.textContent = t.sub; d.append(s);
+    bento.append(d);
+  }
+
+  /* staggered reveal, in reading order */
+  const tiles = [...bento.children];
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const i = tiles.indexOf(e.target);
+    setTimeout(() => e.target.classList.add("shown"), reduce ? 0 : (i % 4) * 55 + Math.floor(i / 4) * 40);
+    io.unobserve(e.target);
+  }), { threshold: .1, rootMargin: "0px 0px -6% 0px" });
+  tiles.forEach(t => io.observe(t));
+}
+
+/* ==========================================================================
+   4 — the reports.  Press a cover and the book opens; the pages turn.
    ========================================================================== */
 {
   const shelf = $("shelf"), dots = [...$("shelfDots").children];
@@ -434,6 +495,7 @@ $("wlForm").addEventListener("submit", e => {
 }
 {
   const nav = $("nav"), lights = [...document.querySelectorAll(".tour,.shelf-act,.close-act")];
+  /* the bento is dark, so the nav must go back to its dark treatment over it */
   const f = () => { nav.classList.toggle("solid", scrollY > 50);
     nav.classList.toggle("light", lights.some(s => { const r = s.getBoundingClientRect(); return r.top < 48 && r.bottom > 48; })); };
   addEventListener("scroll", f, { passive: true }); f();

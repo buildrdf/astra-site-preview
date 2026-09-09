@@ -478,7 +478,54 @@ body.next{ background:var(--light); color:var(--ink-d) }
 }
 
 /* ==========================================================================
-   3 — the reports, and the reader that opens one
+   3 — the bento: everything the six screens had no room for.
+
+   Apple's own device for this — a mosaic of short labels, a few large tiles,
+   one number per idea. Every tile here names something the app actually does;
+   the numbers come out of the engine, not out of the marketing.
+   ========================================================================== */
+.bento-act{ background:var(--deep-2); color:var(--sky-paper);
+  padding:clamp(80px,11vh,150px) 0 clamp(80px,11vh,140px) }
+.bento-act h2{ color:var(--sky-paper) }
+.bento-act .eyebrow{ color:var(--accent) } .bento-act .eyebrow::before{ background:var(--accent) }
+.bento-act .lede{ color:var(--sky-dim) }
+.bento-act .act-head{ display:grid; justify-items:center; gap:10px; text-align:center;
+  margin-bottom:clamp(34px,5vh,58px) }
+
+.bento{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px }
+.bt{ position:relative; display:grid; align-content:end; gap:5px; min-height:132px;
+  padding:16px 17px; border-radius:18px; overflow:hidden;
+  background:linear-gradient(160deg, rgba(36,58,98,.55), rgba(14,24,45,.85));
+  border:1px solid rgba(169,203,232,.10);
+  opacity:0; transform:translateY(14px) scale(.985);
+  transition:opacity .6s var(--ease), transform .6s var(--ease), border-color .4s }
+.bt.shown{ opacity:1; transform:none }
+.bt:hover{ border-color:rgba(169,203,232,.26) }
+.bt b{ font-size:15px; font-weight:600; letter-spacing:-.015em; color:var(--sky-paper); line-height:1.2 }
+.bt span{ font-size:12.5px; line-height:1.4; color:var(--sky-dim) }
+.bt .big{ font-size:clamp(34px,3.4vw,54px); font-weight:600; letter-spacing:-.035em;
+  line-height:.95; color:var(--sky-paper) }
+.bt .big em{ font-style:normal; font-size:.42em; font-weight:500; color:var(--sky-dim); margin-left:5px }
+.bt.w2{ grid-column:span 2 } .bt.h2{ grid-row:span 2; min-height:276px }
+.bt.mid{ align-content:center; justify-items:center; text-align:center }
+.bt img.art{ position:absolute; right:-14px; top:-10px; width:104px; height:104px;
+  opacity:.5; pointer-events:none }
+.bt.h2 img.art{ width:150px; height:150px; right:-18px; top:8px; opacity:.6 }
+.bt .row{ display:flex; gap:6px; margin-bottom:4px }
+.bt .row img{ width:26px; height:26px }
+.bt.accent{ background:linear-gradient(160deg, rgba(120,96,48,.42), rgba(20,26,44,.9));
+  border-color:rgba(203,185,149,.20) }
+
+@media (max-width:900px){
+  .bento{ grid-template-columns:repeat(2,1fr); gap:9px }
+  .bt{ min-height:112px; padding:13px 14px; border-radius:15px }
+  .bt.h2{ min-height:112px; grid-row:span 1 }
+  .bt b{ font-size:13.5px } .bt span{ font-size:11.5px }
+  .bt img.art{ width:74px; height:74px } .bt.h2 img.art{ width:74px; height:74px }
+}
+
+/* ==========================================================================
+   4 — the reports, and the reader that opens one
    ========================================================================== */
 .shelf-act{ background:var(--light); color:var(--ink-d); padding:clamp(80px,11vh,150px) 0; position:relative }
 .shelf-act h2,.shelf-act h3{ color:var(--ink-d) }
