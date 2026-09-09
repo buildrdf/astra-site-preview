@@ -29,28 +29,38 @@
 
 <main id="top">
 
-<!-- ============ 1 — your Kundali, briefly ============================ -->
-<section class="intro" id="intro" aria-labelledby="h1">
-  <div class="rim" aria-hidden="true"></div>
-  <div class="intro-grid">
-    <div class="intro-copy">
-      <p class="eyebrow">Personal Vedic astrology</p>
-      <h1 id="h1">Your birth<br>made legible.</h1>
-      <p class="lede">A date, a time and a place become a chart, a reading, and guidance you can act on. Computed by our own engine, never guessed.</p>
-      <div class="saying" id="saying">
-        <b id="sayHead">&nbsp;</b>
-        <p id="sayBody">&nbsp;</p>
+<!-- ============ 1 — the sky you were born under ====================== -->
+<section class="hero" id="hero" aria-labelledby="h1">
+  <div class="hero-view">
+    <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
+    <div class="earth" aria-hidden="true"></div>
+    <div class="hero-chart" aria-hidden="true"><svg id="heroChart"></svg></div>
+    <div class="bodies" id="heroBodies" aria-hidden="true"></div>
+
+    <div class="hero-say">
+      <div class="beat" data-on="1">
+        <p class="eyebrow">Vedic astrology · iPhone and Android</p>
+        <h1 id="h1">You were forged<br>under this sky.</h1>
+        <p class="lede">It has not moved on. It still remembers where everything stood.</p>
       </div>
-      <div class="actions">
+      <div class="beat" data-on="0">
+        <h2>Then find out<br>where they stood.</h2>
+        <p class="lede">Nine grahas, at the exact minute you arrived, over the exact place.</p>
+      </div>
+      <div class="beat" data-on="0">
+        <h2>That is your chart.</h2>
+        <p class="lede">Not one of twelve signs. A whole sky, held still — and Astra reads it back to you.</p>
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <div class="hero-do">
         <a class="btn" href="#free">Create my Kundali</a>
         <a class="btn line" href="#tour">See the app</a>
       </div>
-    </div>
-    <div class="intro-chart">
-      <!-- the Earth as the app itself draws it, zoomed out from the sky view -->
-      <img class="earth" src="assets/app/earth.png" alt="The zodiac seen from above the Earth, as Astra draws it" width="1400" height="1711">
       <p class="stamp" id="stamp"></p>
     </div>
+    <div class="cue" id="cue" aria-hidden="true"><i></i>Scroll</div>
   </div>
 </section>
 
@@ -86,23 +96,23 @@
     </div>
     <div class="shelf" id="shelf">
       <article class="book" data-in>
-        <div class="cover"><img src="assets/covers/kundali-free.png" alt="Cover of the Vedic Kundali report"></div>
-        <h3>Kundali Report</h3>
-        <p>Your chart, your nine placements, your house lords and the full period ladder. Sixteen pages.</p>
+        <div class="cover"><img src="assets/covers/essential.png" alt="Cover of the Essential Vedic Kundali"></div>
+        <h3>Essential Vedic Kundali</h3>
+        <p>Your birth chart, planetary placements, houses and their Vedic significance.</p>
         <div class="price">Free <span>· no sign-up, no card</span></div>
         <a class="btn" href="#free">Get mine</a>
       </article>
       <article class="book" data-in>
-        <div class="cover"><img src="assets/covers/kundali-pro.png" alt="Cover of the Vedic Kundali Pro report"></div>
-        <h3>Kundali Pro</h3>
-        <p>Every yoga your chart forms, each life area, and every period read in sequence. English or Hindi.</p>
+        <div class="cover"><img src="assets/covers/complete.png" alt="Cover of the Complete Vedic Kundali Analysis"></div>
+        <h3>The Complete Vedic Kundali</h3>
+        <p>Your handbook for life: every placement, dasha and yoga interpreted, with guidance and traditional remedies.</p>
         <div class="price">₹499 <span>· $14.99</span></div>
         <span class="btn line" aria-disabled="true">At launch</span>
       </article>
       <article class="book" data-in>
-        <div class="cover pair" aria-hidden="true"><svg id="pairA"></svg><svg id="pairB"></svg></div>
-        <h3>Relationship Report</h3>
-        <p>Two charts read together. The eight kootas, each explained, with the placements that cause them.</p>
+        <div class="cover"><img src="assets/covers/milan.png" alt="Cover of the Vedic Kundali Milan compatibility analysis"></div>
+        <h3>Vedic Kundali Milan</h3>
+        <p>How two charts align: compatibility, emotional connection, marriage potential, challenges and guidance.</p>
         <div class="price">₹399 <span>· $11.99</span></div>
         <span class="btn line" aria-disabled="true">At launch</span>
       </article>

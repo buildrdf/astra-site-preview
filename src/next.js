@@ -34,16 +34,119 @@ const lerp = (a,b,k) => a+(b-a)*k;
 const INSIGHT = dailyInsight(transitInto(new Date(), SAMPLE.lagna.sign), SAMPLE.planets);
 const FOCUS = INSIGHT ? INSIGHT.house : 10;
 
+/* ==========================================================================
+   1 — the pinned hero: nine grahas in the sky, then in the chart
+   ========================================================================== */
 {
-  /* The hero shows the Earth the app itself draws — the sky view zoomed out to the
-     zodiac ring. It is a picture, so it costs nothing and cannot fail to load a
-     chart engine before the first frame. The interpretation beside it is still
-     computed, from today's real transits. */
-  $("stamp").textContent = `Astra, seen from above the Earth · ${SAMPLE.moment.name}`;
-  if (INSIGHT) {
-    $("sayHead").textContent = "What a chart is for";
-    $("sayBody").textContent = `${INSIGHT.line} That sentence came from three facts about a chart, and Astra shows you all three.`;
+  const view = document.querySelector(".hero-view");
+  const hero = $("hero"), earth = document.querySelector(".earth");
+  const box = document.querySelector(".hero-chart"), svg = $("heroChart"), layer = $("heroBodies");
+  const beats = [...document.querySelectorAll(".hero-say .beat")];
+  const GR = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
+  const SIZE = { Sun:1.16, Moon:1, Mars:1, Mercury:.97, Jupiter:1.12, Venus:1, Saturn:1.24, Rahu:1.05, Ketu:1.05 };
+
+  renderChart(svg, SAMPLE, { assets:"assets" });
+  svg.querySelectorAll(".k-planet").forEach(p => p.remove());
+  const lines = [...svg.querySelectorAll(".k-line")];
+  const signs = [...svg.querySelectorAll(".k-sign,.k-asc")];
+  for (const l of lines) l.dataset.len = l.getTotalLength?.() ?? 400;
+  for (const s2 of signs) s2.style.opacity = 0;
+
+  const el2 = {};
+  for (const g of GR) {
+    const d = document.createElement("div"); d.className = "body";
+    const im = new Image(); im.src = asset(`assets/graha/${g.toLowerCase()}.png`); im.alt = "";
+    d.append(im); layer.append(d); el2[g] = d;
   }
+  /* where each graha hangs in the sky before it comes down: fixed angles, so the
+     opening frame is the same every time, spread across the dark upper half */
+  const SKY = GR.map((g, i) => ({ g, x: 7 + i * 10.8 + (i % 2 ? 3 : -3), y: 34 + (i % 3) * 12 + (i % 2 ? 4 : 0) }));
+  const seatOf = {};
+  for (const p of SAMPLE.planets) {
+    const share = SAMPLE.planets.filter(q => q.house === p.house);
+    const k = share.indexOf(p), n = share.length;
+    const [sx, sy] = SEAT[p.house];
+    const off = n > 1 ? (k - (n - 1) / 2) * (n > 2 ? 7 : 8.5) : 0;
+    const along = p.house % 3 === 1 ? [1,0] : [.72,.69];
+    seatOf[p.graha] = [sx + along[0]*off, sy + along[1]*off*(p.house > 6 ? -1 : 1)];
+  }
+
+  let W=0, H=0, S=0, bx=0, by=0, disc=0;
+  function measure() {
+    W = view.clientWidth; H = view.clientHeight;
+    const r = box.getBoundingClientRect(), v = view.getBoundingClientRect();
+    S = r.width; bx = r.left - v.left; by = r.top - v.top;
+    disc = Math.max(30, Math.min(W, H) * .062);
+    for (const l of lines) l.dataset.px = l.dataset.len * (S / 104);
+  }
+
+  let t = 0, target = 0, raf = 0, drift = 0, last = 0, shown = -1;
+  let px = 0, py = 0;                                  /* pointer parallax */
+
+  function frame() {
+    const gone = smooth((t - .22) / .24);
+    earth.style.opacity = (1 - gone * .55).toFixed(3);
+    earth.style.transform = `translate(-50%,${(gone * 16).toFixed(1)}%) scale(${(1 + gone * .06).toFixed(3)})`;
+
+    const drawn = smooth((t - .24) / .26);
+    for (const l of lines) l.style.strokeDashoffset = (l.dataset.px * (1 - drawn)).toFixed(1);
+    for (const s2 of signs) s2.style.opacity = smooth((t - .74) / .14).toFixed(3);
+
+    GR.forEach((g, i) => {
+      const sky = SKY[i];
+      /* in the sky: a slow drift, and a little parallax under the pointer */
+      const depth = .5 + (i % 3) * .3;
+      const ox = W * (sky.x / 100) + Math.sin((drift + i * 40) / 60) * 7 + px * depth * 16;
+      const oy = H * (sky.y / 100) + Math.cos((drift + i * 55) / 70) * 5 + py * depth * 12;
+      const seat = seatOf[g] ?? [50,50];
+      const sxp = bx + seat[0] / 100 * S, syp = by + seat[1] / 100 * S;
+      const k = glide((t - .26 - i * .028) / .30);
+      const dx = sxp - ox, dy = syp - oy, len = Math.hypot(dx, dy) || 1;
+      const bulge = Math.sin(k * Math.PI) * len * .12 * (i % 2 ? -1 : 1);
+      const x = lerp(ox, sxp, k) + (-dy / len) * bulge;
+      const y = lerp(oy, syp, k) + (dx / len) * bulge;
+      const size = disc * SIZE[g] * lerp(1, .40, k);
+      const e = el2[g];
+      e.style.width = e.style.height = size.toFixed(1) + "px";
+      e.style.transform = `translate(${(x - size/2).toFixed(1)}px,${(y - size/2).toFixed(1)}px)`;
+      e.classList.add("in");
+    });
+
+    const want = t < .22 ? 0 : t < .62 ? 1 : 2;
+    if (want !== shown) { beats.forEach((b, i) => b.dataset.on = i === want ? "1" : "0"); shown = want; }
+    const cue = $("cue"); if (cue) cue.style.opacity = (1 - smooth(t / .06)).toFixed(2);
+  }
+
+  function tick(now) {
+    const d = target - t;
+    t += Math.abs(d) < .0004 ? d : d * .13;
+    const ms = last ? Math.min(now - last, 64) : 16; last = now;
+    drift += ms / 1000 * 3.2;
+    frame();
+    raf = Math.abs(d) > .0004 || t < .26 ? requestAnimationFrame(tick) : (last = 0);
+  }
+  function onScroll() {
+    const span = (hero.offsetHeight - view.clientHeight) * .88;
+    target = clamp(span > 0 ? -hero.getBoundingClientRect().top / span : 0);
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  measure();
+  for (const l of lines) { l.style.strokeDasharray = l.dataset.px; l.style.strokeDashoffset = l.dataset.px; }
+  if (reduce) { t = target = 1; frame(); earth.style.opacity = ".45"; }
+  else {
+    onScroll();
+    addEventListener("scroll", onScroll, { passive:true });
+    addEventListener("resize", () => { measure(); frame(); }, { passive:true });
+    if (!matchMedia("(pointer: coarse)").matches)
+      view.addEventListener("pointermove", e => {
+        const r = view.getBoundingClientRect();
+        px = (e.clientX - r.left) / r.width - .5; py = (e.clientY - r.top) / r.height - .5;
+        if (!raf) raf = requestAnimationFrame(tick);
+      });
+  }
+
+  $("stamp").textContent = `Example chart · ${SAMPLE.moment.local}, ${SAMPLE.moment.name}`;
 }
 
 /* ==========================================================================
@@ -177,12 +280,8 @@ const FEATURES = [
    3 — the shelf: the relationship cover uses two real charts
    ========================================================================== */
 {
-  const a = $("pairA"), b = $("pairB");
-  renderChart(a, SAMPLE, { assets:"assets", size:"small" }); a.classList.add("on-paper");
-  const second = { ...SAMPLE, planets: transitInto(new Date(+new Date(SAMPLE.moment.iso) + 864e5 * 4000), SAMPLE.lagna.sign) };
-  renderChart(b, second, { assets:"assets", size:"small" }); b.classList.add("on-paper");
-
-  /* the dots follow the swipe on a phone */
+  /* the Milan cover is the real one now, so nothing is drawn here — only the
+     dots that follow the swipe on a phone */
   const shelf = $("shelf"), dots = [...$("shelfDots").children];
   shelf.addEventListener("scroll", () => {
     const i = Math.round(shelf.scrollLeft / (shelf.scrollWidth / dots.length));
