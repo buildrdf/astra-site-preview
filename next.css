@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Rebuild preview — the continuity stage.
+
+   Only what the one-chart stage needs; everything else is inherited from
+   styles.css so the two pages cannot drift apart typographically.
+
+   The composition answers two of the audit's findings directly. The chart is
+   no longer a small object floating in a lot of black: on desktop it takes
+   the right half at 62% of viewport height, with the words offset left so
+   neither has to shrink for the other. On a phone the words sit above and the
+   chart takes 88% of the width.
+   ========================================================================== */
+
+body.next { background: var(--black); }
+.nav .stagetag{ font-family:var(--fm); font-size:11px; letter-spacing:.06em; color:var(--dim);
+  border:1px solid var(--hair); border-radius:999px; padding:4px 10px }
+@media (max-width:700px){ .nav .stagetag{ display:none } }
+
+/* ---------- the stage ------------------------------------------------ */
+.story{ position:relative; height:720vh }                 /* travel, not section height */
+.story-view{ position:sticky; top:0; height:100svh; overflow:hidden; background:var(--black) }
+.story-view .starfield{ position:absolute; inset:0; width:100%; height:100% }
+
+/* the horizon: a lit rim low in the frame, never a bright map behind type */
+.horizon{ position:absolute; left:50%; top:74%; width:min(190vw,1800px); aspect-ratio:1;
+  border-radius:50%; transform:translate(-50%,0);
+  background:radial-gradient(120% 120% at 50% 8%, #22304d 0%, #101827 34%, #05070d 66%, #000 100%);
+  will-change:transform,opacity }
+.horizon::before{ content:""; position:absolute; inset:-2px; border-radius:50%;
+  box-shadow: inset 0 3px 2px -1px rgba(200,225,255,.9),
+              inset 0 18px 44px -10px rgba(120,170,255,.34),
+              0 -6px 90px 12px rgba(105,155,255,.30) }
+
+/* ---------- layout: words left, chart right -------------------------- */
+.story-grid{ position:absolute; inset:0; display:grid; align-items:center;
+  grid-template-columns: 1fr 1fr; gap:clamp(24px,4vw,64px);
+  padding:0 var(--gutter); pointer-events:none }
+.story-say{ display:grid; align-content:center; justify-items:start; text-align:left; gap:22px }
+.beats{ display:grid; min-height:clamp(200px,26vh,270px); align-content:center; width:100% }
+.beats > *{ grid-area:1/1; align-self:center }
+.story-say h1{ font-size:clamp(40px,5.6vw,82px) }
+.story-say h2{ font-size:clamp(30px,4vw,58px) }
+.story-say .lede{ max-width:30ch }
+.beat{ display:grid; gap:14px; justify-items:start; align-content:center;
+  transition:opacity .45s var(--ease), transform .45s var(--ease) }
+.beat[data-on="0"]{ opacity:0; transform:translateY(12px); pointer-events:none }
+.beat[data-on="1"]{ opacity:1; transform:none }
+
+.story-chart{ display:grid; justify-items:center; gap:14px }
+.chart-box{ position:relative; width:min(62vh,46vw); aspect-ratio:1 }
+.chart-box svg{ width:100%; height:100%; overflow:visible }
+.stamp{ font-family:var(--fm); font-size:11px; letter-spacing:.05em; color:var(--dim);
+  text-align:center; margin:0; opacity:0; transition:opacity .6s var(--ease) }
+.stamp.on{ opacity:1 }
+
+/* the nine, one element each, alive for the whole stage */
+.bodies{ position:absolute; inset:0; pointer-events:none }
+.bodies .body{ position:absolute; left:0; top:0; width:0; height:0; opacity:0;
+  transform-origin:50% 50%; transition:opacity .6s var(--ease); will-change:transform }
+.bodies .body.in{ opacity:1 }
+.bodies .body img{ width:100%; height:100%; filter:drop-shadow(0 6px 16px rgba(0,0,0,.6)) }
+
+/* today's grahas: smaller, ringed, on the outer edge of the cell they cross,
+   so the eye can never confuse them with the natal placements inside */
+.bodies .body.transit img{ filter:drop-shadow(0 2px 6px rgba(0,0,0,.7)) saturate(.55) brightness(1.05) }
+.bodies .body.transit::after{ content:""; position:absolute; inset:-22%; border-radius:50%;
+  border:1px solid rgba(255,255,255,.45) }
+
+/* the chart's own lines, brighter here than on the current page */
+.story .k-line{ stroke:rgba(255,255,255,.55); stroke-width:1.15 }
+.story .k-sign{ fill:var(--dim); font-size:3.1px; transition:opacity .5s }
+.story .k-asc{ fill:rgba(255,255,255,.72); font-size:2.7px; letter-spacing:.3em }
+.story .k-cell{ fill:transparent; transition:fill .55s var(--ease) }
+.story .k-cell.lit{ fill:rgba(255,255,255,.11) }
+
+/* ---------- the reading ---------------------------------------------- */
+.reading{ width:min(460px,100%); display:grid; gap:9px; justify-items:start; pointer-events:auto;
+  opacity:0; transform:translateY(12px); transition:opacity .6s var(--ease), transform .6s var(--ease) }
+.reading.on{ opacity:1; transform:none }
+.read-line{ margin:0; font-size:clamp(16px,1.35vw,19px); line-height:1.45; color:var(--paper);
+  letter-spacing:-.015em }
+.why{ justify-self:start; background:none; border:0; padding:0; cursor:pointer;
+  font-size:13.5px; color:var(--dim); text-decoration:underline; text-underline-offset:3px }
+.why:hover{ color:var(--paper) }
+.why-list{ margin:0; padding:0; list-style:none; display:grid; gap:6px;
+  border-left:1px solid var(--hair); padding-left:12px }
+.why-list li{ font-size:13px; line-height:1.5; color:var(--dim) }
+
+.cue{ position:absolute; left:50%; bottom:22px; transform:translateX(-50%); display:grid; gap:8px;
+  justify-items:center; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
+  transition:opacity .5s }
+.cue i{ width:1px; height:24px; background:linear-gradient(var(--dim),transparent) }
+
+/* ---------- phone ----------------------------------------------------- */
+@media (max-width:860px){
+  .story{ height:640vh }
+  .story-grid{ grid-template-columns:1fr; grid-template-rows:auto auto; align-content:start;
+    padding:clamp(66px,9vh,92px) var(--gutter) 0; gap:clamp(12px,2.4vh,22px) }
+  .story-say{ justify-items:center; text-align:center }
+  .story-say h1{ font-size:clamp(34px,9vw,46px) }
+  .story-say h2{ font-size:clamp(27px,7.4vw,38px) }
+  .story-say .lede{ font-size:16px; max-width:32ch }
+  .beat{ justify-items:center }
+  .chart-box{ width:min(72vw,300px) }
+  .reading{ width:100%; max-width:min(560px,88vw); margin-inline:auto;
+    text-align:center; justify-items:center }
+  .reading .why-list{ text-align:left }
+  .beats{ min-height:clamp(150px,22vh,200px) }
+  .story-grid{ overflow:visible }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .story{ height:auto }
+  .story-view{ position:relative; height:auto; min-height:100svh; padding-bottom:8vh }
+  .cue{ display:none }
+  .beat[data-on="0"]{ opacity:1; transform:none; position:static }
+  .story-say > *{ grid-area:auto }
+  .story-say{ gap:26px }
+}

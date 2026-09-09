@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<title>Astra — one chart</title>
+<meta name="description" content="Rebuild preview: one birth chart that stays alive from the sky, through today's transits, into a daily reading.">
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="next.css">
+<script>document.documentElement.className = "js"</script>
+</head>
+<body class="next">
+
+<header class="nav" id="nav">
+  <div class="shell">
+    <a class="brand" href="#top">Astra</a>
+    <span class="stagetag">Rebuild preview · scenes 1–3</span>
+    <a class="cta" href="/astra-site-preview/">Current page</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ==========================================================================
+     ONE STAGE. One chart element, one set of nine grahas, from the sky through
+     today's transits into a reading. Nothing here is torn down and rebuilt.
+     ========================================================================== -->
+<section class="story" id="story" aria-labelledby="h1">
+  <div class="story-view">
+    <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
+    <div class="horizon" aria-hidden="true"></div>
+
+    <!-- the nine natal grahas and the nine transiting ones. Positioned in VIEW space,
+         because they start out in the open sky and end inside the chart. -->
+    <div class="bodies" id="bodies" aria-hidden="true"></div>
+
+    <div class="story-grid">
+      <!-- the words: they change, the chart does not -->
+      <div class="story-say">
+       <div class="beats">
+        <div class="beat" data-beat="0">
+          <p class="eyebrow">Personal Vedic astrology</p>
+          <h1 id="h1">The sky at<br>your beginning.</h1>
+          <p class="lede">Every chart on this page is computed, not drawn.</p>
+        </div>
+        <div class="beat" data-beat="1">
+          <h2>A moment.<br>A pattern. Yours.</h2>
+          <p class="lede">The nine grahas take the houses they held that minute.</p>
+        </div>
+        <div class="beat" data-beat="2">
+          <h2>Every house<br>means something.</h2>
+          <p class="lede" id="houseLede">&nbsp;</p>
+        </div>
+        <div class="beat" data-beat="3">
+          <h2>The sky moves.<br>Your chart does not.</h2>
+          <p class="lede">Today's grahas cross the houses you were born with. The outer marks are today. The inner ones are yours.</p>
+        </div>
+        <div class="beat" data-beat="4">
+          <h2>Which is why today<br>reads differently<br>for you.</h2>
+        </div>
+       </div>
+
+        <!-- the reading arrives last, under the words, and names its own reason -->
+        <aside class="reading" id="reading" aria-live="polite">
+          <p class="eyebrow" id="readWhen">Today</p>
+          <p class="read-line" id="readLine"></p>
+          <button class="why" id="whyBtn" aria-expanded="false" aria-controls="whyList">Why this reading?</button>
+          <ul class="why-list" id="whyList" hidden></ul>
+        </aside>
+      </div>
+
+      <!-- the chart: created once, alive for the whole section -->
+      <div class="story-chart">
+        <div class="chart-box" id="chartBox">
+          <svg id="oneChart" aria-hidden="true"></svg>
+        </div>
+        <p class="stamp" id="stamp"></p>
+      </div>
+    </div>
+
+    <div class="cue" id="cue" aria-hidden="true"><i></i>Scroll</div>
+  </div>
+</section>
+
+<section class="act act-light" aria-labelledby="h-end">
+  <div class="shell" style="display:grid;gap:22px;justify-items:center;text-align:center">
+    <p class="eyebrow" data-in>End of the rebuilt slice</p>
+    <h2 id="h-end" data-in>Three scenes, one chart.</h2>
+    <p class="lede" data-in>Scenes four to eight — the day's shape, nested life periods, the question, the second chart, the moment — extend this same object rather than replacing it. This preview stops here on purpose, so the continuity can be judged before more is built on top of it.</p>
+    <a class="btn" href="/astra-site-preview/" data-in>See the current page</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="shell">
+    <span>© 2026 Reality Distortion Field · Astra · rebuild preview</span>
+  </div>
+</footer>
+
+<script type="module" src="src/next.js"></script>
+</body>
+</html>
