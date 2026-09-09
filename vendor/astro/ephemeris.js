@@ -12,9 +12,18 @@
    convention. Nodes: true node.
    Ayanamsa: Lahiri.
 
-   Verified against a professional report for the private reference moment:
-   worst error 5.6 arcmin across all nine; every sign, nakshatra,
-   pada and retrograde flag correct. A pada is 200 arcmin wide.
+   ACCURACY, MEASURED — not assumed. Against JPL Horizons at 1990, 2026 and 2045
+   (tools/jpl_reference.mjs, tools/validate_ephemeris_accuracy.mjs), worst error:
+     Sun 0.2'  Moon 1'  Mercury ~6'  Venus 16'  Mars 22'  Jupiter 28'  Saturn 44'
+   That is the documented price of Standish's approximation, not a defect in the
+   implementation, and it grows toward the 2050 edge of its validity. A pada is 200
+   arcmin wide, so signs, nakshatras and padas are safe except within a hair of a
+   boundary — but SLOW GRAHAS TURN SMALL LONGITUDE ERRORS INTO LARGE TIME ONES:
+   20 arcmin of Saturn is days of sign-ingress error, and near a station it is weeks.
+   Nothing in the product may claim hour-level Saturn boundaries or arc-minute
+   accuracy while this is the engine. An earlier note here claimed "worst error 5.6
+   arcmin across all nine" from one private reference moment; that did not generalise.
+   Upgrading Jupiter and Saturn to a fuller series is the open engine job.
    Moon separately validated to <0.05 arcmin against two printed
    charts (tools/validate_moon.mjs), fit for dasha-epoch precision.
    --------------------------------------------------------------- */
@@ -189,9 +198,22 @@ export function positions(date){
   const out={};
   out.Sun=sg.lon;
   out.Moon=moonTropical(J);
+  /* TWO FRAMES, AND THEY MUST BE THE SAME ONE.
+     Standish's elements are referred to the ECLIPTIC AND EQUINOX OF J2000. The Sun's
+     longitude from sunGeo — and therefore the Earth vector built from it — is referred to
+     the equinox OF DATE. Subtracting one from the other left the whole difference of
+     precession in the answer: measured against JPL Horizons the outer planets were out by
+     about minus the precession since J2000, which is 22' at 2026 and 38' at 2045, and it
+     was mistaken for the method's own error. Standish publishes roughly 10' for Saturn over
+     1800-2050; we were at 44'.
+     The planet vector is rotated into the ecliptic of date before the subtraction. To this
+     accuracy the general precession in longitude is a rotation about the ecliptic pole. */
+  const pA=(5029.0966*T + 1.11113*T*T - 0.000006*T*T*T)/3600;
+  const cp=cos(pA), sp=sin(pA);
   for(const p of ['Mercury','Venus','Mars','Jupiter','Saturn']){
     const h=heliocentric(p,T);
-    out[p]=norm(Math.atan2(h[1]-earth[1],h[0]-earth[0])/D);
+    const hx=h[0]*cp-h[1]*sp, hy=h[0]*sp+h[1]*cp;
+    out[p]=norm(Math.atan2(hy-earth[1],hx-earth[0])/D);
   }
   out.Rahu=rahuTropical(J);
   out.Ketu=norm(out.Rahu+180);

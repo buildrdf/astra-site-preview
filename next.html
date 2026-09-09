@@ -6,11 +6,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#080F20">
 <title>Astra</title>
-<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that explains its reasoning.">
+<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that shows its reasoning.">
 <link rel="icon" href="assets/icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="next.css">
 <script>document.documentElement.className = "js"</script>
@@ -26,7 +23,7 @@
     <nav class="nav-links" aria-label="Sections">
       <a href="#tour">The app</a><a href="#reports">Reports</a>
     </nav>
-    <a class="cta" href="#close">Join the waitlist</a>
+    <a class="cta" href="index.html#free">Free Kundali</a>
   </div>
 </header>
 
@@ -36,30 +33,30 @@
 <section class="hero" id="hero" aria-labelledby="h1">
   <div class="hero-view">
     <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
-    <div class="earth" aria-hidden="true"></div>
-    <svg class="orbits" id="orbits" aria-hidden="true" preserveAspectRatio="none"></svg>
+    <svg class="orbits" id="orbits" aria-hidden="true"></svg>
+    <div class="earth" id="earth" aria-hidden="true"></div>
     <div class="hero-chart" aria-hidden="true"><svg id="heroChart"></svg></div>
     <div class="bodies" id="heroBodies" aria-hidden="true"></div>
 
     <div class="hero-say">
       <div class="beat" data-on="1">
         <p class="eyebrow">Vedic astrology · iPhone and Android</p>
-        <h1 id="h1">You were forged<br>under this sky.</h1>
-        <p class="lede">It has not moved on. It still remembers where everything stood.</p>
+        <h1 id="h1">The sky remembers.</h1>
+        <p class="lede">You were born under it. It has not repeated since.</p>
       </div>
       <div class="beat" data-on="0">
-        <h2>Then find out<br>where they stood.</h2>
-        <p class="lede">Seven grahas, at the exact minute you arrived, over the exact place.</p>
+        <h2>Find where they stood.</h2>
+        <p class="lede">Nine grahas. One minute. One place on Earth.</p>
       </div>
       <div class="beat" data-on="0">
-        <h2>That is your chart.</h2>
-        <p class="lede">Not one of twelve signs. A whole sky, held still — and Astra reads it back to you.</p>
+        <h2>This is your Kundali.</h2>
+        <p class="lede">A whole sky, held still.</p>
       </div>
     </div>
 
     <div class="hero-foot">
       <div class="hero-do">
-        <a class="btn" href="index.html#free">Create my Kundali</a>
+        <a class="btn" href="index.html#free">Create my free Kundali</a>
         <a class="btn line" href="#tour">See the app</a>
       </div>
       <p class="stamp" id="stamp"></p>
@@ -69,21 +66,16 @@
 </section>
 
 <!-- ============ 2 — the app walkthrough ============================== -->
-<section class="tour" id="tour" aria-labelledby="tourSectionHead">
+<section class="tour" id="tour" aria-labelledby="tourHead">
   <div class="tour-view">
-    <p class="tour-heading" id="tourSectionHead">Everything your birth chart can tell you.</p>
+    <div class="tour-say">
+      <p class="eyebrow" id="tourEyebrow">What Astra does</p>
+      <h2 id="tourHead">&nbsp;</h2>
+      <p id="tourLine">&nbsp;</p>
+    </div>
     <div class="tour-grid">
       <div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
-      <div class="tour-main">
-        <div class="prod">
-          <div class="panel" id="panel"></div>
-        </div>
-        <div class="tour-desc">
-          <h3 id="tourHead">&nbsp;</h3>
-          <p id="tourLine1">&nbsp;</p>
-          <a class="skip" href="#reports">Skip to the reports</a>
-        </div>
-      </div>
+      <div class="prod"><div class="panel" id="panel"></div></div>
     </div>
   </div>
 </section>
@@ -94,32 +86,39 @@
     <div class="act-head">
       <p class="eyebrow" data-in>Reports</p>
       <h2 id="h-rep" data-in>Something to keep.</h2>
-      <p class="lede" data-in>Each one computed from your chart and written in plain language. The first is free, and always will be.</p>
+      <p class="lede" data-in>Open a cover. Turn the pages.</p>
       <div class="head-actions" data-in>
         <a class="btn" href="index.html#free">Get my free Kundali</a>
         <span class="btn line" aria-disabled="true">Download the app · Soon</span>
       </div>
     </div>
 
-    <div class="flipbook" id="flipbook" aria-hidden="true"></div>
-
     <div class="shelf" id="shelf">
-      <article class="book" data-in>
-        <div class="cover"><img src="assets/covers/essential.png" alt="Cover of the Essential Vedic Kundali"></div>
+      <article class="book" data-in data-report="essential">
+        <button class="cover" type="button" aria-label="Open the Essential Vedic Kundali and turn its pages">
+          <img src="assets/covers/essential.png" alt="Cover of the Essential Vedic Kundali">
+          <span class="open-hint">Open it</span>
+        </button>
         <h3>Essential Vedic Kundali</h3>
         <p>Your birth chart, planetary placements, houses and their Vedic significance.</p>
         <div class="price">Free <span>· no sign-up, no card</span></div>
         <a class="btn" href="index.html#free">Get mine</a>
       </article>
-      <article class="book" data-in>
-        <div class="cover"><img src="assets/covers/complete.png" alt="Cover of the Complete Vedic Kundali Analysis"></div>
+      <article class="book" data-in data-report="complete">
+        <button class="cover" type="button" aria-label="Open the Complete Vedic Kundali and turn its pages">
+          <img src="assets/covers/complete.png" alt="Cover of the Complete Vedic Kundali Analysis">
+          <span class="open-hint">Open it</span>
+        </button>
         <h3>The Complete Vedic Kundali</h3>
         <p>Your handbook for life: every placement, dasha and yoga interpreted, with guidance and traditional remedies.</p>
         <div class="price">₹499 <span>· $14.99</span></div>
         <span class="btn line" aria-disabled="true">At launch</span>
       </article>
-      <article class="book" data-in>
-        <div class="cover"><img src="assets/covers/milan.png" alt="Cover of the Vedic Kundali Milan compatibility analysis"></div>
+      <article class="book" data-in data-report="milan">
+        <button class="cover" type="button" aria-label="Open the Vedic Kundali Milan and turn its pages">
+          <img src="assets/covers/milan.png" alt="Cover of the Vedic Kundali Milan compatibility analysis">
+          <span class="open-hint">Open it</span>
+        </button>
         <h3>Vedic Kundali Milan</h3>
         <p>How two charts align: compatibility, emotional connection, marriage potential, challenges and guidance.</p>
         <div class="price">₹399 <span>· $11.99</span></div>
@@ -128,24 +127,38 @@
     </div>
     <div class="shelf-dots" id="shelfDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
+
+  <!-- the reader: one book, opened, pages turning -->
+  <div class="reader" id="reader" hidden>
+    <div class="reader-bg" data-close></div>
+    <div class="reader-stage" role="dialog" aria-modal="true" aria-label="Report preview">
+      <div class="rd-book" id="rdBook"></div>
+      <div class="reader-bar">
+        <button class="rd-nav" id="rdPrev" type="button" aria-label="Previous page">‹</button>
+        <p class="rd-count" id="rdCount"></p>
+        <button class="rd-nav" id="rdNext" type="button" aria-label="Next page">›</button>
+      </div>
+      <button class="rd-close" id="rdClose" type="button" aria-label="Close">Close</button>
+    </div>
+  </div>
 </section>
 
 <!-- ============ 4 — the close ======================================== -->
 <section class="act close-act" id="close" aria-labelledby="h-close">
   <div class="shell">
     <p class="eyebrow" data-in>Coming to iPhone and Android</p>
-    <h2 id="h-close" data-in>Your sky, explained.</h2>
-    <p class="lede" data-in style="max-width:38ch">One email on launch day. Nothing else, ever.</p>
+    <h2 id="h-close" data-in>Read your sky.</h2>
+    <p class="lede" data-in style="max-width:36ch">The Kundali is free. No sign-up, no card.</p>
+    <div class="close-actions" data-in>
+      <a class="btn" href="index.html#free">Create my free Kundali</a>
+      <span class="btn line" aria-disabled="true">Download the app · Soon</span>
+    </div>
     <form class="wl" id="wlForm" data-in>
       <label class="sr" for="wlEmail">Email</label>
       <input id="wlEmail" type="email" placeholder="you@example.com" required>
-      <button class="btn" type="submit">Join</button>
+      <button class="btn line" type="submit">Tell me at launch</button>
     </form>
     <p class="status" id="wlStatus"></p>
-    <div class="close-actions" data-in>
-      <a class="btn line" href="index.html#free">Get my free Kundali</a>
-      <span class="btn line" aria-disabled="true">Download the app · Soon</span>
-    </div>
   </div>
 </section>
 

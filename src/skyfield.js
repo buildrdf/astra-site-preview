@@ -14,7 +14,16 @@
    lines straight near the centre. Drag or use the arrow keys to turn.
    ========================================================================== */
 import { ASTERISMS } from "../vendor/astro/asterisms.js";
-import { altAz, raDecToAltAz } from "../vendor/astro/sky.js";
+import { altAz, raDecToAltAz, siderealPointAltAz } from "../vendor/astro/sky.js";
+
+/* The twelve rashis, and the artwork the app draws them with. These are the
+   same plates the app's sky view uses — translucent starlight sculpture, one
+   per sign — so the band overhead here is the band the app shows. */
+const RASHI = [
+  ["Mesha","Aries"], ["Vrishabha","Taurus"], ["Mithuna","Gemini"], ["Karka","Cancer"],
+  ["Simha","Leo"], ["Kanya","Virgo"], ["Tula","Libra"], ["Vrischika","Scorpio"],
+  ["Dhanu","Sagittarius"], ["Makara","Capricorn"], ["Kumbha","Aquarius"], ["Meena","Pisces"]
+];
 
 const D = Math.PI / 180;
 const COMPASS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -31,6 +40,15 @@ export function createSkyField(canvas, opts = {}) {
   let cam = { az: 180, alt: 24 }, aim = { az: 180, alt: 24 };
   const fov = 74;                          /* degrees across the taller axis */
   let raf = 0, dirty = true;
+
+  /* the rashi plates, loaded only if this field is asked to show the zodiac */
+  const rashiArt = [];
+  if (opts.zodiac) RASHI.forEach(([sans], i) => {
+    const im = new Image();
+    im.src = `assets/rashi/${sans.toLowerCase()}.png`;
+    im.addEventListener("load", () => { dirty = true; kick(); });
+    rashiArt[i] = im;
+  });
 
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 2);
@@ -57,7 +75,13 @@ export function createSkyField(canvas, opts = {}) {
     /* the ground: everything below altitude zero, so the horizon is real */
     const horizon = [];
     for (let a = 0; a <= 360; a += 2) { const p = project(a, 0); if (p) horizon.push(p); }
-    ctx.fillStyle = "#000";
+    /* the night sky's own gradient — zenith, middle, horizon — from the app's
+       SKY_KEYS (skyview.js). Flat black reads as a void, not as a sky. */
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, "rgb(3,4,14)");
+    sky.addColorStop(.58, "rgb(13,17,44)");
+    sky.addColorStop(1, "rgb(26,30,66)");
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
     if (horizon.length > 1) {
       ctx.save();
@@ -82,6 +106,53 @@ export function createSkyField(canvas, opts = {}) {
     for (let i = 0; i < 8; i++) {
       const p = project(i * 45, 0);
       if (p && p[0] > 14 && p[0] < W - 14) ctx.fillText(COMPASS[i], p[0], p[1] + 20);
+    }
+
+    /* THE ZODIAC — the ecliptic, the twelve rashis along it, and their artwork.
+       This is the belt the grahas never leave, so it is the one line on the sky
+       worth drawing. Colours are the app's: brass at night (skyview.js). */
+    if (opts.zodiac) {
+      const ecl = [];
+      for (let l = 0; l <= 360; l += 3) {
+        const { alt, az } = siderealPointAltAz(l % 360, when, place.lat, place.lon);
+        ecl.push({ p: project(az, alt), alt });
+      }
+      ctx.lineWidth = 26;
+      ctx.strokeStyle = "rgba(194,155,78,.10)";
+      ctx.beginPath();
+      let pen = false;
+      for (const e of ecl) {
+        if (!e.p) { pen = false; continue; }
+        pen ? ctx.lineTo(e.p[0], e.p[1]) : ctx.moveTo(e.p[0], e.p[1]);
+        pen = true;
+      }
+      ctx.stroke();
+      ctx.lineWidth = 1; ctx.strokeStyle = "rgba(214,180,110,.30)";
+      ctx.stroke();
+
+      for (let s = 0; s < 12; s++) {
+        const mid = s * 30 + 15;
+        const { alt, az } = siderealPointAltAz(mid, when, place.lat, place.lon);
+        const p = project(az, alt);
+        if (!p) continue;
+        const img = rashiArt[s];
+        if (img?.complete && img.naturalWidth) {
+          /* size by the HEIGHT of the belt, not the frame's short side: a tall
+             plate sized off its width grows until one sign fills the sky */
+          const h = Math.min(H, W) * .34, w = h * (img.naturalWidth / img.naturalHeight);
+          ctx.save();
+          ctx.globalAlpha = alt < -6 ? .10 : .24;
+          ctx.drawImage(img, p[0] - w / 2, p[1] - h / 2, w, h);
+          ctx.restore();
+        }
+        ctx.font = "600 11px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillStyle = alt < -6 ? "rgba(214,180,110,.28)" : "rgba(226,196,136,.72)";
+        ctx.fillText(RASHI[s][0].toUpperCase(), p[0], p[1] + 4);
+        ctx.font = "500 9.5px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillStyle = alt < -6 ? "rgba(214,180,110,.2)" : "rgba(226,196,136,.5)";
+        ctx.fillText(RASHI[s][1], p[0], p[1] + 17);
+      }
     }
 
     /* the twenty-seven nakshatras */
@@ -216,6 +287,11 @@ export function createSkyField(canvas, opts = {}) {
 
   return {
     show, highest,
+    /* resize() clears the backing store, and the repaint it schedules only
+       happens on the next animation frame — which never arrives while the tab
+       is in the background. Painting once, synchronously, means the sky is
+       already there the moment it is shown. */
+    resize() { resize(); cam.az = aim.az; cam.alt = aim.alt; draw(); },
     setPlace(p) { place = p; dirty = true; kick(); },
     setWhen(d) { when = d; dirty = true; kick(); },
     get readout() { return readout(); }
