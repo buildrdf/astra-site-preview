@@ -178,6 +178,7 @@ h3{font-size:clamp(21px,2vw,26px);letter-spacing:-.02em;line-height:1.2}
 .k-sign{font-family:var(--fm);font-size:2.9px;fill:var(--dim);letter-spacing:.04em}
 .k-asc{font-family:var(--fm);font-size:2.5px;fill:var(--dim);letter-spacing:.3em}
 .k-halo{fill:rgba(255,255,255,0);transition:fill .5s}
+.k-hit{fill:transparent;pointer-events:all}
 .k-planet{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;
   transition:opacity .5s var(--ease);filter:drop-shadow(0 1.2px 2.4px rgba(0,0,0,.5))}
 .k-planet .k-art{transition:transform .65s var(--ease)}
@@ -234,7 +235,10 @@ h3{font-size:clamp(21px,2vw,26px);letter-spacing:-.02em;line-height:1.2}
 
 /* ---------- ACT 5 — tonight's sky ------------------------------------ */
 .sky-act{padding:0;height:100svh;position:relative;overflow:hidden;background:var(--black)}
-.sky-act canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+/* pan-y, not none: a finger that starts on the sky must still be able to scroll the
+   page. Only sideways movement turns the camera. touch-action:none trapped the reader
+   in a full-height canvas with no way past it except finding the screen edge. */
+.sky-act canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}
 .sky-ui{position:absolute;inset:auto 0 0 0;padding:0 var(--gutter) clamp(34px,6vh,64px);
   display:grid;justify-items:center;gap:18px;text-align:center}
 .sky-ui .row{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
@@ -273,12 +277,17 @@ h3{font-size:clamp(21px,2vw,26px);letter-spacing:-.02em;line-height:1.2}
 
 /* the day's arc: one bar, the windows marked on it */
 .arc{position:relative;height:52px;border-radius:12px;overflow:hidden;background:var(--paper-2);margin-top:4px}
-.arc .band{position:absolute;top:0;bottom:0;display:grid;place-items:center;font-size:10.5px;font-weight:600;
-  letter-spacing:.04em;text-transform:uppercase;color:var(--paper);white-space:nowrap;overflow:hidden}
+.arc .band{position:absolute;top:0;bottom:0;border-radius:3px}
 .arc .band.good{background:var(--ink)}
 .arc .band.hold{background:repeating-linear-gradient(45deg,#c9c9ce 0 6px,#dedee3 6px 12px);color:var(--ink)}
 .arc .nowline{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);border-radius:2px}
 .arc-scale{display:flex;justify-content:space-between;font-family:var(--fm);font-size:10.5px;color:var(--dim-lo);margin-top:7px}
+.arc-keys{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:12.5px;color:var(--dim-lo)}
+.arc-keys .key{display:inline-flex;align-items:center;gap:7px}
+.arc-keys .sw{width:13px;height:13px;border-radius:4px;flex:none}
+.arc-keys .sw.good{background:var(--ink)}
+.arc-keys .sw.hold{background:repeating-linear-gradient(45deg,#c9c9ce 0 4px,#dedee3 4px 8px)}
+.arc-keys .sw.now{width:3px;height:15px;border-radius:2px;background:var(--ink)}
 
 .moons{display:flex;gap:10px;align-items:flex-end;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .moons::-webkit-scrollbar{display:none}

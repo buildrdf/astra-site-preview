@@ -72,7 +72,10 @@ buildStage($("stage"), SAMPLE, { assets: "assets" });
 {
   const svg = $("thenNow"), facts = $("chartFacts");
   const birthT = new Date(SAMPLE.moment.iso).getTime();
-  const spanYears = 60;
+  const nowT = Date.now();
+  /* "Today" means today. It used to mean the birth moment plus sixty years, which with a
+     sample chart dated 2093 put the label on the year 2153. */
+  const spanYears = Math.max(1, Math.round((nowT - birthT) / (365.25 * 864e5)));
   let mode = "birth";
 
   const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
@@ -95,7 +98,7 @@ buildStage($("stage"), SAMPLE, { assets: "assets" });
   };
 
   const atFraction = f => {
-    const when = birthT + f * spanYears * 365.25 * 864e5;
+    const when = birthT + f * (nowT - birthT);
     return { when, planets: transitInto(new Date(when), SAMPLE.lagna.sign) };
   };
 
@@ -106,7 +109,7 @@ buildStage($("stage"), SAMPLE, { assets: "assets" });
     const thumb = $("segThumb"), on = m === "birth" ? $("tabBirth") : $("tabNow");
     thumb.style.left = on.offsetLeft + "px"; thumb.style.width = on.offsetWidth + "px";
     if (m === "birth") { $("scrubber").value = 0; paint(SAMPLE.planets, birthT, "the chart, as cast"); }
-    else { const f = $("scrubber"); f.value = 1000; const a = atFraction(1); paint(a.planets, a.when, "the sky, moved on"); }
+    else { $("scrubber").value = 1000; paint(transitInto(new Date(nowT), SAMPLE.lagna.sign), nowT, "today's sky, laid into that chart"); }
   };
 
   $("tabBirth").onclick = () => setMode("birth");
@@ -120,11 +123,12 @@ buildStage($("stage"), SAMPLE, { assets: "assets" });
     const thumb = $("segThumb"), on = $("tabNow");
     thumb.style.left = on.offsetLeft + "px"; thumb.style.width = on.offsetWidth + "px";
     const a = atFraction(f);
-    paint(a.planets, a.when, `${Math.round(f * spanYears)} years after the chart was cast`);
+    const age = Math.round(f * spanYears);
+    paint(a.planets, a.when, age === 0 ? "the chart, as cast" : `${age} year${age === 1 ? "" : "s"} after that birth`);
   });
 
   $("tickA").textContent = new Date(birthT).getUTCFullYear();
-  $("tickB").textContent = new Date(birthT).getUTCFullYear() + spanYears;
+  $("tickB").textContent = new Date(nowT).getUTCFullYear();
   requestAnimationFrame(() => setMode("birth"));
 }
 
@@ -215,14 +219,20 @@ let chosen = SAMPLE.planets.find(p => p.graha === "Saturn");
   $("varaNum").textContent = `Colour and number traditionally associated with ${d.vara.lord}. Number ${d.vara.num}.`;
 
   if (d.polar) {
-    $("dayArc").innerHTML = "";
+    $("dayArc").innerHTML = ""; $("dayKeys").innerHTML = "";
     $("dayNote").textContent = d.polar;
   } else {
+    /* The two windows can overlap, and painting their names inside them made the labels
+       collide and clip. The bands stay wordless; the legend below names them. */
     $("dayArc").innerHTML =
-      `<div class="band good" style="left:${d.abhijit.left}%;width:${d.abhijit.width}%">Abhijit</div>` +
-      `<div class="band hold" style="left:${d.rahu.left}%;width:${d.rahu.width}%">Rahu Kalam</div>` +
+      `<div class="band good" style="left:${d.abhijit.left}%;width:${d.abhijit.width}%" title="Abhijit ${d.abhijit.text}"></div>` +
+      `<div class="band hold" style="left:${d.rahu.left}%;width:${d.rahu.width}%" title="Rahu Kalam ${d.rahu.text}"></div>` +
       (d.nowPct == null ? "" : `<div class="nowline" style="left:${d.nowPct}%"></div>`);
     $("dayScale").innerHTML = `<span>${d.riseText} sunrise</span><span>${d.setText} sunset</span>`;
+    $("dayKeys").innerHTML =
+      `<span class="key"><i class="sw good"></i>Abhijit · ${d.abhijit.text}</span>` +
+      `<span class="key"><i class="sw hold"></i>Rahu Kalam · ${d.rahu.text}</span>` +
+      (d.nowPct == null ? "" : `<span class="key"><i class="sw now"></i>Now</span>`);
     $("dayNote").textContent = `Abhijit ${d.abhijit.text}, the eighth muhurta of fifteen. `
       + `Rahu Kalam ${d.rahu.text}, the ${ORD(d.vara.rk)} eighth of daylight. Computed for ${HERE.name}.`;
   }

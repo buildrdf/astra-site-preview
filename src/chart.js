@@ -125,6 +125,10 @@ export function renderChart(svg, chart, opts = {}) {
         "aria-label": `${p.graha}, ${p.signName ?? ""} ${p.deg != null ? p.deg.toFixed(1) + " degrees" : ""}, house ${p.house}${p.retro ? ", retrograde" : ""}` });
       if (g.getAttribute("role") === null) g.removeAttribute("role");
       g.append(el("circle", { r: d / 2 + 1.6, class: "k-halo" }));
+      /* On a phone the chart is about 280px wide, which leaves a graha roughly 32px
+         across — under the 44pt Apple asks for. An invisible disc gives the finger
+         something honest to hit without changing what the eye sees. */
+      if (opts.interactive) g.append(el("circle", { r: Math.max(d / 2 + 1.6, 8.6), class: "k-hit" }));
       const href = asset(`${assets}/graha/${p.graha.toLowerCase()}.png`);
       const img = el("image", { href, x: -d / 2, y: -d / 2, width: d, height: d, class: "k-art" });
       img.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);

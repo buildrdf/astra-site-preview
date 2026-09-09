@@ -149,7 +149,7 @@ export function buildStage(root, chart, opts = {}) {
     seatOf[p.graha] = [sx + along[0] * spread, sy + along[1] * spread * (p.house > 6 ? -1 : 1)];
   }
 
-  let t = 0, shown = 0, raf = 0, idle = 0;
+  let t = 0, shown = 0, raf = 0, idle = 0, lastT = 0;
   /* the opening, in seconds since the stage started: the Earth rises into the
      frame and the grahas arrive one after another, with no scroll needed */
   let born = 0;
@@ -211,11 +211,19 @@ export function buildStage(root, chart, opts = {}) {
   /* t follows the scroll, but eases toward it, so a flicked trackpad still
      lands softly instead of snapping through the whole sequence */
   let target = 0;
-  function tick() {
+  function tick(now) {
     const d = target - t;
     t += Math.abs(d) < .0004 ? d : d * .13;
     frame();
-    idle += .28;
+    /* Drift is measured in SECONDS, not frames. Counting frames made the grahas drift
+       twice as fast on a 120Hz screen, and meant returning to the same scroll offset
+       gave a different arrangement. */
+    const ms = lastT ? Math.min(now - lastT, 64) : 16;
+    lastT = now;
+    /* about 1.2 degrees a second on the innermost ring: enough that the sky is alive,
+       slow enough that it never competes with the headline. The seated chart does not
+       drift at all — once a graha reaches its house its position is the house. */
+    idle += ms / 1000 * 3.5;
     const opening = born && performance.now() - born < 2400;
     raf = Math.abs(d) > .0004 || t < .30 || opening ? requestAnimationFrame(tick) : 0;
   }

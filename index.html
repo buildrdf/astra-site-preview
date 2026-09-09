@@ -150,6 +150,7 @@
         <h3 id="dayDate">Today</h3>
         <div class="arc" id="dayArc"></div>
         <div class="arc-scale" id="dayScale"></div>
+        <div class="arc-keys" id="dayKeys"></div>
         <p id="dayNote">Computed from today's sunrise and sunset where you are.</p>
       </div>
       <div class="tile" data-in>
@@ -244,7 +245,7 @@
     <div class="act-head">
       <p class="eyebrow" data-in>Free Kundali</p>
       <h2 id="h-free" data-in>Start with your own.</h2>
-      <p class="lede" data-in>Your chart is cast here, in this browser, by the engine itself. Nothing is sent anywhere.</p>
+      <p class="lede" data-in>Your chart is worked out on your own device, by the engine itself. Only the name of your birthplace is looked up online, to turn it into coordinates.</p>
     </div>
     <div class="free-grid">
       <form class="form" id="form" novalidate data-in>
@@ -254,7 +255,7 @@
           <div class="field"><label for="fTime">Time of birth</label><input id="fTime" type="time" required></div>
         </div>
         <div class="field"><label for="fPlace">Place of birth</label><input id="fPlace" autocomplete="off" placeholder="City, town or village" required><div class="suggest" id="suggest" hidden></div></div>
-        <div class="promise"><span>No sign-up</span><span>No card</span><span>Computed on your device</span></div>
+        <div class="promise"><span>No sign-up</span><span>No card</span><span>Your birth date and time never leave this device</span></div>
         <button class="btn" type="submit" id="cast">Cast my chart</button>
         <p class="status" id="status"></p>
       </form>
@@ -290,7 +291,7 @@
 <footer>
   <div class="shell">
     <span>© 2026 Reality Distortion Field · Astra</span>
-    <nav aria-label="Legal"><a href="#rare">How we calculate</a><a href="#">Privacy</a><a href="#">Terms</a></nav>
+    <nav aria-label="More"><a href="#rare">How we calculate</a><a href="#free">Free Kundali</a></nav>
   </div>
 </footer>
 
