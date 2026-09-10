@@ -86,7 +86,14 @@ export function taraBala(natalNak, todayNak){
   const count=((todayNak-natalNak)%27+27)%27+1;
   const i=(count-1)%9;
   const [name,tone,note]=TARA[i];
-  return {count, n:i+1, name, tone, note};
+  /* The nine rungs repeat three times across the 27, so the 1st, 10th and 19th star from
+     your own all read Janma — but only the FIRST is the star you were born under. The
+     stored note says "your own birth star"; on the other two rungs that is simply untrue,
+     and the app was printing it for Magha while every other screen said Mula. */
+  const own = name!=="Janma" || count===1;
+  return {count, n:i+1, name, tone, own,
+    note: own ? note
+      : "The same rung of the nine-fold cycle as your birth star, though not the star itself. The tradition reads it the same way: keep your own counsel rather than push."};
 }
 
 /* House of a transiting sign counted from a reference sign (1-12) */

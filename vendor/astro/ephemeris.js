@@ -12,20 +12,22 @@
    convention. Nodes: true node.
    Ayanamsa: Lahiri.
 
-   ACCURACY, MEASURED — not assumed. Against JPL Horizons at 1990, 2026 and 2045
+   ACCURACY, MEASURED against JPL Horizons at 1990, 2026 and 2045
    (tools/jpl_reference.mjs, tools/validate_ephemeris_accuracy.mjs), worst error:
-     Sun 0.2'  Moon 1'  Mercury ~6'  Venus 16'  Mars 22'  Jupiter 28'  Saturn 44'
-   That is the documented price of Standish's approximation, not a defect in the
-   implementation, and it grows toward the 2050 edge of its validity. A pada is 200
-   arcmin wide, so signs, nakshatras and padas are safe except within a hair of a
-   boundary — but SLOW GRAHAS TURN SMALL LONGITUDE ERRORS INTO LARGE TIME ONES:
-   20 arcmin of Saturn is days of sign-ingress error, and near a station it is weeks.
-   Nothing in the product may claim hour-level Saturn boundaries or arc-minute
-   accuracy while this is the engine. An earlier note here claimed "worst error 5.6
-   arcmin across all nine" from one private reference moment; that did not generalise.
-   Upgrading Jupiter and Saturn to a fuller series is the open engine job.
-   Moon separately validated to <0.05 arcmin against two printed
-   charts (tools/validate_moon.mjs), fit for dasha-epoch precision.
+     Sun 0.2'  Moon 0.9'  Mercury 0.6'  Venus 0.4'  Mars 0.3'  Jupiter 3.6'  Saturn 6.4'
+   Until 10 Sep 2026 those read 5.6 / 15.6 / 22.1 / 28.2 / 44.2 for Mercury..Saturn,
+   and it was blamed on Standish's approximation. It was not: the elements are referred
+   to the ecliptic of J2000 while the Sun subtracted from them is of date, so the whole
+   precession since J2000 sat in the answer. See positions(). Standish's own bound for
+   1800-2050 is roughly 10' on Saturn, and we are inside it now.
+
+   WHAT THIS STILL MEANS FOR SLOW GRAHAS. A pada is 200 arcmin wide, so signs,
+   nakshatras and padas are safe. But Saturn near a station moves under 2 arcmin a day,
+   so 5 arcmin of longitude is still DAYS of ingress timing. Measured against Drik
+   Panchang: Makara ingress 23 Jan 2020 23:35 IST vs 24 Jan (was 26 Jan); Kumbha 27 Apr
+   2022 vs 29 Apr (was 3 May); retrograde return 14 Jul 2022 vs 12 Jul (was 7 Jul). Do
+   not claim hour-level Saturn boundaries. Some residual is convention: Drik publishes
+   several Lahiri variants.
    --------------------------------------------------------------- */
 
 /* Planetary positions from JPL's "Approximate Positions of the Planets"

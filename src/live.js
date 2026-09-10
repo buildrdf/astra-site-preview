@@ -122,10 +122,27 @@ function rhythmModel(date, place, sample) {
            tara, moonFav, chandrashtama:cAshtama, best, care, sky, V };
 }
 
+const SVGNS = "http://www.w3.org/2000/svg";
+/* the app's sunrise and sunset glyphs: half a sun on the horizon, with the arrow
+   saying which way it is going — not a moon standing in for sunset */
+function sunGlyph(up) {
+  const s = document.createElementNS(SVGNS, "svg");
+  s.setAttribute("viewBox", "0 0 24 18"); s.setAttribute("aria-hidden", "true");
+  for (const d of ["M2 16h20", "M7 16a5 5 0 0 1 10 0", "M4.6 11.2l1.5 1", "M19.4 11.2l-1.5 1", "M12 1.5v6",
+                   up ? "M9.6 3.9L12 1.5l2.4 2.4" : "M9.6 5.1L12 7.5l2.4-2.4"]) {
+    const p = document.createElementNS(SVGNS, "path");
+    p.setAttribute("d", d); p.setAttribute("fill", "none"); p.setAttribute("stroke", "currentColor");
+    p.setAttribute("stroke-width", "1.6"); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
+    s.append(p);
+  }
+  return s;
+}
+
 export function dayPanel(host, place, sample) {
-  let offset = 0, held = null, model = null;
+  let offset = 0, held = null, model = null, seek = null;
   host.replaceChildren();
   const wrap = el("div", "lv lv-day");
+  const left = el("div", "dy-left"), right = el("div", "dy-right");
 
   const top = el("div", "lv-daytop");
   const prev = el("button", "lv-step", "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous day");
@@ -134,49 +151,68 @@ export function dayPanel(host, place, sample) {
   const today = el("button", "lv-today", "Today"); today.type = "button"; today.hidden = true;
   top.append(prev, when, next, today);
 
+  const bar = el("div", "dy-bar");
   const track = el("div", "rhytrack"); track.tabIndex = 0;
   track.setAttribute("role", "slider"); track.setAttribute("aria-label", "The day, midnight to midnight");
-  const sunlabels = el("div", "rsunlabels");
+  const pill = el("div", "rpill");
+  bar.append(track, pill);
+  const marks = el("div", "rmarks");
+  /* the clock under the bar, each hour at its true place: 12 AM to 12 AM */
   const scale = el("div", "rscale");
-  for (const t of ["12 AM","6 AM","12 PM","6 PM","12 AM"]) scale.append(el("span", null, t));
+  ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"].forEach((t, i) => {
+    const s = el("span", null, t); s.style.left = (i * 25) + "%"; scale.append(s); });
   const read = el("div", "rread");
-  const areas = el("div", "lv-areas");
+  left.append(top, bar, marks, scale, read);
+
+  const areas = el("div", "dy-areas");
   const dohold = el("div", "lv-dohold");
-  wrap.append(top, track, sunlabels, scale, read, areas, dohold);
+  right.append(el("p", "dy-h", "Across your life today"), areas, dohold);
+
+  wrap.append(left, right);
   host.append(wrap);
 
-  const hhmm = t => new Date(t).toLocaleTimeString("en-GB",
-    { hour:"2-digit", minute:"2-digit", hour12:false, timeZone:place.tz });
+  const t12 = t => new Date(t).toLocaleTimeString("en-US",
+    { hour:"numeric", minute:"2-digit", hour12:true, timeZone:place.tz });
+  const pct = t => (t - model.d0) / (model.d1 - model.d0) * 100;
+  const windowAt = t => model.windows.find(w => t >= w.a && t < w.b);
+  const natalMoon = sample.planets.find(p => p.graha === "Moon");
 
-  function paintRead(w, atNow) {
-    if (!w) { read.replaceChildren(); return; }
+  function paint(t) {
+    const w = windowAt(t);
+    if (!w) return;
+    seek.style.left = pct(t) + "%";
+    pill.style.left = pct(t) + "%";
+    pill.textContent = t12(t);
     const sense = RH_SENSE[w.name] || RH_SENSE[w.chog] || "";
-    const g = el("p", "rgrade " + "g-" + w.cls, w.label);
-    g.append(el("span", null, `${hhmm(w.a)} – ${hhmm(w.b)}`));
+    const g = el("p", "rgrade g-" + w.cls, w.label);
+    g.append(el("span", null, `${t12(w.a)} – ${t12(w.b)}`));
     const nm = el("p", "rname");
     nm.append(el("b", null, w.name), document.createTextNode(sense ? " · " + sense : ""));
     const why = el("p", "rwhy", `Why: the ${w.name} window, shaded by your tara bala (${model.tara.name}) `
       + `and the Moon's ${model.moonFav ? "supportive" : "unsupportive"} count from your natal Moon`
       + `${model.chandrashtama ? ", with the whole day capped by Chandrashtama" : ""}.`);
     read.replaceChildren(g, nm, why);
-    if (atNow && model.best && model.care) {
-      const s = el("p", "lv-thin");
-      s.append(document.createTextNode("Best window "), el("b", "g-good", `${hhmm(model.best.a)}–${hhmm(model.best.b)}`),
-               document.createTextNode("  ·  Take care "), el("b", "g-caution", `${hhmm(model.care.a)}–${hhmm(model.care.b)}`));
-      read.append(s);
-    }
+  }
+
+  function mark(t, up) {
+    const m = el("div", "rmark" + (up ? " up" : " down"));
+    const p = pct(t.getTime());
+    m.style.left = p + "%";
+    if (p < 7) m.classList.add("edge-l"); else if (p > 93) m.classList.add("edge-r");
+    m.title = up ? "Sunrise" : "Sunset";
+    m.append(sunGlyph(up), el("span", null, t12(t)));
+    return m;
   }
 
   function render() {
     const date = new Date(Date.now() + offset * 864e5);
     today.hidden = offset === 0;
     when.textContent = date.toLocaleDateString("en-GB",
-      { weekday:"long", day:"numeric", month:"long", timeZone:place.tz })
-      + ` · ${place.name}`;
+      { weekday:"long", day:"numeric", month:"long", timeZone:place.tz }) + ` · ${place.name}`;
 
     model = rhythmModel(date, place, sample);
-    if (!model) { track.replaceChildren(); read.replaceChildren(el("p", "lv-note", "The Sun does not rise or set here today.")); return; }
-    const span = model.d1 - model.d0, pct = t => (t - model.d0) / span * 100;
+    if (!model) { track.replaceChildren(); marks.replaceChildren();
+      read.replaceChildren(el("p", "lv-note", "The Sun does not rise or set here today.")); return; }
 
     track.replaceChildren();
     for (const w of model.windows) {
@@ -185,70 +221,64 @@ export function dayPanel(host, place, sample) {
       track.append(i);
     }
     for (const [t, cls] of [[model.sunrise, "rsun"], [model.sunset, "rsun set"]]) {
-      const s = el("i", cls); s.style.left = pct(t.getTime()) + "%"; track.append(s);
-    }
+      const s = el("i", cls); s.style.left = pct(t.getTime()) + "%"; track.append(s); }
     const now = Date.now();
     if (now >= model.d0 && now < model.d1) { const n = el("i", "rnow"); n.style.left = pct(now) + "%"; track.append(n); }
-    const seek = el("i", "rseek"); track.append(seek);
+    seek = el("i", "rseek"); track.append(seek);
+    marks.replaceChildren(mark(model.sunrise, true), mark(model.sunset, false));
 
-    sunlabels.replaceChildren(el("span", null, `☀ ${hhmm(model.sunrise)} sunrise`),
-                              el("span", null, `${hhmm(model.sunset)} sunset ☾`));
+    paint(held ?? (now >= model.d0 && now < model.d1 ? now : model.d0 + (model.d1 - model.d0) * .5));
 
-    const at = held ?? (now >= model.d0 && now < model.d1 ? now : model.d0 + span * .5);
-    seek.style.left = pct(at) + "%";
-    paintRead(model.windows.find(w => at >= w.a && at < w.b), held === null);
-
-    /* the six areas of life, from where the grahas actually are */
+    /* six areas of life, as a light list rather than six heavy cards */
     areas.replaceChildren();
     for (const [name, houses] of Object.entries(AREA_HOUSES)) {
       const here = model.sky.filter(p => houses.includes(p.house) && p.graha !== "Moon");
-      const natalMoon = sample.planets.find(p => p.graha === "Moon");
       const good = here.filter(p => gocharaFavourable(p.graha, houseFrom(natalMoon.sign, p.sign))).length;
-      const state = !here.length ? ["steady","Steady"]
-        : good >= here.length - good + 1 ? ["strong","Supportive"]
-        : good === 0 ? ["care","Caution"] : ["steady","Steady"];
-      const c = el("div", "lacard");
-      c.append(el("div", "laname", name), el("div", "lastatus " + state[0], state[1]));
-      const row = el("div", "lagrahas");
-      for (const p of here.slice(0, 3)) row.append(art(p.graha));
-      c.append(row);
-      areas.append(c);
+      const [cls, word] = !here.length ? ["steady", "Steady"]
+        : good > here.length - good ? ["strong", "Supportive"]
+        : good === 0 ? ["care", "Caution"] : ["steady", "Steady"];
+      const row = el("div", "dy-area");
+      const st = el("span", "st " + cls); st.append(el("i"), document.createTextNode(word));
+      const gr = el("span", "gr"); for (const p of here.slice(0, 3)) gr.append(art(p.graha));
+      row.append(el("span", "nm", name), gr, st);
+      areas.append(row);
     }
 
-    /* one thing to start, one to leave alone — both taken from the windows */
     dohold.replaceChildren();
     const d = el("div", "do"), h = el("div", "hold");
     d.append(el("b", null, "Do"), el("span", null, model.best
-      ? `Put the thing that matters into ${hhmm(model.best.a)}–${hhmm(model.best.b)} — the day's ${model.best.label.toLowerCase()} stretch, and ${RH_SENSE[model.best.name] || "the strongest window it has"}.`
-      : "Keep to the routine; today has no standout window."));
+      ? `${t12(model.best.a)}–${t12(model.best.b)} is the day's ${model.best.label.toLowerCase()} stretch. Put the thing that matters there.`
+      : "Keep to the routine; nothing stands out today."));
     h.append(el("b", null, "Hold"), el("span", null, model.care
-      ? `Leave ${hhmm(model.care.a)}–${hhmm(model.care.b)} for maintenance rather than beginnings — ${RH_SENSE[model.care.name] || "the tradition sets it aside"}.`
+      ? `${t12(model.care.a)}–${t12(model.care.b)} is for maintenance, not beginnings.`
       : "Nothing today is especially set aside."));
     dohold.append(d, h);
-
-    /* dragging the day */
-    const atX = clientX => { const r = track.getBoundingClientRect();
-      return model.d0 + Math.min(1, Math.max(0, (clientX - r.left) / r.width)) * span; };
-    let dragging = false;
-    const move = x => { held = atX(x); seek.style.left = pct(held) + "%";
-      paintRead(model.windows.find(w => held >= w.a && held < w.b), false); };
-    track.onpointerdown = e => { dragging = true; track.setPointerCapture(e.pointerId); move(e.clientX); };
-    track.onpointermove = e => { if (dragging) move(e.clientX); };
-    track.onpointerup = () => { dragging = false; };
-    track.onkeydown = e => {
-      const step = span / 48;
-      if (e.key === "ArrowRight") { held = Math.min(model.d1 - 1, (held ?? now) + step); }
-      else if (e.key === "ArrowLeft") { held = Math.max(model.d0, (held ?? now) - step); }
-      else return;
-      e.preventDefault(); seek.style.left = pct(held) + "%";
-      paintRead(model.windows.find(w => held >= w.a && held < w.b), false);
-    };
   }
+
+  const atX = clientX => { const r = track.getBoundingClientRect();
+    return model.d0 + Math.min(.999, Math.max(0, (clientX - r.left) / r.width)) * (model.d1 - model.d0); };
+  let dragging = false;
+  track.addEventListener("pointerdown", e => { if (!model) return; dragging = true;
+    track.setPointerCapture(e.pointerId); held = atX(e.clientX); paint(held); });
+  track.addEventListener("pointermove", e => { if (dragging) { held = atX(e.clientX); paint(held); } });
+  track.addEventListener("pointerup", () => { dragging = false; });
+  track.addEventListener("keydown", e => {
+    if (!model) return;
+    const step = 30 * 60000, base = held ?? Date.now();
+    if (e.key === "ArrowRight") held = Math.min(model.d1 - 1, base + step);
+    else if (e.key === "ArrowLeft") held = Math.max(model.d0, base - step);
+    else return;
+    e.preventDefault(); paint(held);
+  });
 
   prev.onclick = () => { offset -= 1; held = null; render(); };
   next.onclick = () => { offset += 1; held = null; render(); };
   today.onclick = () => { offset = 0; held = null; render(); };
   render();
+
+  /* scrolling through this screen walks the seeker across the day */
+  return { scrub(f) { if (!model) return;
+    held = model.d0 + Math.min(.999, Math.max(0, f)) * (model.d1 - model.d0); paint(held); } };
 }
 
 /* ==========================================================================
@@ -259,99 +289,148 @@ export function dayPanel(host, place, sample) {
    ========================================================================== */
 const COLOUR = g => `var(--${g.toLowerCase()})`;
 
+/* what each graha's years are traditionally read as bringing — plain words,
+   framed as tradition, never as a forecast */
+const DASHA_TONE = {
+  Sun: "authority, visibility and the slow clarifying of who you are when people are watching",
+  Moon: "home, feeling and the people who keep you steady",
+  Mars: "drive and direction — the energy to finish what has stalled",
+  Mercury: "learning, trade, talk and the sorting of detail",
+  Jupiter: "growth, teachers and a wider view of where your life is going",
+  Venus: "love, comfort, beauty and what you choose to keep",
+  Saturn: "patience, duty and the slow work of building something that lasts",
+  Rahu: "appetite, ambition and the pull toward the unfamiliar",
+  Ketu: "detachment, inwardness and letting go of what no longer fits"
+};
+
 export function timelinePanel(host, sample) {
   const moon = sample.planets.find(p => p.graha === "Moon");
   const birth = new Date(sample.moment.iso);
   const cycle = vimshottari(moon.lon, birth);
-  const mahas = cycle.mahadashas;
-  const t0 = +new Date(mahas[0].start), t1 = +new Date(mahas.at(-1).end);
-  const now = Date.now();
-  let at = Math.min(Math.max(now, t0), t1);
+  const YR = 365.25 * 864e5;
+  const t0 = +birth, t1 = t0 + 80 * YR, now = Date.now();     /* a life, not the whole 120-year cycle */
+  let at = Math.min(Math.max(now, t0), t1 - 1);
+  const ms = d => +new Date(d);
+  const mahas = cycle.mahadashas.filter(m => ms(m.end) > t0 && ms(m.start) < t1);
 
   host.replaceChildren();
   const wrap = el("div", "lv lv-time");
-  const spine = el("div", "spine"); spine.tabIndex = 0;
-  spine.setAttribute("role", "slider"); spine.setAttribute("aria-label", "A hundred and twenty years of dasha");
-  const scale = el("div", "spine-scale");
-  const stack = el("div", "dstack");
-  const say = el("p", "dsay");
-  wrap.append(spine, scale, stack, say);
+  const left = el("div", "tl-left"), right = el("div", "tl-right");
+
+  const whenRow = el("div", "tl-when");
+  const whenB = el("b"), whenS = el("span");
+  const toNow = el("button", "lv-today", "Today"); toNow.type = "button";
+  whenRow.append(whenB, whenS, toNow);
+
+  /* three timelines stacked: the life, the chapter you are in, the weeks inside it */
+  const mkRow = (cls, label) => {
+    const row = el("div", "tl-row");
+    const lab = el("div", "tl-lab"), lord = el("b");
+    lab.append(el("span", null, label), lord);
+    const bar = el("div", "tl-bar " + cls); bar.tabIndex = 0;
+    bar.setAttribute("role", "slider"); bar.setAttribute("aria-label", label);
+    row.append(lab, bar);
+    return { row, lord, bar, key: null, span: [0, 1], segs: [] };
+  };
+  const R1 = mkRow("l1", "Mahadasha"), R2 = mkRow("l2", "Antardasha"), R3 = mkRow("l3", "Pratyantardasha");
+  const scale = el("div", "tl-scale");
+  for (const y of [0, 20, 40, 60, 80]) scale.append(el("span", null, String(new Date(t0 + y * YR).getFullYear())));
+  R1.row.append(scale);
+  left.append(whenRow, R1.row, R2.row, R3.row);
+
+  const title = el("div", "tl-title"), dates = el("p", "tl-dates");
+  const prog = el("div", "tl-prog"), progI = el("i"); prog.append(progI);
+  const pct = el("p", "tl-pct"), sub = el("p", "tl-sub"), read = el("p", "tl-read");
+  const go = el("button", "tl-go", "Understand this period in detail ›"); go.type = "button";
+  /* in the app this opens the period's own page; here it says where to get the app */
+  go.addEventListener("click", e => { e.stopPropagation(); document.querySelector(".nav-get")?.click(); });
+  right.append(title, dates, prog, pct, sub, read, go);
+
+  wrap.append(left, right);
   host.append(wrap);
 
-  const bands = [];
-  for (const m of mahas) {
-    const b = el("div", "band");
-    b.style.flex = String(m.years);
-    b.style.background = `linear-gradient(180deg, color-mix(in srgb, ${COLOUR(m.lord)} 26%, transparent), color-mix(in srgb, ${COLOUR(m.lord)} 6%, transparent))`;
-    b.append(art(m.lord), el("span", "blabel", m.lord));
-    spine.append(b); bands.push(b);
+  const fmtM = t => new Date(t).toLocaleDateString("en-GB", { month:"short", year:"numeric" });
+  const fmtD = t => new Date(t).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+  const age = t => Math.floor((t - t0) / YR);
+  const find = (list, t) => list.find(p => t >= ms(p.start) && t < ms(p.end)) ?? list[list.length - 1];
+  const tint = (lord, on) => `color-mix(in srgb, ${COLOUR(lord)} ${on ? 34 : 13}%, #fff)`;
+
+  function fill(R, list, s, e, t) {
+    const key = list.map(p => p.lord + p.start).join("|");      /* rebuild only when the level changes */
+    if (R.key !== key) {
+      R.key = key; R.span = [s, e];
+      R.bar.replaceChildren();
+      R.segs = list.map(p => {
+        const a = Math.max(ms(p.start), s), b = Math.min(ms(p.end), e);
+        const seg = el("div", "tl-seg");
+        seg.style.flex = String(Math.max(b - a, 1));
+        seg.title = `${p.lord} · ${fmtM(a)} – ${fmtM(b)}`;
+        seg.append(art(p.lord));
+        R.bar.append(seg);
+        return { seg, p };
+      });
+      R.mark = el("i", "tl-mark"); R.nowDot = el("i", "tl-now");
+      R.bar.append(R.mark, R.nowDot);
+    }
+    const [a, b] = R.span, x = v => (v - a) / (b - a) * 100;
+    R.mark.style.left = x(t) + "%";
+    R.nowDot.hidden = !(now >= a && now < b);
+    R.nowDot.style.left = x(now) + "%";
+    const cur = find(list, t);
+    for (const { seg, p } of R.segs) { seg.classList.toggle("on", p === cur); seg.style.background = tint(p.lord, p === cur); }
+    R.lord.textContent = cur.lord; R.lord.style.color = COLOUR(cur.lord);
+    return cur;
   }
-  const mark = el("i", "spinemark"); spine.append(mark);
-  const tick = el("i", "nowtick"); spine.append(tick);
-  scale.append(el("span", null, new Date(t0).getFullYear()), el("span", null, new Date(t1).getFullYear()));
 
-  const pct = t => (t - t0) / (t1 - t0) * 100;
-  const fmt = d => new Date(d).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
-  const ageAt = d => Math.floor((+new Date(d) - +birth) / (365.25 * 864e5));
-
-  function rung(level, p, parentColour) {
-    const noun = ["mahadasha","antardasha","pratyantardasha"][level - 1];
-    const s = +new Date(p.start), e = +new Date(p.end);
-    const frac = Math.min(1, Math.max(0, (at - s) / (e - s)));
-    const d = el("div", `dlvl l${level}`);
-    if (parentColour) d.style.borderLeftColor = parentColour;
-
-    const head = el("div", "dhead");
-    const im = art(p.lord);
-    const b = el("b", null, p.lord); b.style.color = COLOUR(p.lord);
-    head.append(im, b, el("span", "dnoun", noun));
-
-    const span = el("div", "dspan");
-    span.append(el("span", null, `${fmt(p.start)} → ${fmt(p.end)}`));
-    if (level === 1) span.append(el("span", "dage", `age ${ageAt(p.start)}–${ageAt(p.end)}`));
-
-    const bar = el("div", "dbar");
-    const fill = el("i"); fill.style.width = (frac * 100).toFixed(1) + "%"; fill.style.background = COLOUR(p.lord);
-    bar.append(fill);
-
-    d.append(head, span, bar, el("p", "dpct", `${Math.round(frac * 100)}% through`));
-    return d;
-  }
+  const coloured = lord => { const b = el("b", null, lord); b.style.color = COLOUR(lord); return b; };
 
   function draw() {
-    const maha = mahas.find(m => at >= +new Date(m.start) && at < +new Date(m.end)) ?? mahas.at(-1);
-    const antar = maha.antardashas.find(a => at >= +new Date(a.start) && at < +new Date(a.end)) ?? maha.antardashas[0];
-    const prat = (antar.pratyantardashas || []).find(p => at >= +new Date(p.start) && at < +new Date(p.end))
-      ?? (antar.pratyantardashas || [])[0];
+    const maha = fill(R1, mahas, t0, t1, at);
+    const antar = fill(R2, maha.antardashas, ms(maha.start), ms(maha.end), at);
+    const prats = antar.pratyantardashas || [];
+    const prat = prats.length ? fill(R3, prats, ms(antar.start), ms(antar.end), at) : null;
 
-    bands.forEach((b, i) => b.classList.toggle("on", mahas[i] === maha));
-    mark.style.left = pct(at) + "%";
-    tick.style.left = pct(now) + "%";
+    whenB.textContent = fmtM(at);
+    whenS.textContent = `age ${age(at)}`;
+    toNow.hidden = Math.abs(at - now) < 20 * 864e5;
 
-    stack.replaceChildren(rung(1, maha, null), rung(2, antar, COLOUR(maha.lord)));
-    if (prat) stack.append(rung(3, prat, COLOUR(antar.lord)));
+    const s = ms(maha.start), e = ms(maha.end), frac = Math.min(1, Math.max(0, (at - s) / (e - s)));
+    title.replaceChildren(art(maha.lord), coloured(maha.lord), el("span", "noun", "mahadasha"));
+    dates.replaceChildren(document.createTextNode(`${fmtD(s)} → ${fmtD(e)}`),
+                          el("span", null, `age ${Math.max(0, age(s))}–${age(e)}`));
+    progI.style.width = (frac * 100).toFixed(1) + "%";
+    progI.style.background = COLOUR(maha.lord);
+    pct.textContent = `${Math.round(frac * 100)}% through${at > now + 864e5 ? " · this chapter lies ahead" : ""}`;
 
-    const when = at > now ? "lies ahead" : at < now - 864e5 ? "has passed" : "is running now";
-    say.textContent = `${maha.lord} over ${maha.years} years, ${antar.lord} within it`
-      + `${prat ? `, and ${prat.lord} for these few weeks` : ""} — this stretch ${when}. `
-      + `The whole sequence, and its starting point, come from the Moon sitting in ${moon.nakshatra} at birth.`;
+    sub.replaceChildren(document.createTextNode("Inside it, "), coloured(antar.lord), document.createTextNode(" antardasha"));
+    if (prat) sub.append(document.createTextNode(", and "), coloured(prat.lord), document.createTextNode(" for these few weeks."));
+    else sub.append(document.createTextNode("."));
+
+    const natal = sample.planets.find(p => p.graha === maha.lord);
+    read.textContent = `${maha.lord} years are traditionally read as a season of ${DASHA_TONE[maha.lord]}.`
+      + (natal ? ` Here ${maha.lord} sits in the ${ORD(natal.house)} house, so that season gathers around ${HOUSE_THEME[natal.house][0]}.` : "");
   }
 
-  const atX = clientX => { const r = spine.getBoundingClientRect();
-    return t0 + Math.min(1, Math.max(0, (clientX - r.left) / r.width)) * (t1 - t0); };
-  let dragging = false;
-  spine.addEventListener("pointerdown", e => { dragging = true; spine.setPointerCapture(e.pointerId); at = atX(e.clientX); draw(); });
-  spine.addEventListener("pointermove", e => { if (dragging) { at = atX(e.clientX); draw(); } });
-  spine.addEventListener("pointerup", () => { dragging = false; });
-  spine.addEventListener("keydown", e => {
-    const step = (t1 - t0) / (e.shiftKey ? 40 : 220);
-    if (e.key === "ArrowRight") at = Math.min(t1 - 1, at + step);
-    else if (e.key === "ArrowLeft") at = Math.max(t0, at - step);
-    else if (e.key === "Home") at = now;
-    else return;
-    e.preventDefault(); draw();
-  });
+  for (const R of [R1, R2, R3]) {
+    let drag = false;
+    const atX = x => { const r = R.bar.getBoundingClientRect(), [a, b] = R.span;
+      return a + Math.min(.999, Math.max(0, (x - r.left) / r.width)) * (b - a); };
+    R.bar.addEventListener("pointerdown", e => { drag = true; R.bar.setPointerCapture(e.pointerId); at = atX(e.clientX); draw(); });
+    R.bar.addEventListener("pointermove", e => { if (drag) { at = atX(e.clientX); draw(); } });
+    R.bar.addEventListener("pointerup", () => { drag = false; });
+    R.bar.addEventListener("keydown", e => {
+      const [a, b] = R.span, step = (b - a) / (e.shiftKey ? 20 : 100);
+      if (e.key === "ArrowRight") at = Math.min(t1 - 1, at + step);
+      else if (e.key === "ArrowLeft") at = Math.max(t0, at - step);
+      else return;
+      e.preventDefault(); draw();
+    });
+  }
+  toNow.onclick = () => { at = Math.min(Math.max(now, t0), t1 - 1); draw(); };
   draw();
+
+  /* scrolling through this screen carries you across the life, birth to eighty */
+  return { scrub(f) { at = t0 + Math.min(.999, Math.max(0, f)) * (t1 - t0); draw(); } };
 }
 
 /* ==========================================================================
@@ -368,95 +447,111 @@ export function universePanel(host, sample, place) {
   host.append(wrap);
 
   const TABS = ["Birth chart", "Today's sky", "The sky above you"];
-  let tab = 1, field = null, started = false;
+  let tab = 1, started = false, day = 0, sel = "Saturn", field = null, tour = 0;
+  const birthT = +new Date(sample.moment.iso), nowT = Date.now();
 
-  const chartWrap = el("div", "lv-chart"); chartWrap.style.display = "grid";
-  chartWrap.style.gap = "10px"; chartWrap.style.justifyItems = "center";
+  /* ---- the chart, and a day-by-day tracker under it ---------------------- */
+  const chartWrap = el("div", "lv-chart uv-chart");
   const holder = el("div", "lv-chartbox");
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("role", "group");
-  svg.setAttribute("aria-label", "An example birth chart; every graha is a button.");
+  svg.setAttribute("aria-label", "The chart; every graha is a button.");
   holder.append(svg);
-  const scrub = el("input", "lv-scrub"); scrub.type = "range"; scrub.min = "0"; scrub.max = "1000"; scrub.value = "1000";
-  scrub.setAttribute("aria-label", "Move through the years between birth and today");
+  const dayRow = el("div", "uv-day");
+  const prev = el("button", "lv-step", "‹"); prev.type = "button"; prev.setAttribute("aria-label", "One day back");
+  const next = el("button", "lv-step", "›"); next.type = "button"; next.setAttribute("aria-label", "One day on");
+  const dateL = el("p", "uv-date");
+  const reset = el("button", "lv-today", "Back to today"); reset.type = "button";
+  dayRow.append(prev, dateL, next);
+  const scrub = el("input", "lv-scrub uv-scrub");
+  scrub.type = "range"; scrub.min = "-180"; scrub.max = "180"; scrub.step = "1"; scrub.value = "0";
+  scrub.setAttribute("aria-label", "Move the sky one day at a time");
   const say = el("div", "lv-say");
-  chartWrap.append(holder, scrub, say);
+  chartWrap.append(holder, dayRow, scrub, reset, say);
 
-  const skyWrap = el("div", "lv-skywrap");
-  const cv = document.createElement("canvas"); cv.tabIndex = 0;
-  cv.setAttribute("aria-label", "The sky over you now. Drag it, or use the arrow keys.");
-  const chip = el("div", "sky-chip");
-  const clock = el("div", "sky-time");
-  const picks = el("div", "sky-picks");
-  skyWrap.append(cv, chip, clock, picks);
-
-  const birthT = +new Date(sample.moment.iso), nowT = Date.now();
+  const fmt = t => new Date(t).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
   const read = p => {
     focusPlanet(svg, p);
     say.replaceChildren(
       el("b", null, `${p.graha} · ${ORD(p.house)} house · ${p.signName}`),
-      el("p", null, PLAIN[p.graha]),
-      el("p", "lv-thin", `${fmtDeg(p.deg)} ${p.signName} · ${p.nakshatra} pada ${p.pada}`
-        + `${p.retro ? " · retrograde" : ""}${p.dignity ? " · " + p.dignity : ""}`
-        + ` · aspects the ${aspectsOf(p.graha, p.house).map(ORD).join(", ")}`));
+      el("p", "lv-thin", `${fmtDeg(p.deg)} ${p.signName} · ${p.nakshatra}${p.retro ? " · retrograde" : ""}`));
   };
-  function paintChart(when) {
-    const planets = tab === 0 ? sample.planets : transitInto(when, sample.lagna.sign);
-    renderChart(svg, { ...sample, planets }, { assets:"assets", interactive:true, onSelect:read });
-    read(planets.find(p => p.graha === "Saturn") ?? planets[0]);
+  function paint() {
+    const when = tab === 0 ? birthT : nowT + day * 864e5;
+    const planets = tab === 0 ? sample.planets : transitInto(new Date(when), sample.lagna.sign);
+    renderChart(svg, { ...sample, planets }, { assets:"assets", interactive:true, onSelect:p => { sel = p.graha; read(p); } });
+    read(planets.find(p => p.graha === sel) ?? planets[0]);
+    dateL.textContent = tab === 0 ? `Born ${fmt(birthT)}` : day === 0 ? `Today · ${fmt(when)}` : fmt(when);
+    chartWrap.classList.toggle("is-birth", tab === 0);
+    reset.hidden = tab === 0 || day === 0;
+    scrub.value = String(day);
   }
-  scrub.addEventListener("input", () => {
-    if (tab === 0) { tab = 1; sync(); }
-    paintChart(new Date(birthT + (+scrub.value / 1000) * (nowT - birthT)));
-  });
+  const setDay = d => { day = Math.max(-180, Math.min(180, Math.round(d))); paint(); };
+  prev.onclick = () => setDay(day - 1);
+  next.onclick = () => setDay(day + 1);
+  reset.onclick = () => setDay(0);
+  scrub.addEventListener("input", () => setDay(+scrub.value));
   svg.addEventListener("click", e => { if (e.target === svg) clearFocus(svg); });
 
-  const GR = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
-  const imgs = {};
-  for (const g of GR) { const i = new Image(); i.src = GRAHA_ART(g); imgs[g] = i; }
-  const tellSky = r => {
-    if (!r) return;
-    picks.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.g === r.graha)));
+  /* ---- the real sky: a live preview, and a door into the immersive one ---- */
+  const skyCard = el("div", "uv-sky");
+  const cv = document.createElement("canvas"); cv.tabIndex = 0;
+  cv.setAttribute("aria-label", "The sky over you now. Arrow keys look around.");
+  const veil = el("div", "uv-veil");
+  const step = el("button", "uv-step", "Step outside"); step.type = "button";
+  /* the real sky is ~4 MB of plates: start fetching the moment someone reaches for the door */
+  step.addEventListener("pointerenter", () => import("./sky-embed.js").then(m => m.preloadRealSky?.()), { once: true });
+  veil.append(el("b", null, "The sky above you, right now"),
+    el("span", null, "Zoom out to the Earth. Scrub through the night. Point your phone at the sky."), step);
+  skyCard.append(cv, veil);
+  step.onclick = async () => {
+    const { openRealSky } = await import("./sky-embed.js");
+    openRealSky({ lat:place.lat, lon:place.lon, name:place.name, tz:place.tz });
   };
-  for (const g of GR) {
-    const b = el("button", "sky-pick"); b.type = "button"; b.dataset.g = g;
-    const i = new Image(); i.src = GRAHA_ART(g); i.alt = "";
-    b.append(i, document.createTextNode(g));
-    b.onclick = () => tellSky(field?.show(g, imgs[g]));
-    picks.append(b);
+  /* while the card is showing, the camera drifts from graha to graha, so the sky
+     is seen to be alive before anyone touches it */
+  const GR = ["Saturn","Jupiter","Moon","Venus","Mars","Mercury","Sun"];
+  const imgs = Object.fromEntries(GR.map(g => { const i = new Image(); i.src = GRAHA_ART(g); return [g, i]; }));
+  function wander() {
+    clearTimeout(tour);
+    if (tab !== 2 || !field) return;
+    const g = GR[Math.floor(Date.now() / 3800) % GR.length];
+    field.show(g, imgs[g]);
+    tour = setTimeout(wander, 3800);
   }
 
   function sync() {
     [...pills.children].forEach((b, i) => b.classList.toggle("on", i === tab));
-    body.replaceChildren(tab === 2 ? skyWrap : chartWrap);
     if (tab === 2) {
-      if (!field) {
-        field = createSkyField(cv, { place, when:new Date(), zodiac:true });
-        chip.textContent = `${new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})} · ${place.name}`;
-        clock.textContent = new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz});
-      }
-      /* a timeout, not an animation frame: the canvas has just been attached and
-         needs one layout pass, but rAF never fires while the tab is in the
-         background, and the sky would then be a black rectangle on return */
-      setTimeout(() => {
-        field.resize();                        /* paints synchronously */
-        const g = field.highest(); tellSky(field.show(g, imgs[g]));
-        clock.textContent = new Date().toLocaleTimeString("en-GB",
-          { hour:"2-digit", minute:"2-digit", timeZone:place.tz });
-      }, 0);
+      body.replaceChildren(skyCard);
+      if (!field) field = createSkyField(cv, { place, when:new Date(), zodiac:true });
+      setTimeout(() => { field.resize(); wander(); cv.focus({ preventScroll:true }); }, 0);
     } else {
-      scrub.value = tab === 0 ? "0" : "1000";
-      paintChart(new Date(tab === 0 ? birthT : nowT));
+      clearTimeout(tour);
+      body.replaceChildren(chartWrap);
+      paint();
     }
   }
-
   TABS.forEach((name, i) => {
     const b = el("button", null, name); b.type = "button";
-    b.onclick = () => { tab = i; sync(); };
+    b.onclick = () => { tab = i; if (i !== 1) day = 0; sync(); };
     pills.append(b);
   });
 
-  return { start(){ if (!started) { started = true; sync(); } else if (tab === 2) sync(); } };
+  /* the first time the screen is seen, the tracker walks a fortnight forward and
+     back on its own — so it is obvious that the sky moves, and that you can move it */
+  async function hint() {
+    if (reduce) return;
+    const path = [...Array(15).keys(), ...[...Array(15).keys()].reverse()];
+    for (const d of path) { if (tab !== 1) return; setDay(d); await wait(70); }
+  }
+
+  return {
+    start() { if (!started) { started = true; sync(); hint(); } else if (tab === 2) sync(); },
+    stop() { clearTimeout(tour); },
+    /* scrolling on through this screen carries today's sky forward, a day at a time */
+    scrub(f) { if (tab !== 1) return; setDay(Math.max(0, (f - .15) / .85) * 120); }
+  };
 }
 
 /* ==========================================================================
@@ -546,157 +641,212 @@ export function askPanel(host, sample) {
 }
 
 /* ==========================================================================
-   5 — FIND YOUR MOMENT
-   The app's own muhurta engine, running here. Pick what it is for, say how
-   long you have, and it scores every window in the range and shows its working.
+   5 — FIND MUHURAT
+   Dates, an occasion, one button. The app's own muhurta engine scores every
+   window in the range; the page shows the three best, in the place's own clock.
    ========================================================================== */
+const OCCASIONS = [
+  { id:"marriage",   label:"Marriage",     icon:["M8.5 15.5a4.5 4.5 0 1 0 0-.01", "M15.5 15.5a4.5 4.5 0 1 0 0-.01", "M10 5.5l2-2.5 2 2.5-2 2z"] },
+  { id:"business",   label:"New venture",  icon:["M4 8.5h16v11H4z", "M9 8.5V6h6v2.5", "M4 13h16"] },
+  { id:"property",   label:"Home",         icon:["M3.5 11L12 4l8.5 7", "M6 9.5V20h12V9.5", "M10 20v-5.5h4V20"] },
+  { id:"purchase",   label:"Big purchase", icon:["M5.5 8.5h13l-1 11.5h-11z", "M9 8.5a3 3 0 0 1 6 0"] },
+  { id:"travel",     label:"Journey",      icon:["M3 11.5l18-7.5-7.5 18-2.5-7.5z", "M11 14.5l3-3"] },
+  { id:"childbirth", label:"Childbirth",   icon:["M12 5.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z", "M6 20a6 6 0 0 1 12 0"] }
+];
+const icon = paths => {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true");
+  for (const d of paths) { const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", d); s.append(p); }
+  return s;
+};
+/* "IST", "EST", "BST" where the locale knows a short name; the GMT offset otherwise */
+function tzAbbr(tz, at = new Date()) {
+  for (const loc of ["en-US", "en-GB", "en-IN"]) {
+    const n = new Intl.DateTimeFormat(loc, { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(at).find(p => p.type === "timeZoneName")?.value;
+    if (n && !/^GMT|^UTC/.test(n)) return n;
+  }
+  return new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+    .formatToParts(at).find(p => p.type === "timeZoneName")?.value || tz;
+}
+const isoDay = d => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+
 export function muhurtaPanel(host, place) {
   host.replaceChildren();
   const wrap = el("div", "lv lv-muh");
-  const grid = el("div", "muhgrid");
-  const row = el("div", "muhrow");
-  const results = el("div", "muhres");
-  const scanned = el("p", "muhscan");
-  wrap.append(grid, row, results, scanned);
+  const form = el("div", "mu-form");
+
+  /* the range: up to two months, because every two-minute step in it is scored */
+  const MAX_DAYS = 60;
+  const range = el("div", "mu-range");
+  const mkDate = (label, v) => { const l = el("label", "mu-date"); l.append(el("span", null, label));
+    const i = el("input"); i.type = "date"; i.value = v; l.append(i); range.append(l); return i; };
+  const today = new Date();
+  const fromI = mkDate("From", isoDay(today));
+  const toI = mkDate("To", isoDay(new Date(Date.now() + 14 * 864e5)));
+  fromI.min = isoDay(today);
+  const clampRange = () => {
+    const f = new Date(fromI.value + "T00:00"), t = new Date(toI.value + "T00:00");
+    toI.min = fromI.value;
+    toI.max = isoDay(new Date(f.getTime() + MAX_DAYS * 864e5));
+    if (t < f) toI.value = fromI.value;
+    if (t > new Date(toI.max + "T00:00")) toI.value = toI.max;
+  };
+  fromI.addEventListener("change", clampRange); toI.addEventListener("change", clampRange); clampRange();
+
+  let purpose = "marriage";
+  const occ = el("div", "mu-occ"); occ.setAttribute("role", "radiogroup"); occ.setAttribute("aria-label", "Occasion");
+  for (const o of OCCASIONS) {
+    const b = el("button"); b.type = "button"; b.dataset.id = o.id;
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(o.id === purpose));
+    b.append(icon(o.icon), el("span", null, o.label));
+    b.onclick = () => { purpose = o.id;
+      occ.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", String(x === b))); };
+    occ.append(b);
+  }
+  const go = el("button", "mu-go", "Find the best Muhurat"); go.type = "button";
+  form.append(range, occ, go);
+
+  const stage = el("div", "mu-stage");
+  wrap.append(form, stage);
   host.append(wrap);
 
-  let purpose = "business";
-  for (const [id, p] of Object.entries(PURPOSES)) {
-    const b = el("button", "muhpick"); b.type = "button"; b.dataset.id = id;
-    b.setAttribute("aria-pressed", String(id === purpose));
-    b.append(el("b", null, p.label), el("span", null, p.note));
-    b.onclick = () => { purpose = id;
-      grid.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.id === id)));
-      results.replaceChildren(); scanned.textContent = ""; };
-    grid.append(b);
+  const tz = tzAbbr(place.tz);
+  const t12 = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", hour12:true, timeZone:place.tz });
+  const dayname = t => new Date(t).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", timeZone:place.tz });
+
+  /* the computation takes milliseconds; the animation is there so the reading is
+     seen being made — and the number it counts to is the true number scanned */
+  function computing(scanned, span) {
+    const c = el("div", "mu-calc");
+    const orb = el("div", "mu-orrery");
+    for (const g of ["Moon", "Sun", "Jupiter"]) { const r = el("i", "ring"); r.append(art(g)); orb.append(r); }
+    const count = el("p", "mu-count");
+    const sweep = el("div", "mu-sweep"); sweep.append(el("i"));
+    const lab = el("p", "mu-lab", `${span} days · every window`);
+    c.append(orb, count, sweep, lab);
+    stage.replaceChildren(c);
+    const t0 = performance.now(), dur = reduce ? 200 : 1900;
+    return new Promise(res => {
+      const step = now => {
+        const k = Math.min(1, (now - t0) / dur);
+        count.textContent = `Reading ${Math.round(scanned * k).toLocaleString()} windows`;
+        sweep.firstChild.style.width = (k * 100) + "%";
+        k < 1 ? requestAnimationFrame(step) : setTimeout(res, 150);
+      };
+      requestAnimationFrame(step);
+    });
   }
 
-  const seg = el("div", "feelseg");
-  let days = 7;
-  for (const [label, n] of [["1 week",7],["2 weeks",14],["1 month",30]]) {
-    const b = el("button", n === days ? "on" : null, label); b.type = "button";
-    b.onclick = () => { days = n; [...seg.children].forEach(x => x.classList.toggle("on", x === b)); };
-    seg.append(b);
-  }
-  const go = el("button", "muhgo", "Find the times"); go.type = "button";
-  row.append(el("label", null, "How long you have"), seg, go);
+  go.onclick = async () => {
+    const from = new Date(fromI.value + "T00:00"), to = new Date(toI.value + "T23:59");
+    if (!(to > from)) return;
+    go.disabled = true;
+    const r = findMuhurta({ from, to, lat:place.lat, lon:place.lon, tzMinutes: offsetAt(from, place.tz), purpose, top:18 });
+    await computing(r.scanned, Math.round((to - from) / 864e5));
+    go.disabled = false;
 
-  const hhmm = t => new Date(t).toLocaleTimeString("en-GB",
-    { hour:"2-digit", minute:"2-digit", hour12:false, timeZone:place.tz });
-  const dayname = t => new Date(t).toLocaleDateString("en-GB",
-    { weekday:"short", day:"numeric", month:"short", timeZone:place.tz });
+    /* three options on three different days where the range allows — two
+       back-to-back windows on one afternoon are one option, not two */
+    const picks = [], seen = new Set();
+    for (const w of r.best) { const d = dayname(w.windowFrom);
+      if (!seen.has(d)) { seen.add(d); picks.push(w); } if (picks.length === 3) break; }
+    for (const w of r.best) { if (picks.length === 3) break; if (!picks.includes(w)) picks.push(w); }
 
-  go.onclick = () => {
-    go.disabled = true; go.textContent = "Reading the window…";
-    results.replaceChildren(); scanned.textContent = "";
-    setTimeout(() => {
-      const from = new Date(), to = new Date(Date.now() + days * 864e5);
-      const t0 = performance.now();
-      const r = findMuhurta({ from, to, lat:place.lat, lon:place.lon,
-        tzMinutes: offsetAt(from, place.tz), purpose, top:5 });
-      const ms = Math.round(performance.now() - t0);
-      go.disabled = false; go.textContent = "Find the times";
-
-      const best = r.best[0]?.score ?? 1;
-      r.best.forEach((w, i) => {
-        const c = el("div", "muhcard" + (i === 0 ? " top" : ""));
-        const top = el("div", "muhtop");
-        top.append(el("span", "mdate", dayname(w.windowFrom)),
-                   el("span", "mwin", `${hhmm(w.windowFrom)} – ${hhmm(w.windowTo)}`),
-                   el("span", "mlen", `${w.minutes} min`));
-        if (i === 0) top.append(el("span", "mflag", "Strongest"));
-        const meter = el("div", "muhmeter"); const bar = el("i"); meter.append(bar);
-        const panch = el("p", "muhpanch",
-          `${w.lagna} lagna · ${w.nakshatra} (${w.nakClass}) · ${w.paksha} ${w.tithi} · ${w.vara}`);
-        c.append(top, meter, panch);
-
-        /* the two strongest reasons for, and the strongest against */
-        const up = w.reasons.filter(x => x.pts > 0).sort((a,b) => b.pts - a.pts).slice(0, 2);
-        const down = w.reasons.filter(x => x.pts < 0).sort((a,b) => a.pts - b.pts).slice(0, 1);
-        for (const x of [...up, ...down]) {
-          const p = el("p", "muhwhy");
-          const pts = el("b", "pts " + (x.pts > 0 ? "up" : "down"), (x.pts > 0 ? "+" : "") + x.pts);
-          p.append(pts, document.createTextNode("  " + x.text));
-          c.append(p);
-        }
-        results.append(c);
-        setTimeout(() => { c.classList.add("on");
-          bar.style.width = Math.max(8, Math.min(100, 100 * (w.score + 6) / (best + 6))) + "%"; }, i * 90);
-      });
-      scanned.textContent = `${r.scanned.toLocaleString()} windows between ${dayname(from)} and ${dayname(to)} `
-        + `at ${place.name}, read in ${ms} ms. Each is a stretch in which the chart itself does not change — ${r.grainAbout}.`;
-    }, 30);
+    const list = el("ol", "mu-res");
+    picks.forEach((w, i) => {
+      const li = el("li", "mu-item" + (i === 0 ? " top" : ""));
+      const when = el("div", "mu-when");
+      when.append(el("b", null, dayname(w.windowFrom)),
+        el("span", null, `${t12(w.windowFrom)} – ${t12(w.windowTo)}`), el("em", "mu-tz", tz));
+      const more = el("button", "mu-more", "See in detail"); more.type = "button";
+      const why = el("ul", "mu-why"); why.hidden = true;
+      for (const x of w.reasons.filter(x => x.pts > 0).sort((a, b) => b.pts - a.pts).slice(0, 3))
+        why.append(el("li", null, x.text));
+      more.onclick = () => { why.hidden = !why.hidden; more.textContent = why.hidden ? "See in detail" : "Hide"; };
+      li.append(el("span", "mu-rank", String(i + 1)), when, more, why);
+      if (i === 0) li.append(el("span", "mu-flag", "Most auspicious"));
+      list.append(li);
+      setTimeout(() => li.classList.add("on"), 60 + i * 110);
+    });
+    stage.replaceChildren(list);
   };
 }
 
 /* ==========================================================================
    6 — RELATIONSHIP COMPATIBILITY
-   Ashtakoota Milan on two real charts, with the reasoning behind each point.
+   Ashtakoota Milan on two real charts. The inputs fold away once computed;
+   what is left is two names, one score and the eight kootas.
    ========================================================================== */
 export function matchPanel(host, sample) {
   host.replaceChildren();
   const wrap = el("div", "lv lv-match");
-  const two = el("div", "mtwo");
-  const go = el("button", "mgo", "Compute the match"); go.type = "button";
-  const out = el("div", "lv-full");
-  out.style.display = "grid"; out.style.gap = "11px"; out.style.justifyItems = "center";
-  wrap.append(two, go, out, el("p", "lv-foot",
-    "Gun Milan is one traditional method among several, and a score is not a verdict on a relationship."));
+  const people = el("div", "mtwo");
+  const names = el("p", "mt-names");
+  const go = el("button", "mgo", "Compute compatibility"); go.type = "button";
+  const out = el("div", "mt-out");
+  wrap.append(people, names, go, out);
   host.append(wrap);
 
-  /* two real births: the example chart, and a second one cast from its own
-     moment — different day, different Moon, so the reading is a real one */
+  /* two real births: the example chart ("Aarav", as the app's own sample profile is
+     called) and a second chart cast from its own moment — 4 August 2004. The
+     partner was chosen as an example that reads well (29.5 of 36); the score is
+     still the engine's, computed below, not a number written into the page */
   const moonA = sample.planets.find(p => p.graha === "Moon");
-  const bornB = new Date(+new Date(sample.moment.iso) + 2153 * 864e5 + 7 * 36e5);
+  const bornB = new Date(+new Date(sample.moment.iso) - 1008 * 864e5 + 5 * 36e5);
   const moonBL = ((positions(bornB).Moon % 360) + 360) % 360;
+  const A = "Aarav", B = "Natasha";
 
   const person = (name, born, lon) => {
     const c = el("div", "mperson");
     c.append(el("div", "mname", name), el("div", "mborn", born));
-    const m = el("div", "mmoon");
-    m.append(art("Moon"), document.createTextNode(`Moon in ${NAKS[nakOf(lon)]}`));
+    const m = el("div", "mmoon"); m.append(art("Moon"), document.createTextNode(`Moon in ${NAKS[nakOf(lon)]}`));
     c.append(m);
     return c;
   };
-  two.append(
-    person("You", `${sample.moment.local}, ${sample.moment.name}`, moonA.lon),
+  people.append(
+    person(A, `${new Date(sample.moment.iso).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })}, ${sample.moment.name}`, moonA.lon),
     el("div", "mjoin", "+"),
-    person("Them", bornB.toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" }) + ", Delhi", moonBL));
+    person(B, `${bornB.toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })}, Delhi`, moonBL));
 
-  let done = false;
-  go.onclick = () => {
-    if (done) return; done = true;
-    go.disabled = true; go.textContent = "Counting the eight…";
-    setTimeout(() => {
-      const k = ashtakoota({ moonL: moonA.lon }, { moonL: moonBL });
-      go.textContent = "Computed";
-      const low = k.total < 18;
+  go.onclick = async () => {
+    go.disabled = true;
+    const k = ashtakoota({ moonL: moonA.lon }, { moonL: moonBL });
 
-      const card = el("div", "scorecard");
-      const num = el("div", "scorenum" + (low ? " low" : ""), String(k.total));
-      num.append(el("small", null, " / 36"));
-      const side = el("div", "scoreside");
-      const bar = el("div", "bar" + (low ? " low" : ""));
-      const fill = el("i"); const gate = el("b"); gate.style.left = "50%";
-      bar.append(fill, gate);
-      side.append(bar, el("p", "scoreverdict", `${k.verdict}. The tick is the eighteen-point threshold the tradition treats as acceptable.`));
-      card.append(num, side);
+    /* the two Moons draw together while the eight are counted */
+    const calc = el("div", "mt-calc");
+    const pair = el("div", "mt-moons"); pair.append(art("Moon"), art("Moon"));
+    const tick = el("p", "mt-tick");
+    calc.append(pair, tick);
+    out.replaceChildren(calc);
+    people.classList.add("done");
+    names.textContent = `${A}  ·  ${B}`;
+    go.hidden = true;
+    for (let i = 0; i < k.kootas.length; i++) {
+      tick.textContent = `${k.kootas[i].name}…`;
+      await wait(reduce ? 20 : 210);
+    }
 
-      const grid = el("div", "kootas");
-      k.kootas.forEach((it, i) => {
-        const c = el("div", "koota");
-        const top = el("div", "ktop");
-        top.append(el("b", null, it.name), el("span", "kscore", `${it.got}/${it.max}`));
-        const kb = el("div", "kbar");
-        const f = el("i", it.got === 0 ? "none" : it.got === it.max ? "full" : "part");
-        kb.append(f);
-        c.append(top, kb, el("p", "kabout", it.why));
-        grid.append(c);
-        setTimeout(() => { c.classList.add("on"); f.style.width = (it.got / it.max * 100) + "%"; }, 120 + i * 80);
-      });
+    const low = k.total < 18;
+    const card = el("div", "scorecard");
+    const num = el("div", "scorenum" + (low ? " low" : ""), String(k.total)); num.append(el("small", null, " / 36"));
+    const side = el("div", "scoreside");
+    const bar = el("div", "bar" + (low ? " low" : "")), fill = el("i"), gate = el("b");
+    gate.style.left = "50%"; bar.append(fill, gate);
+    side.append(bar, el("p", "scoreverdict", k.verdict.charAt(0).toUpperCase() + k.verdict.slice(1) + "."));
+    card.append(num, side);
 
-      out.replaceChildren(card, grid);
-      requestAnimationFrame(() => { fill.style.width = (k.total / 36 * 100) + "%"; });
-    }, reduce ? 30 : 700);
+    const grid = el("div", "kootas");
+    k.kootas.forEach((it, i) => {
+      const c = el("div", "koota");
+      const top = el("div", "ktop"); top.append(el("b", null, it.name), el("span", "kscore", `${it.got}/${it.max}`));
+      const kb = el("div", "kbar"), f = el("i", it.got === 0 ? "none" : it.got === it.max ? "full" : "part");
+      kb.append(f); c.append(top, kb);
+      grid.append(c);
+      setTimeout(() => { c.classList.add("on"); f.style.width = (it.got / it.max * 100) + "%"; }, 140 + i * 70);
+    });
+    out.replaceChildren(card, grid);
+    requestAnimationFrame(() => { fill.style.width = (k.total / 36 * 100) + "%"; });
   };
 }

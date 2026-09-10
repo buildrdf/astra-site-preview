@@ -21,11 +21,39 @@
   <div class="shell">
     <a class="brand" href="#top">Astra</a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#tour">The app</a><a href="#reports">Reports</a>
+      <a href="#tour">The app</a><a href="#more">Everything else</a><a href="#reports">Reports</a>
     </nav>
-    <a class="cta" href="index.html#free">Free Kundali</a>
+    <div class="nav-do">
+      <button class="nav-signin" type="button" data-pop="signin" aria-haspopup="dialog">Sign in</button>
+      <a class="cta" href="index.html#free">Free Kundali</a>
+      <button class="nav-get" type="button" data-pop="get" aria-haspopup="dialog" aria-label="Download the app for iPhone or Android">
+        <svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
+        <svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg>
+        <span>Download</span>
+      </button>
+      <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu"><i></i><i></i></button>
+    </div>
   </div>
+  <div class="nav-pop" id="navPop" role="dialog" aria-label="Get Astra" hidden></div>
 </header>
+
+<!-- the phone's menu — Apple's pattern: a full-screen sheet of big links -->
+<div class="menu" id="menu" hidden>
+  <nav class="menu-links" aria-label="Menu">
+    <a href="#tour">The app</a>
+    <a href="#more">Everything else</a>
+    <a href="#reports">Reports</a>
+    <a href="index.html#free">Free Kundali</a>
+  </nav>
+  <div class="menu-do">
+    <p class="menu-soon">Coming to iPhone and Android</p>
+    <div class="store-row">
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>Soon on the</small>App Store</span></span>
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg><span><small>Soon on</small>Google Play</span></span>
+    </div>
+    <button class="menu-signin" type="button" data-pop="signin">Sign in</button>
+  </div>
+</div>
 
 <main id="top">
 
@@ -59,7 +87,6 @@
         <a class="btn" href="index.html#free">Create my free Kundali</a>
         <a class="btn line" href="#tour">See the app</a>
       </div>
-      <p class="stamp" id="stamp"></p>
     </div>
     <div class="cue" id="cue" aria-hidden="true"><i></i>Scroll</div>
   </div>
@@ -140,19 +167,6 @@
     <div class="shelf-dots" id="shelfDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
 
-  <!-- the reader: one book, opened, pages turning -->
-  <div class="reader" id="reader" hidden>
-    <div class="reader-bg" data-close></div>
-    <div class="reader-stage" role="dialog" aria-modal="true" aria-label="Report preview">
-      <div class="rd-book" id="rdBook"></div>
-      <div class="reader-bar">
-        <button class="rd-nav" id="rdPrev" type="button" aria-label="Previous page">‹</button>
-        <p class="rd-count" id="rdCount"></p>
-        <button class="rd-nav" id="rdNext" type="button" aria-label="Next page">›</button>
-      </div>
-      <button class="rd-close" id="rdClose" type="button" aria-label="Close">Close</button>
-    </div>
-  </div>
 </section>
 
 <!-- ============ 5 — the close ======================================== -->
@@ -176,10 +190,39 @@
 
 </main>
 
-<footer>
+<footer class="foot" id="contact">
   <div class="shell">
-    <span>© 2026 Reality Distortion Field · Astra</span>
-    <nav aria-label="More"><a href="#tour">The app</a><a href="#reports">Reports</a></nav>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <b>Astra</b>
+        <p>Personal Vedic astrology. Computed, never guessed.</p>
+        <div class="store-row">
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>Soon on the</small>App Store</span></span>
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg><span><small>Soon on</small>Google Play</span></span>
+    </div>
+      </div>
+      <nav class="foot-col" aria-label="Astra">
+        <h4>Astra</h4><a href="#tour">The app</a><a href="#more">Everything else</a><a href="#reports">Reports</a><a href="index.html#free">Free Kundali</a>
+      </nav>
+      <nav class="foot-col" aria-label="Read">
+        <h4>Read</h4><a href="blog.html">The Astra Journal</a>
+      </nav>
+      <nav class="foot-col" aria-label="Company">
+        <h4>Company</h4><span>Reality Distortion Field</span><a href="#contactForm">Contact us</a><a href="terms.html">Terms &amp; privacy</a>
+      </nav>
+      <form class="foot-form" id="contactForm">
+        <h4>Write to us</h4>
+        <label class="sr" for="cfName">Name</label><input id="cfName" autocomplete="name" placeholder="Name" required>
+        <label class="sr" for="cfMail">Email</label><input id="cfMail" type="email" autocomplete="email" placeholder="Email" required>
+        <label class="sr" for="cfMsg">Message</label><textarea id="cfMsg" rows="3" placeholder="Message" required></textarea>
+        <button class="btn" type="submit">Send</button>
+        <p class="foot-status" id="cfStatus" aria-live="polite"></p>
+      </form>
+    </div>
+    <div class="foot-base">
+      <span>© 2026 Reality Distortion Field · Astra</span>
+      <span>Vedic astrology is a tradition of reflection, not a forecast.</span>
+    </div>
   </div>
 </footer>
 
