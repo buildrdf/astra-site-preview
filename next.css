@@ -57,14 +57,14 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .next .nav.solid.light{ background:rgba(255,255,255,.86); border-bottom-color:rgba(12,24,48,.1) }
 .next .nav .brand{ opacity:1 }
 .next .nav-links a{ font-size:13px }
-.nav-do{ display:flex; align-items:center; gap:10px }
-.nav-signin{ background:none; border:0; padding:5px 4px; font-size:13px; cursor:pointer; color:inherit; opacity:.85 }
-.nav-signin:hover{ opacity:1 }
+.nav-do{ display:flex; align-items:center; gap:14px }
+/* the app is the point: Download is the one filled button; the free Kundali a quiet link */
+.nav-free{ font-size:13px; color:inherit; opacity:.85 }
+.nav-free:hover{ opacity:1 }
 .next .nav .cta{ background:var(--sky-paper); color:var(--deep); font-size:13px }
 .next .nav.light .cta{ background:var(--ink-d); color:var(--sky-paper) }
-.nav-get{ display:inline-flex; align-items:center; gap:6px; height:29px; padding:0 12px; border-radius:999px;
-  border:1px solid currentColor; background:none; color:inherit; font-size:13px; cursor:pointer; opacity:.9 }
-.nav-get:hover{ opacity:1 }
+.nav-get{ display:inline-flex; align-items:center; gap:6px; height:29px; padding:0 13px; border-radius:999px;
+  border:0; font-size:13px; font-weight:600; cursor:pointer }
 .nav-get svg{ width:12px; height:13px; flex:none }
 .nav-get svg + svg{ margin-left:-1px }
 
@@ -106,9 +106,10 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .menu-signin{ justify-self:start; background:none; border:0; padding:0; color:var(--sky-dim); font-size:15px; cursor:pointer }
 
 @media (max-width:900px){
-  .next .nav-links,.nav-signin,.nav-get{ display:none }
+  .next .nav-links,.nav-free{ display:none }
   .burger{ display:block }
-  .next .nav .cta{ padding:4px 12px; font-size:12.5px }
+  .nav-do{ gap:6px }
+  .nav-get{ height:27px; padding:0 11px; font-size:12.5px }
 }
 .next .btn{ background:var(--sky-paper); color:var(--deep) }
 .next .btn.line{ background:transparent; border:1px solid var(--hair-2); color:var(--sky-paper) }
@@ -854,6 +855,21 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .fr-email .send{ display:grid; grid-template-columns:1fr auto; gap:10px }
 .fr-email input{ height:46px; border-radius:12px; border:1px solid rgba(12,24,48,.16); background:var(--light-2); padding:0 14px; font:inherit; font-size:16px; color:var(--ink-d) }
 .fr-tag{ font-size:11.5px; color:#8595AE; border:1px dashed rgba(12,24,48,.2); border-radius:999px; padding:5px 11px; justify-self:start }
+/* what arrives, and where the chart itself lives */
+.fr-what{ display:grid; gap:8px; padding:26px 28px; border-radius:22px; background:#fff; border:1px solid rgba(12,24,48,.08) }
+.fr-eyebrow{ margin:0; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--brass) }
+.fr-eyebrow + b{ font-size:19px; font-weight:600; letter-spacing:-.02em; color:var(--ink-d) }
+.fr-what p:not(.fr-eyebrow){ margin:0 0 12px; font-size:14px; line-height:1.55; color:var(--dim-lo) }
+.fr-what .store-row{ max-width:340px; margin-top:4px }
+.fr-done{ display:grid; gap:10px; justify-items:start; padding:26px 28px; border-radius:22px; background:#fff; border:1px solid rgba(12,24,48,.08) }
+.fr-seal{ width:56px; height:56px; display:grid; place-items:center; border-radius:50%; background:var(--light-2) }
+.fr-seal img{ width:36px; height:36px }
+.fr-done b{ font-size:21px; font-weight:600; letter-spacing:-.02em; color:var(--ink-d) }
+.fr-done p{ margin:0; font-size:14px; line-height:1.55; color:var(--dim-lo) }
+.fr-done .fr-cast{ font-size:13px; font-weight:600; color:var(--ink-d) }
+.fr-done .store-row{ max-width:340px; margin-top:6px }
+.mt-report{ display:inline-block; margin-top:2px; font-size:13.5px; font-weight:600; color:var(--brass); text-decoration:none }
+.mt-report:hover{ text-decoration:underline; text-underline-offset:3px }
 @media (max-width:900px){ .free-grid{ grid-template-columns:1fr } .fr-email .send{ grid-template-columns:1fr } }
 
 /* ---------- the bento's lunar month --------------------------------------- */

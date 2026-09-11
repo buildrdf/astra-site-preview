@@ -932,7 +932,9 @@ export function matchPanel(host, sample) {
       grid.append(c);
       setTimeout(() => { c.classList.add("on"); f.style.width = (it.got / it.max * 100) + "%"; }, 140 + i * 70);
     });
-    out.replaceChildren(card, grid);
+    /* the eight are the summary; the report reads each one, with the placements behind it */
+    const more = el("a", "mt-report", "Read a detailed report ›"); more.href = "#reports";
+    out.replaceChildren(card, grid, more);
     requestAnimationFrame(() => { fill.style.width = (k.total / 36 * 100) + "%"; });
   };
 }

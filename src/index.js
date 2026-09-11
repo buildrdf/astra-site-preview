@@ -521,8 +521,7 @@ $("contactForm").addEventListener("submit", e => {
   const pop = $("navPop"), menu = $("menu"), burger = $("burger");
   const STORE = `<div class="store-row">${document.querySelector(".menu .store-row").innerHTML}</div>`;
   const SHEETS = {
-    get: `<b>Astra is coming to iPhone and Android.</b><p>Both stores on launch day. Until then, the free Kundali works right here.</p>${STORE}`,
-    signin: `<b>Accounts open with the app.</b><p>Your charts, your people and your reports will follow you from phone to phone. For now, no sign-in is needed — the free Kundali asks for nothing.</p>`
+    get: `<b>Astra is coming to iPhone and Android.</b><p>Both stores on launch day. Until then, the free Kundali is sent by email, and it will be waiting in the app when you sign in with the same address.</p>${STORE}`
   };
   let openKey = null;
   const closePop = () => { pop.classList.remove("on"); openKey = null;
