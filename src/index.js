@@ -13,7 +13,10 @@ import { SEAT, renderChart } from "./chart.js";
 import { transitInto, guessPlace } from "./kundali.js";
 import { asset } from "./asset.js";
 import { ashtakoota } from "../vendor/astro/match.js";
-import { dayPanel, timelinePanel, universePanel, askPanel, muhurtaPanel, matchPanel } from "./live.js";
+import { dayPanel, timelinePanel, universePanel, skyPanel, askPanel, muhurtaPanel, matchPanel } from "./live.js";
+import { lunarMonth } from "./today.js";
+import { mountBook } from "./book.js";
+import { freeKundali } from "./free.js";
 
 const SAMPLE = await fetch("src/sample.json").then(r => r.json());
 const $ = id => document.getElementById(id);
@@ -196,22 +199,29 @@ const HERE = guessPlace();
 /* One label, one short headline, one line. Anything longer and nobody reads it —
    the detail belongs on the screen itself, where it is computed. */
 const FEATURES = [
-  { id:"day", tab:"Your horoscope", eyebrow:"Your horoscope",
+  { id:"day", tab:"Your Horoscope", eyebrow:"Your Horoscope",
     head:"Not one of twelve. Only you.",
     a:"A sun-sign horoscope is written for 680 million people at once. Yours is cast for the minute you were born, and read against today's sky.",
     live: h => dayPanel(h, HERE, SAMPLE) },
 
-  { id:"time", tab:"Your timeline", eyebrow:"Timeline",
+  { id:"time", tab:"Your Timeline", eyebrow:"Timeline",
     head:"Your life, in chapters.",
     a:"Vedic astrology divides a life into planetary periods, each nested inside the last. Keep scrolling and watch yours unfold.",
     live: h => timelinePanel(h, SAMPLE) },
 
-  { id:"universe", tab:"Your universe", eyebrow:"Universe",
-    head:"Your chart. Your sky.",
-    a:"Touch any graha and the chart answers. Then go outside and drag the real one.",
+  { id:"universe", tab:"Your Universe", eyebrow:"Universe",
+    head:"Your chart, then and now.",
+    a:"Touch any graha and the chart answers. Keep scrolling and today's sky moves a day at a time.",
     live: h => universePanel(h, SAMPLE, HERE) },
 
-  { id:"ask", tab:"Ask Astra", eyebrow:"Ask",
+  /* the same grahas leave the chart and take their real places overhead */
+  { id:"sky", tab:"The Sky Above You", eyebrow:"The Sky Above You", w:.8,
+    head:"Now look up.",
+    a:"The same grahas, where they stand over you this minute. Drag to look around.",
+    live: h => skyPanel(h, HERE) },
+
+  /* three exchanges, each given its own stretch of scroll so none is skipped */
+  { id:"ask", tab:"Ask Astra", eyebrow:"Ask", w:2.2,
     head:"Ask your chart.",
     a:"Every answer is built from it — and names exactly what it used.",
     live: h => askPanel(h, SAMPLE) },
@@ -221,24 +231,29 @@ const FEATURES = [
     a:"The most auspicious time to begin something that matters.",
     live: h => muhurtaPanel(h, HERE) },
 
-  { id:"match", tab:"Relationship compatibility", eyebrow:"Compatibility",
+  { id:"match", tab:"Relationship Compatibility", eyebrow:"Compatibility",
     head:"How two charts meet.",
     a:"Eight kootas. Thirty-six points.",
     live: h => matchPanel(h, SAMPLE) }
 ];
 
+/* each screen owns a stretch of the scroll in proportion to its weight */
+const WEIGHTS = FEATURES.map(f => f.w ?? 1), WSUM = WEIGHTS.reduce((a, b) => a + b, 0);
+const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc), [0]);
+
 {
   const nav = $("tourNav"), panel = $("panel"), tour = $("tour"), say = document.querySelector(".tour-say");
-  tour.style.height = (FEATURES.length * 92 + 30) + "vh";
+  tour.style.height = (WSUM * 92 + 30) + "vh";
 
   FEATURES.forEach((f, i) => {
     const host = document.createElement("div");
     host.className = "livehost surface"; host.dataset.f = i;
     panel.append(host);
     const api = f.live(host);
-    host._start = api?.start; host._stop = api?.stop; host._scrub = api?.scrub;
+    host._start = api?.start; host._stop = api?.stop; host._scrub = api?.scrub; host._api = api;
   });
   const surfaces = [...panel.children];
+  const iUni = FEATURES.findIndex(f => f.id === "universe"), iSky = FEATURES.findIndex(f => f.id === "sky");
 
   FEATURES.forEach((f, i) => {
     const b = document.createElement("button");
@@ -246,16 +261,45 @@ const FEATURES = [
     b.setAttribute("aria-current", i === 0 ? "true" : "false");
     b.onclick = () => {
       const span = tour.offsetHeight - innerHeight;
-      const top = tour.offsetTop + ((i + .35) / FEATURES.length) * span;
+      const top = tour.offsetTop + ((CUM[i] + WEIGHTS[i] * .35) / WSUM) * span;
       scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
     };
     nav.append(b);
   });
 
+  /* The grahas leave the chart and fly to their real places in the sky — and
+     come back when the visitor scrolls up. A picture of each is carried across
+     the stage; the sky underneath is already drawing them where they land. */
+  const prod = document.querySelector(".prod");
+  function fly(from, to) {
+    if (reduce) return;
+    const pr = prod.getBoundingClientRect();
+    const layer = document.createElement("div"); layer.className = "flight"; prod.append(layer);
+    let n = 0;
+    for (const g of Object.keys(from)) {
+      const a = from[g], b = to[g];
+      const ax = a.x ?? a.left + a.width / 2, ay = a.y ?? a.top + a.height / 2, as = a.width ?? 36;
+      const im = new Image(); im.src = asset(`assets/graha/${g.toLowerCase()}.png`); im.alt = "";
+      im.style.width = im.style.height = as + "px";
+      im.style.transform = `translate(${ax - pr.left - as / 2}px,${ay - pr.top - as / 2}px)`;
+      layer.append(im); n++;
+      const bs = b ? (b.width ?? 36) : as;
+      const frames = b
+        ? [{ transform: im.style.transform, opacity: 1 },
+           { transform: `translate(${(ax + (b.x ?? b.left + b.width / 2)) / 2 - pr.left - as / 2}px,${Math.min(ay, b.y ?? b.top + b.height / 2) - 60 - pr.top - as / 2}px) scale(${(1 + bs / as) / 2})`, opacity: 1, offset: .5 },
+           { transform: `translate(${(b.x ?? b.left + b.width / 2) - pr.left - as / 2}px,${(b.y ?? b.top + b.height / 2) - pr.top - as / 2}px) scale(${bs / as})`, opacity: 1, offset: .9 },
+           { transform: `translate(${(b.x ?? b.left + b.width / 2) - pr.left - as / 2}px,${(b.y ?? b.top + b.height / 2) - pr.top - as / 2}px) scale(${bs / as})`, opacity: 0 }]
+        : [{ opacity: 1 }, { opacity: 0, transform: im.style.transform + " scale(.6)" }];
+      im.animate(frames, { duration: b ? 1150 : 500, delay: (n % 7) * 40, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+    }
+    setTimeout(() => layer.remove(), 1500);
+  }
+
   let shown = -1, swapTimer = 0;
   function show(i) {
     if (i === shown) return;
     const f = FEATURES[i];
+    const was = shown;
     const paint = () => { $("tourEyebrow").textContent = f.eyebrow;
       $("tourHead").textContent = f.head; $("tourLine").textContent = f.a; };
     if (shown < 0 || reduce) paint();
@@ -270,6 +314,9 @@ const FEATURES = [
       const want = on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2;
       nav.scrollTo({ left: Math.max(0, want), behavior: reduce ? "auto" : "smooth" });
     }
+    /* where the grahas are before the switch, if they are about to fly */
+    const flying = (was === iUni && i === iSky) || (was === iSky && i === iUni);
+    const from = flying ? (was === iUni ? surfaces[iUni]._api.planetRects() : surfaces[iSky]._api.skyPoints()) : null;
     surfaces.forEach((s, k) => {
       const isOn = k === i;
       s.classList.toggle("on", isOn);
@@ -277,17 +324,20 @@ const FEATURES = [
       if (!isOn && s.dataset.started) s._stop?.();
       else if (isOn && s.dataset.started) s._start?.();
     });
+    if (flying) fly(from, i === iSky ? surfaces[iSky]._api.skyPoints() : surfaces[iUni]._api.planetRects());
     shown = i;
   }
 
   function onScroll() {
     const span = tour.offsetHeight - innerHeight;
     const t = clamp(span > 0 ? -tour.getBoundingClientRect().top / span : 0);
-    const raw = t * FEATURES.length, i = Math.min(FEATURES.length - 1, Math.floor(raw));
+    const at = t * WSUM;
+    let i = 0; while (i < FEATURES.length - 1 && at >= CUM[i + 1]) i++;
     show(i);
     /* the rest of the scroll through a screen drives that screen: the day's seeker
-       walks across the hours, the timeline across the years */
-    surfaces[i]._scrub?.(clamp((raw - i - .1) / .8));
+       walks across the hours, the timeline across the years, Ask through its questions */
+    const sub = (at - CUM[i]) / WEIGHTS[i];
+    surfaces[i]._scrub?.(clamp((sub - .1) / .8));
   }
   addEventListener("scroll", onScroll, { passive: true });
   addEventListener("resize", onScroll, { passive: true });
@@ -303,31 +353,44 @@ const FEATURES = [
    never rounded up for the sake of a nicer tile.
    ========================================================================== */
 {
+  /* Three rows. The first is the lunar month — thirty true phases with tonight's
+     lit — then the seven things that matter most, in two rows of four. */
   const TILES = [
-    { big:"81", unit:"yogas", sub:"Each one named, with the rule that formed it", cls:"w2 h2", art:"jupiter" },
+    { moons:true, cls:"w4 lunar" },
+    { big:"81", unit:"yogas", sub:"Each one named, with the rule that formed it", cls:"w2", art:"jupiter" },
     { b:"Divisional charts", sub:"D1 through D60, Parashari rules" },
-    { b:"Ashtakavarga", sub:"The bindu count, house by house" },
-    { b:"Shadbala", sub:"Six-fold planetary strength" },
     { b:"Sade Sati", sub:"Saturn's seven and a half years", art:"saturn" },
-    { big:"27", unit:"nakshatras", sub:"With pada, lord and yogatara", cls:"w2" },
-    { b:"Yogini dasha", sub:"A second timing system beside Vimshottari" },
-    { b:"Festivals & vrats", sub:"Amanta months, adhika included" },
-    { big:"30", unit:"moon phases", sub:"Tonight's is the true one", art:"moon" },
     { b:"Panchang, in full", sub:"Tithi, nakshatra, yoga, karana, vara" },
-    { b:"Point it at the sky", sub:"The chart follows where you turn" },
-    { big:"27", unit:"lessons", sub:"Learn the craft, three levels deep", cls:"w2" },
-    { b:"Glossary", sub:"38 terms, in plain language" },
-    { b:"Your people", sub:"More than one chart, side by side" },
-    { b:"Life events", sub:"Mark what happened, see where it falls" },
-    { b:"Remedies", sub:"Traditional, and never sold on fear", cls:"accent" },
-    { b:"Reports in Hindi", sub:"The whole thing, not a summary" },
-    { b:"Transits, live", sub:"Where the grahas stand over you now" },
-    { b:"Lahiri ayanamsa", sub:"And the app says so, on every screen" }
+    { b:"Festivals & vrats", sub:"Amanta months, adhika included" },
+    { big:"27", unit:"lessons", sub:"Learn the craft, three levels deep" },
+    { b:"Reports in Hindi", sub:"The whole thing, not a summary", cls:"accent" }
   ];
-  /* 19 tiles at 24 grid cells — six full rows of four, no hole at the end */
 
   const bento = $("bento");
+  const moonRow = () => {
+    const w = document.createElement("div"); w.className = "moons";
+    const now = new Date();
+    for (const p of lunarMonth(now)) {
+      const f = document.createElement("figure");
+      if (p.isToday) f.className = "on";
+      const mi = new Image(); mi.src = asset(p.file); mi.alt = ""; mi.loading = "lazy";
+      const cap = document.createElement("figcaption"); cap.textContent = p.isToday ? "Tonight" : p.date.getDate();
+      f.append(mi, cap); w.append(f);
+    }
+    /* tonight in the middle — measured once the row has a width, and again when
+       the tile comes into view, since a row measured while unseen centres on nothing */
+    w._centre = () => { const on = w.querySelector(".on");
+      if (on && w.clientWidth) w.scrollLeft = on.offsetLeft - w.clientWidth / 2 + on.clientWidth / 2; };
+    setTimeout(w._centre, 60); addEventListener("load", w._centre);
+    return w;
+  };
   for (const t of TILES) {
+    if (t.moons) {
+      const d = document.createElement("div"); d.className = "bt " + t.cls;
+      const b = document.createElement("b"); b.textContent = "The lunar month";
+      const s = document.createElement("span"); s.textContent = "Thirty phases, each the true one for its night. Tonight's is lit.";
+      d.append(b, s, moonRow()); bento.append(d); continue;
+    }
     const d = document.createElement("div");
     d.className = "bt" + (t.cls ? " " + t.cls : "");
     if (t.art) { const im = new Image(); im.className = "art";
@@ -349,7 +412,8 @@ const FEATURES = [
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (!e.isIntersecting) return;
     const i = tiles.indexOf(e.target);
-    setTimeout(() => e.target.classList.add("shown"), reduce ? 0 : (i % 4) * 55 + Math.floor(i / 4) * 40);
+    setTimeout(() => { e.target.classList.add("shown"); e.target.querySelector(".moons")?._centre(); },
+      reduce ? 0 : (i % 4) * 55 + Math.floor(i / 4) * 40);
     io.unobserve(e.target);
   }), { threshold: .1, rootMargin: "0px 0px -6% 0px" });
   tiles.forEach(t => io.observe(t));
@@ -388,57 +452,52 @@ const FEATURES = [
     return w;
   };
 
-  /* the two pages under each cover: its contents, then one real page */
-  const PAGES = {
-    essential: [
-      ["Contents", "Essential Vedic Kundali", () => contents([["Your birth details", 3], ["The birth chart", 4],
-        ["Ascendant & Moon", 5], ["The nine grahas", 6], ["House by house", 8], ["Vimshottari dasha", 13], ["Glossary", 16]])],
-      ["Page 4", "The birth chart", chartPage] ],
-    complete: [
-      ["Contents", "The Complete Vedic Kundali", () => contents([["The chart, read whole", 4], ["Every graha in turn", 9],
-        ["The twelve houses", 21], ["Yogas in your chart", 34], ["The dasha years ahead", 41], ["Remedies", 57], ["Glossary", 62]])],
-      ["Page 41", "The dasha years ahead", dashaPage] ],
-    milan: [
-      ["Contents", "Vedic Kundali Milan", () => contents([["Both charts, side by side", 4], ["The eight kootas", 7],
-        ["Gun Milan score", 12], ["Manglik, read carefully", 15], ["Where you differ", 19], ["Guidance", 24]])],
-      ["Page 7", "The eight kootas", kootaPage] ]
+  const planetPage = () => { const w = el("div", "rd-rows");
+    for (const p of SAMPLE.planets) w.append(row(p.graha, `${p.signName} · ${ORDS(p.house)} house`));
+    return w; };
+  const housePage = () => { const w = el("div", "rd-rows");
+    for (const h of SAMPLE.houses.slice(0, 8)) w.append(row(`${ORDS(h.house)} house`, `${h.signName} · ${h.lord}`));
+    return w; };
+  const ORDS = n => n + (["th","st","nd","rd"][(n % 100 - 20) % 10] || ["th","st","nd","rd"][n % 100] || "th");
+  const page = (tag, title, body) => () => { const w = el("div", "rd-page");
+    w.append(el("p", "rd-tag", tag), el("p", "rd-title", title), body()); return w; };
+  const title = name => () => { const w = el("div", "rd-tp");
+    w.append(el("b", null, "Astra"), el("p", null, name), el("span", null, "Prepared for Aarav · 9 May 2007 · Mumbai")); return w; };
+  const last = () => { const w = el("div", "rd-last");
+    w.append(el("b", null, "The rest is yours to read."), el("span", null, "Every page is computed from the birth details, then written in plain language."));
+    const a = el("a", "btn", "Get my free Kundali"); a.href = "#free"; w.append(a); return w; };
+
+  /* the pages under each cover: contents, then real pages, computed */
+  const BOOKS = {
+    essential: { name: "Essential Vedic Kundali", sheets: [
+      { name: ["Contents", "The birth chart"], front: page("Contents", "Essential Vedic Kundali", () => contents([["Your birth details", 3], ["The birth chart", 4],
+          ["Ascendant & Moon", 5], ["The nine grahas", 6], ["House by house", 8], ["Vimshottari dasha", 13], ["Glossary", 16]])),
+        back: page("Page 4", "The birth chart", chartPage) },
+      { name: ["The nine grahas", "House by house"], front: page("Page 6", "The nine grahas", planetPage), back: page("Page 8", "House by house", housePage) } ] },
+    complete: { name: "The Complete Vedic Kundali", sheets: [
+      { name: ["Contents", "The chart, read whole"], front: page("Contents", "The Complete Vedic Kundali", () => contents([["The chart, read whole", 4], ["Every graha in turn", 9],
+          ["The twelve houses", 21], ["Yogas in your chart", 34], ["The dasha years ahead", 41], ["Remedies", 57], ["Glossary", 62]])),
+        back: page("Page 4", "The chart, read whole", chartPage) },
+      { name: ["Every graha in turn", "The dasha years ahead"], front: page("Page 9", "Every graha in turn", planetPage), back: page("Page 41", "The dasha years ahead", dashaPage) } ] },
+    milan: { name: "Vedic Kundali Milan", sheets: [
+      { name: ["Contents", "Both charts"], front: page("Contents", "Vedic Kundali Milan", () => contents([["Both charts, side by side", 4], ["The eight kootas", 7],
+          ["Gun Milan score", 12], ["Manglik, read carefully", 15], ["Where you differ", 19], ["Guidance", 24]])),
+        back: page("Page 4", "Both charts, side by side", chartPage) },
+      { name: ["The eight kootas", "Gun Milan score"], front: page("Page 7", "The eight kootas", kootaPage), back: page("Page 12", "Gun Milan score", kootaPage) } ] }
   };
 
   const touch = matchMedia("(hover: none)").matches;
   document.querySelectorAll(".book").forEach(book => {
-    const cover = book.querySelector(".cover"), img = cover.querySelector("img");
-    const bk = el("div", "bk"), board = el("div", "bk-cover");
-    board.append(img);
-    const [[tag1, t1, b1], [tag2, t2, b2]] = PAGES[book.dataset.report];
-    const p2 = el("div", "bk-page p2"), p1 = el("div", "bk-page p1");
-    let built = false;
-    const build = () => { if (built) return; built = true;
-      p1.append(el("p", "rd-tag", tag1), el("p", "rd-title", t1), b1());
-      p2.append(el("p", "rd-tag", tag2), el("p", "rd-title", t2), b2()); };
-    bk.append(p2, p1, board);
-    cover.replaceChildren(bk, el("span", "open-hint", touch ? "Tap to open" : "Open"));
-
-    let turnT = 0, shutT = 0;
-    const open = () => {
-      clearTimeout(shutT); build();
-      book.classList.add("open");
-      clearTimeout(turnT);
-      turnT = setTimeout(() => book.classList.add("turn"), reduce ? 0 : 1100);
-    };
-    const close = () => {
-      clearTimeout(turnT);
-      book.classList.remove("turn");                     /* the page comes back first … */
-      shutT = setTimeout(() => book.classList.remove("open"), reduce ? 0 : 380);   /* … then the board */
-    };
-    if (touch) cover.addEventListener("click", () => book.classList.contains("open") ? close() : open());
-    else {
-      book.addEventListener("pointerenter", open);
-      book.addEventListener("pointerleave", close);
-      cover.addEventListener("focus", open);
-      cover.addEventListener("blur", close);
-    }
+    const img = book.querySelector(".cover img");
+    const spec = BOOKS[book.dataset.report];
+    mountBook(book, { cover: img, touch, title: title(spec.name), sheets: spec.sheets, base: last });
   });
 }
+
+/* ==========================================================================
+   4b — the free Kundali, on this page
+   ========================================================================== */
+freeKundali($("free"), SAMPLE);
 
 /* ==========================================================================
    5 — the close, and the page's small manners

@@ -435,8 +435,7 @@ export function timelinePanel(host, sample) {
 
 /* ==========================================================================
    3 — YOUR UNIVERSE
-   Birth, today, and the real sky over the visitor — the last one filling the
-   whole stage, because that is the point of it.
+   The chart at birth, and the chart today — a day at a time.
    ========================================================================== */
 export function universePanel(host, sample, place) {
   host.replaceChildren();
@@ -446,8 +445,8 @@ export function universePanel(host, sample, place) {
   wrap.append(pills, body);
   host.append(wrap);
 
-  const TABS = ["Birth chart", "Today's sky", "The sky above you"];
-  let tab = 1, started = false, day = 0, sel = "Saturn", field = null, tour = 0;
+  const TABS = ["Birth Chart", "Today's Sky"];
+  let tab = 1, started = false, day = 0, sel = "Saturn";
   const birthT = +new Date(sample.moment.iso), nowT = Date.now();
 
   /* ---- the chart, and a day-by-day tracker under it ---------------------- */
@@ -493,44 +492,10 @@ export function universePanel(host, sample, place) {
   scrub.addEventListener("input", () => setDay(+scrub.value));
   svg.addEventListener("click", e => { if (e.target === svg) clearFocus(svg); });
 
-  /* ---- the real sky: a live preview, and a door into the immersive one ---- */
-  const skyCard = el("div", "uv-sky");
-  const cv = document.createElement("canvas"); cv.tabIndex = 0;
-  cv.setAttribute("aria-label", "The sky over you now. Arrow keys look around.");
-  const veil = el("div", "uv-veil");
-  const step = el("button", "uv-step", "Step outside"); step.type = "button";
-  /* the real sky is ~4 MB of plates: start fetching the moment someone reaches for the door */
-  step.addEventListener("pointerenter", () => import("./sky-embed.js").then(m => m.preloadRealSky?.()), { once: true });
-  veil.append(el("b", null, "The sky above you, right now"),
-    el("span", null, "Zoom out to the Earth. Scrub through the night. Point your phone at the sky."), step);
-  skyCard.append(cv, veil);
-  step.onclick = async () => {
-    const { openRealSky } = await import("./sky-embed.js");
-    openRealSky({ lat:place.lat, lon:place.lon, name:place.name, tz:place.tz });
-  };
-  /* while the card is showing, the camera drifts from graha to graha, so the sky
-     is seen to be alive before anyone touches it */
-  const GR = ["Saturn","Jupiter","Moon","Venus","Mars","Mercury","Sun"];
-  const imgs = Object.fromEntries(GR.map(g => { const i = new Image(); i.src = GRAHA_ART(g); return [g, i]; }));
-  function wander() {
-    clearTimeout(tour);
-    if (tab !== 2 || !field) return;
-    const g = GR[Math.floor(Date.now() / 3800) % GR.length];
-    field.show(g, imgs[g]);
-    tour = setTimeout(wander, 3800);
-  }
-
   function sync() {
     [...pills.children].forEach((b, i) => b.classList.toggle("on", i === tab));
-    if (tab === 2) {
-      body.replaceChildren(skyCard);
-      if (!field) field = createSkyField(cv, { place, when:new Date(), zodiac:true });
-      setTimeout(() => { field.resize(); wander(); cv.focus({ preventScroll:true }); }, 0);
-    } else {
-      clearTimeout(tour);
-      body.replaceChildren(chartWrap);
-      paint();
-    }
+    body.replaceChildren(chartWrap);
+    paint();
   }
   TABS.forEach((name, i) => {
     const b = el("button", null, name); b.type = "button";
@@ -547,10 +512,76 @@ export function universePanel(host, sample, place) {
   }
 
   return {
-    start() { if (!started) { started = true; sync(); hint(); } else if (tab === 2) sync(); },
-    stop() { clearTimeout(tour); },
+    start() { if (!started) { started = true; sync(); hint(); } },
+    stop() {},
     /* scrolling on through this screen carries today's sky forward, a day at a time */
-    scrub(f) { if (tab !== 1) return; setDay(Math.max(0, (f - .15) / .85) * 120); }
+    scrub(f) { if (tab !== 1) return; setDay(Math.max(0, (f - .15) / .85) * 120); },
+    /* where each graha's picture is on screen right now — the next screen picks
+       them up from here and carries them into the real sky */
+    planetRects() {
+      const out = {};
+      for (const g of svg.querySelectorAll(".k-planet")) {
+        const name = g.dataset.graha || g.getAttribute("data-graha") || g.querySelector("image")?.getAttribute("aria-label");
+        if (!name) continue;
+        const r = (g.querySelector("image") || g).getBoundingClientRect();
+        if (r.width) out[name] = r;
+      }
+      return out;
+    }
+  };
+}
+
+/* ==========================================================================
+   3b — THE SKY ABOVE YOU
+   The real sky over the visitor's place, edge to edge: the twenty-seven
+   nakshatras, the zodiac belt, and the seven grahas where they stand this
+   minute. Drag or use the arrow keys; step outside for the app's own sky.
+   ========================================================================== */
+export function skyPanel(host, place) {
+  host.replaceChildren();
+  const wrap = el("div", "lv lv-sky");
+  const cv = document.createElement("canvas"); cv.tabIndex = 0;
+  cv.setAttribute("aria-label", "The sky over you now. Drag, or use the arrow keys, to look around.");
+  const bar = el("div", "sk-bar");
+  const where = el("p", "sk-where");
+  const step = el("button", "uv-step", "Step outside"); step.type = "button";
+  step.addEventListener("pointerenter", () => import("./sky-embed.js").then(m => m.preloadRealSky?.()), { once: true });
+  step.onclick = async () => {
+    const { openRealSky } = await import("./sky-embed.js");
+    openRealSky({ lat:place.lat, lon:place.lon, name:place.name, tz:place.tz });
+  };
+  bar.append(where, step);
+  const hint = el("p", "sk-hint", "Drag to look around · Zoom out to the Earth, scrub through the night and point your phone at the sky in the app");
+  wrap.append(cv, bar, hint);
+  host.append(wrap);
+
+  let field = null, started = false;
+  const t12 = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", hour12:true, timeZone:place.tz });
+  const ensure = () => {
+    if (field) return field;
+    field = createSkyField(cv, { place, when:new Date(), zodiac:true, all:true, fov:92, art:GRAHA_ART });
+    return field;
+  };
+  const paintWhere = () => { where.textContent = `${place.name} · ${t12(Date.now())} ${tzAbbr(place.tz)} · looking ${compass(field.camera.az)}`; };
+  const compass = az => ["north","north-east","east","south-east","south","south-west","west","north-west"][Math.round((((az % 360) + 360) % 360) / 45) % 8];
+  let tick = 0;
+  return {
+    start() {
+      ensure();
+      /* paint synchronously: the fly-in that follows needs the positions now */
+      field.resize(); field.frameAll(!started); paintWhere();
+      started = true;
+      clearInterval(tick); tick = setInterval(() => { field.setWhen(new Date()); paintWhere(); }, 30000);
+    },
+    stop() { clearInterval(tick); },
+    /* the screen's own coordinates for each graha, for the fly-in */
+    skyPoints() {
+      ensure(); const r = cv.getBoundingClientRect(); const out = {};
+      for (const g of ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"]) {
+        const p = field.screenPos(g); if (p) out[g] = { x:r.left + p.x, y:r.top + p.y, alt:p.alt };
+      }
+      return out;
+    }
   };
 }
 
@@ -604,40 +635,45 @@ export function askPanel(host, sample) {
   const chips = el("div", "gchips");
   answer.append(head, atext, chips);
   thread.append(bubble, answer);
-  wrap.append(moonWrap, thread, el("p", "lv-foot", "Playing on its own. Every answer is assembled from the chart, and names what it used."));
+  const dots = el("div", "gdots");
+  QS.forEach(() => dots.append(el("i")));
+  wrap.append(moonWrap, thread, dots, el("p", "lv-foot", "Keep scrolling: three questions, three answers, each assembled from the chart and naming what it used."));
   host.append(wrap);
 
-  const setState = s => { orb.className = "gmoon " + s; };
-  let i = 0, live = false, running = false;
+  const setState = s => { if (!orb.classList.contains(s)) orb.className = "gmoon " + s; };
+  const built = QS.map(() => null);
+  let shownQ = -1, shownA = -1;
 
-  async function loop() {
-    if (running) return; running = true;
-    while (live) {
-      const { q, build } = QS[i];
-      bubble.classList.remove("on"); answer.classList.remove("on");
-      setState("listening");
-      await wait(reduce ? 100 : 700);
-      if (!live) break;
-      bubble.textContent = q; bubble.classList.add("on");
-      await wait(reduce ? 100 : 600);
-      setState("thinking");
-      atext.textContent = "";
-      chips.replaceChildren();
-      await wait(reduce ? 150 : 1500);
-      if (!live) break;
-      const { text, chips: cs } = build();
-      setState("speaking");
-      atext.textContent = text;
-      chips.replaceChildren(...cs.map(c => el("span", "gchip", c)));
-      answer.classList.add("on");
-      await wait(reduce ? 400 : 2400);
-      setState("idle");
-      await wait(reduce ? 400 : 3400);
-      i = (i + 1) % QS.length;
+  /* The conversation is driven by the scroll, not a clock: each third of the way
+     through this screen is one exchange — the question lands, the Moon thinks,
+     the answer arrives — so nobody is carried past it before it has finished. */
+  function scrub(f) {
+    const n = QS.length;
+    const i = Math.min(n - 1, Math.floor(f * n)), k = f * n - i;
+    [...dots.children].forEach((d, j) => d.classList.toggle("on", j === i));
+    if (shownQ !== i) {
+      shownQ = i; shownA = -1;
+      bubble.textContent = QS[i].q;
+      atext.textContent = ""; chips.replaceChildren();
+      answer.classList.remove("on");
+      bubble.classList.remove("on");
+      requestAnimationFrame(() => bubble.classList.add("on"));
     }
-    running = false;
+    if (k < .12) setState("listening");
+    else if (k < .38) { setState("thinking"); if (shownA === i) { shownA = -1; answer.classList.remove("on"); } }
+    else {
+      if (shownA !== i) {
+        shownA = i;
+        const b = built[i] || (built[i] = QS[i].build());
+        atext.textContent = b.text;
+        chips.replaceChildren(...b.chips.map(c => el("span", "gchip", c)));
+        answer.classList.add("on");
+      }
+      setState(k < .7 ? "speaking" : "idle");
+    }
   }
-  return { start(){ if (!live) { live = true; loop(); } }, stop(){ live = false; } };
+  scrub(0);
+  return { start(){}, stop(){}, scrub };
 }
 
 /* ==========================================================================
@@ -677,12 +713,35 @@ export function muhurtaPanel(host, place) {
   const wrap = el("div", "lv lv-muh");
   const form = el("div", "mu-form");
 
-  /* the range: up to two months, because every two-minute step in it is scored */
+  /* Three steps, one at a time, each appearing when the last is answered:
+       1  the occasion — an icon and a word, nothing else
+       2  the range — a chip picks it; From and To then show, and can be edited
+       3  one button                                                          */
   const MAX_DAYS = 60;
-  const range = el("div", "mu-range");
+  const today = new Date();
+  let purpose = null, rangeSet = false;
+
+  const stepEl = (n, title) => { const s = el("div", "mu-step"); s.dataset.step = n;
+    const h = el("p", "mu-steph"); h.append(el("i", null, String(n)), document.createTextNode(title)); s.append(h); return s; };
+
+  const s1 = stepEl(1, "What are you beginning?");
+  const occ = el("div", "mu-occ"); occ.setAttribute("role", "radiogroup"); occ.setAttribute("aria-label", "Occasion");
+  for (const o of OCCASIONS) {
+    const b = el("button"); b.type = "button"; b.dataset.id = o.id;
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", "false");
+    b.append(icon(o.icon), el("span", null, o.label));
+    b.onclick = () => { purpose = o.id;
+      occ.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+      reveal(); };
+    occ.append(b);
+  }
+  s1.append(occ);
+
+  const s2 = stepEl(2, "When?");
+  const chips = el("div", "mu-chips"); chips.setAttribute("role", "radiogroup"); chips.setAttribute("aria-label", "Date range");
+  const range = el("div", "mu-range"); range.hidden = true;
   const mkDate = (label, v) => { const l = el("label", "mu-date"); l.append(el("span", null, label));
     const i = el("input"); i.type = "date"; i.value = v; l.append(i); range.append(l); return i; };
-  const today = new Date();
   const fromI = mkDate("From", isoDay(today));
   const toI = mkDate("To", isoDay(new Date(Date.now() + 14 * 864e5)));
   fromI.min = isoDay(today);
@@ -694,27 +753,45 @@ export function muhurtaPanel(host, place) {
     if (t > new Date(toI.max + "T00:00")) toI.value = toI.max;
   };
   fromI.addEventListener("change", clampRange); toI.addEventListener("change", clampRange); clampRange();
-
-  let purpose = "marriage";
-  const occ = el("div", "mu-occ"); occ.setAttribute("role", "radiogroup"); occ.setAttribute("aria-label", "Occasion");
-  for (const o of OCCASIONS) {
-    const b = el("button"); b.type = "button"; b.dataset.id = o.id;
-    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(o.id === purpose));
-    b.append(icon(o.icon), el("span", null, o.label));
-    b.onclick = () => { purpose = o.id;
-      occ.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", String(x === b))); };
-    occ.append(b);
+  const RANGES = [["Next 2 weeks", 14], ["Next month", 30], ["Next 2 months", 60], ["Pick dates", 0]];
+  for (const [label, days] of RANGES) {
+    const b = el("button", null, label); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", "false");
+    b.onclick = () => {
+      chips.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+      if (days) { fromI.value = isoDay(new Date()); toI.value = isoDay(new Date(Date.now() + days * 864e5)); clampRange(); }
+      rangeSet = true; range.hidden = false;
+      if (!days) fromI.focus({ preventScroll:true });
+      reveal();
+    };
+    chips.append(b);
   }
-  const go = el("button", "mu-go", "Find the best Muhurat"); go.type = "button";
-  form.append(range, occ, go);
+  s2.append(chips, range);
 
+  const s3 = el("div", "mu-step"); s3.dataset.step = 3;
+  const go = el("button", "mu-go"); go.type = "button";
+  go.append(el("span", null, "Find the best Muhurat"), el("i", "mu-spin"));
+  s3.append(go);
+
+  /* once computed the form folds to one line: what was asked, and a way back */
+  const summary = el("div", "mu-sum"); summary.hidden = true;
+  const sumText = el("span"), change = el("button", "mu-change", "Change"); change.type = "button";
+  summary.append(sumText, change);
+
+  form.append(s1, s2, s3);
   const stage = el("div", "mu-stage");
-  wrap.append(form, stage);
+  wrap.append(summary, form, stage);
   host.append(wrap);
+
+  function reveal() {
+    s2.classList.toggle("on", !!purpose);
+    s3.classList.toggle("on", !!purpose && rangeSet);
+  }
+  change.onclick = () => { summary.hidden = true; form.hidden = false; stage.replaceChildren(); form.classList.remove("gone"); };
 
   const tz = tzAbbr(place.tz);
   const t12 = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", hour12:true, timeZone:place.tz });
   const dayname = t => new Date(t).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", timeZone:place.tz });
+  const dshort = d => new Date(d + "T00:00").toLocaleDateString("en-GB", { day:"numeric", month:"short" });
 
   /* the computation takes milliseconds; the animation is there so the reading is
      seen being made — and the number it counts to is the true number scanned */
@@ -741,11 +818,20 @@ export function muhurtaPanel(host, place) {
 
   go.onclick = async () => {
     const from = new Date(fromI.value + "T00:00"), to = new Date(toI.value + "T23:59");
-    if (!(to > from)) return;
-    go.disabled = true;
+    if (!(to > from) || !purpose) return;
+    /* the press is seen: the button sinks and spins for a beat, then the form
+       folds to one line and the reading is made in the open */
+    go.classList.add("busy"); go.disabled = true;
+    await wait(reduce ? 0 : 520);
     const r = findMuhurta({ from, to, lat:place.lat, lon:place.lon, tzMinutes: offsetAt(from, place.tz), purpose, top:18 });
+    const occLabel = OCCASIONS.find(o => o.id === purpose).label;
+    sumText.textContent = `${occLabel} · ${dshort(fromI.value)} – ${dshort(toI.value)} · ${place.name}`;
+    summary.hidden = false;
+    form.classList.add("gone");
+    await wait(reduce ? 0 : 300);
+    form.hidden = true;
+    go.classList.remove("busy"); go.disabled = false;
     await computing(r.scanned, Math.round((to - from) / 864e5));
-    go.disabled = false;
 
     /* three options on three different days where the range allows — two
        back-to-back windows on one afternoon are one option, not two */

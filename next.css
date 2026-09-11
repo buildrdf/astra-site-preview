@@ -698,7 +698,9 @@ body.next{ background:var(--light); color:var(--ink-d) }
   border-bottom:1px dotted rgba(12,24,48,.16); padding-bottom:1.6% }
 .rd-index b{ font-weight:500; color:var(--ink-d) }
 .rd-chart{ width:74%; aspect-ratio:1; margin:3% auto 0 }
-.rd-chart svg{ width:100%; height:100% }
+.rd-chart svg{ width:100%; height:100%; overflow:visible }
+.rd-chart .k-line{ stroke:rgba(12,24,48,.38); stroke-width:1 }
+.rd-chart .k-sign,.rd-chart .k-asc{ fill:#8595AE }
 .rd-rows{ display:grid; gap:2.6%; font-size:9.5px; color:var(--dim-lo) }
 .rd-rows div{ display:flex; justify-content:space-between; align-items:center; gap:8px }
 .rd-rows b{ color:var(--ink-d); font-weight:600 }
@@ -753,37 +755,180 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .uv-scrub{ max-width:360px }
 .uv-chart .lv-today{ font-size:12px }
 .uv-chart.is-birth .lv-step,.uv-chart.is-birth .uv-scrub{ visibility:hidden }
-.uv-sky{ position:relative; width:100%; height:100%; border-radius:16px; overflow:hidden; background:#05070F }
-.uv-sky canvas{ width:100%; height:100%; display:block; touch-action:pan-y; cursor:grab }
-.uv-veil{ position:absolute; left:0; right:0; bottom:0; padding:48px 22px 22px; display:grid; gap:6px;
-  justify-items:center; text-align:center; background:linear-gradient(rgba(4,7,16,0), rgba(4,7,16,.9)); color:#EEF3FB;
-  pointer-events:none }
-.uv-veil b{ font-size:18px; font-weight:600; letter-spacing:-.015em }
-.uv-veil span{ font-size:12.5px; color:#9DB2D0 }
-.uv-step{ pointer-events:auto; margin-top:8px; height:40px; padding:0 22px; border-radius:999px; border:0; cursor:pointer;
-  background:#EEF3FB; color:#0B1226; font-size:14px; font-weight:600; transition:transform .25s var(--ease) }
+
+/* ---------- The sky above you: the whole stage, edge to edge ------------ */
+.lv-sky{ position:relative; display:block; padding:0; border-radius:18px; overflow:hidden; background:#05070F;
+  box-shadow:0 30px 60px -30px rgba(12,24,48,.5) }
+.lv-sky canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:pan-y; cursor:grab }
+.lv-sky canvas:active{ cursor:grabbing }
+.lv-sky canvas:focus-visible{ outline:2px solid var(--accent); outline-offset:-3px }
+.sk-bar{ position:absolute; left:0; right:0; top:0; padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; pointer-events:none; background:linear-gradient(rgba(4,7,16,.55), rgba(4,7,16,0)) }
+.sk-where{ margin:0; font-size:12.5px; font-weight:600; color:#EEF3FB; letter-spacing:-.005em; text-shadow:0 1px 8px rgba(0,0,0,.6) }
+.sk-hint{ position:absolute; left:0; right:0; bottom:0; margin:0; padding:36px 18px 14px; text-align:center; font-size:11.5px;
+  color:#9DB2D0; pointer-events:none; background:linear-gradient(rgba(4,7,16,0), rgba(4,7,16,.7)) }
+.uv-step{ pointer-events:auto; height:34px; padding:0 16px; border-radius:999px; border:0; cursor:pointer; flex:none;
+  background:#EEF3FB; color:#0B1226; font-size:13px; font-weight:600; transition:transform .25s var(--ease) }
 .uv-step:hover{ transform:scale(1.03) }
+/* the grahas in flight between the chart and the sky */
+.flight{ position:absolute; inset:0; pointer-events:none; z-index:20; overflow:visible }
+.flight img{ position:absolute; left:0; top:0; will-change:transform, opacity; filter:drop-shadow(0 6px 14px rgba(12,24,48,.45)) }
+@media (max-width:900px){ .sk-hint{ display:none } .sk-bar{ padding:10px 12px } .sk-where{ font-size:11px } }
+
+/* ---------- Ask Astra: three exchanges, marked --------------------------- */
+.gdots{ display:flex; gap:6px; justify-content:center }
+.gdots i{ width:6px; height:6px; border-radius:50%; background:rgba(12,24,48,.14); transition:background .3s, transform .3s }
+.gdots i.on{ background:var(--brass); transform:scale(1.25) }
+
+/* ---------- Find Muhurat, v3: three steps, one at a time ----------------- */
+.mu-form{ transition:opacity .35s var(--ease), transform .35s var(--ease) }
+.mu-form.gone{ opacity:0; transform:translateY(-8px) }
+.mu-step{ display:grid; gap:10px; justify-items:center; width:100% }
+.mu-step[data-step="2"],.mu-step[data-step="3"]{ opacity:0; transform:translateY(8px); max-height:0; overflow:hidden;
+  transition:opacity .45s var(--ease), transform .45s var(--ease), max-height .45s var(--ease) }
+.mu-step.on{ opacity:1; transform:none; max-height:220px; overflow:visible }
+.mu-steph{ margin:0; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--ink-d) }
+.mu-steph i{ width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:10.5px;
+  background:var(--ink-d); color:#fff }
+.mu-occ{ grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; max-width:560px }
+.mu-occ button{ padding:11px 4px 9px; gap:6px; font-size:11.5px }
+.mu-chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center }
+.mu-chips button{ height:32px; padding:0 14px; border-radius:999px; cursor:pointer; font-size:13px; font-weight:500;
+  background:var(--light-2); border:1px solid rgba(12,24,48,.1); color:var(--ink-d); transition:background .25s, color .25s }
+.mu-chips button[aria-checked="true"]{ background:var(--ink-d); color:#fff; border-color:transparent }
+.mu-range{ gap:14px }
+.mu-go{ position:relative; display:inline-flex; align-items:center; gap:10px; transition:transform .2s var(--ease), opacity .2s }
+.mu-go:active{ transform:scale(.97) }
+.mu-go.busy{ transform:scale(.97); opacity:.9; cursor:default }
+.mu-go:disabled{ opacity:.9 }
+.mu-spin{ width:0; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; opacity:0;
+  transition:width .2s, opacity .2s; animation:mu-spin .8s linear infinite }
+.mu-go.busy .mu-spin{ width:14px; opacity:1 }
+.mu-sum{ display:flex; align-items:center; gap:12px; font-size:13.5px; font-weight:600; color:var(--ink-d) }
+.mu-change{ background:none; border:0; padding:0; cursor:pointer; color:var(--brass); font-size:12.5px; font-weight:600 }
+@media (max-width:900px){ .mu-occ{ grid-template-columns:repeat(3,minmax(0,1fr)) } .mu-step.on{ max-height:300px } }
+
+/* ---------- the free Kundali ------------------------------------------- */
+.free-act{ background:var(--light-2); color:var(--ink-d); padding:clamp(80px,11vh,150px) 0 }
+.free-act h2{ color:var(--ink-d) } .free-act .lede{ color:var(--dim-lo) }
+.free-act .eyebrow{ color:var(--brass) } .free-act .eyebrow::before{ background:var(--brass) }
+.free-act .act-head{ display:grid; justify-items:center; gap:10px; text-align:center; margin-bottom:clamp(30px,5vh,52px) }
+.free-grid{ display:grid; grid-template-columns:400px minmax(0,1fr); gap:clamp(28px,5vw,72px); align-items:start;
+  width:min(1240px,100% - 2*var(--gutter)); margin-inline:auto }
+.fr-form{ display:grid; gap:14px }
+.fr-field{ display:grid; gap:7px; position:relative }
+.fr-field label{ font-size:13px; color:var(--dim-lo) } .fr-field label span{ color:#8595AE }
+.fr-field input{ height:48px; border-radius:12px; border:1px solid rgba(12,24,48,.16); background:#fff; padding:0 14px;
+  font:inherit; font-size:16px; color:var(--ink-d); color-scheme:light }
+.fr-field input:focus{ outline:none; border-color:rgba(12,24,48,.5) }
+.fr-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+.fr-suggest{ position:absolute; top:100%; left:0; right:0; z-index:6; background:#fff; border:1px solid rgba(12,24,48,.14);
+  border-radius:12px; overflow:hidden; box-shadow:0 18px 50px rgba(12,24,48,.14) }
+.fr-suggest button{ display:block; width:100%; text-align:left; background:none; border:0; padding:11px 15px; font-size:14.5px; cursor:pointer; color:var(--ink-d) }
+.fr-suggest button:hover,.fr-suggest button:focus{ background:var(--light-2) }
+.fr-suggest small{ color:#8595AE; margin-left:6px }
+.fr-promise{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--dim-lo) }
+.fr-promise span{ display:flex; gap:7px; align-items:center }
+.fr-promise span::before{ content:""; width:12px; height:12px; border-radius:50%; border:1px solid var(--dim-lo); flex:none }
+.free-act .btn{ background:var(--ink-d); color:#fff; justify-self:start }
+.fr-status{ margin:0; font-size:13px; color:var(--dim-lo); min-height:1.4em }
+.fr-result{ display:grid; gap:18px }
+.fr-empty{ border:1px dashed rgba(12,24,48,.2); border-radius:22px; min-height:340px; display:grid; place-items:center;
+  align-content:center; gap:8px; text-align:center; padding:26px; color:var(--dim-lo); background:#fff }
+.fr-empty svg{ width:170px; height:170px; opacity:.4 } .fr-empty p{ margin:0 } .fr-empty small{ font-size:12px; color:#8595AE }
+.fr-chart{ width:min(520px,100%); aspect-ratio:1; margin-inline:auto } .fr-chart svg{ width:100%; height:100%; overflow:visible }
+.fr-line{ margin:0; font-size:12.5px; color:#8595AE; text-align:center }
+.fr-facts{ display:grid; border-top:1px solid rgba(12,24,48,.1) }
+.fr-facts div{ display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid rgba(12,24,48,.1); font-size:14.5px }
+.fr-facts span{ color:var(--dim-lo) } .fr-facts b{ font-weight:500; text-align:right; color:var(--ink-d) }
+.fr-plain{ margin:0; font-size:15.5px; line-height:1.5; color:var(--ink-d); min-height:3em; max-width:50ch }
+.fr-list{ display:grid; gap:7px }
+.fr-pl{ display:grid; grid-template-columns:34px 1fr auto; gap:13px; align-items:center; padding:10px 13px; border-radius:14px;
+  border:1px solid rgba(12,24,48,.1); background:#fff; text-align:left; cursor:pointer; color:var(--ink-d); transition:background .3s, border-color .3s }
+.fr-pl:hover,.fr-pl.on{ background:#ECECF0 }
+.fr-pl img{ width:30px; height:30px } .fr-pl b{ font-weight:500; font-size:14.5px; display:block }
+.fr-pl span{ font-size:12.5px; color:var(--dim-lo); display:block } .fr-pl .rr{ display:inline; margin-left:5px; font-size:10.5px; color:var(--ink-d) }
+.fr-pl .h{ font-size:11px; color:#8595AE }
+.fr-email{ display:grid; gap:10px; padding:20px; border-radius:18px; border:1px solid rgba(12,24,48,.1); background:#fff }
+.fr-email b{ font-size:15px; color:var(--ink-d) } .fr-email p{ margin:0; font-size:13px; color:var(--dim-lo) }
+.fr-email .send{ display:grid; grid-template-columns:1fr auto; gap:10px }
+.fr-email input{ height:46px; border-radius:12px; border:1px solid rgba(12,24,48,.16); background:var(--light-2); padding:0 14px; font:inherit; font-size:16px; color:var(--ink-d) }
+.fr-tag{ font-size:11.5px; color:#8595AE; border:1px dashed rgba(12,24,48,.2); border-radius:999px; padding:5px 11px; justify-self:start }
+@media (max-width:900px){ .free-grid{ grid-template-columns:1fr } .fr-email .send{ grid-template-columns:1fr } }
+
+/* ---------- the bento's lunar month --------------------------------------- */
+.bt.w4{ grid-column:1 / -1; align-content:start; gap:10px; min-height:0 }
+.bt .moons{ display:flex; gap:8px; align-items:flex-end; overflow-x:auto; padding:6px 2px 4px; scrollbar-width:none; width:100% }
+.bt .moons::-webkit-scrollbar{ display:none }
+.bt .moons figure{ margin:0; display:grid; gap:6px; justify-items:center; flex:0 0 54px; min-width:54px; width:54px }
+.bt .moons img{ width:42px; height:42px; opacity:.45; transition:opacity .4s var(--ease), transform .4s var(--ease) }
+.bt .moons figure.on img{ opacity:1; transform:scale(1.22); filter:drop-shadow(0 0 12px rgba(200,215,255,.5)) }
+.bt .moons figcaption{ font-size:10.5px; color:var(--sky-dim); text-align:center; line-height:1.25 }
+.bt .moons figure.on figcaption{ color:var(--sky-paper); font-weight:600 }
+@media (max-width:900px){ .bt.w4{ grid-column:1 / -1 } .bt .moons figure{ width:46px } .bt .moons img{ width:36px; height:36px } }
+
+/* An element the page has hidden stays hidden. .menu and .nav-pop set display
+   in CSS, which beats the browser's own [hidden] rule — so the phone's menu,
+   at full-screen size and zero opacity, sat over the whole page and took every
+   click. */
+[hidden]{ display:none !important }
 
 /* ==========================================================================
-   The books open where they stand
+   The books open where they stand — and their pages bend as they turn.
+   Each sheet is three nested slices (src/book.js); the whole spread slides
+   right by half a cover so it opens around the place the cover stood.
    ========================================================================== */
 .book{ position:relative }
 .book.open{ z-index:6 }
-.book .cover{ overflow:visible; box-shadow:none; background:none; transform:none; perspective:1700px; border-radius:0 }
+.book .cover{ overflow:visible; box-shadow:none; background:none; transform:none; border-radius:0; perspective:none }
 .book .cover:hover{ transform:none; box-shadow:none }
-.bk{ position:relative; width:100%; aspect-ratio:2/3; transform-style:preserve-3d }
-.bk-cover,.bk-page{ position:absolute; inset:0; border-radius:3px 9px 9px 3px; transform-origin:left center; backface-visibility:hidden }
-.bk-cover{ z-index:3; overflow:hidden; box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12);
-  transition:transform 1.25s cubic-bezier(.2,.75,.25,1), box-shadow 1.25s cubic-bezier(.2,.75,.25,1) }
-.bk-cover img{ width:100%; height:100%; object-fit:cover; display:block }
-.bk-page{ background:#FBFAF6; padding:9% 10%; display:grid; align-content:start; gap:5%; overflow:hidden;
-  box-shadow:0 18px 38px -20px rgba(12,24,48,.38), inset 12px 0 18px -14px rgba(12,24,48,.22);
-  transition:transform 1.1s cubic-bezier(.2,.75,.25,1) }
-.bk-page.p1{ z-index:2 } .bk-page.p2{ z-index:1 }
-.book.open .bk-cover{ transform:rotateY(-122deg); box-shadow:-14px 16px 40px -22px rgba(12,24,48,.28) }
-.book.open.turn .bk-page.p1{ transform:rotateY(-116deg) }
+.bk-shell{ position:relative; width:100%; aspect-ratio:2/3; perspective:2400px; perspective-origin:50% 50% }
+.bk{ position:relative; width:100%; height:100%; transform-style:preserve-3d;
+  transition:transform .9s cubic-bezier(.2,.75,.25,1) }
+.book.open .bk{ transform:translateX(50%) }
+.bk-base{ position:absolute; inset:0; background:#FBFAF6; border-radius:3px 9px 9px 3px;
+  box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12) }
+.bk-sheet{ position:absolute; inset:0; transform-style:preserve-3d }
+/* a slice is a third of the sheet; a nested slice is the same width as its
+   parent (percentages resolve against the parent slice, not the sheet) and
+   hangs off the parent's right edge */
+.bk-slice{ position:absolute; top:0; bottom:0; left:0; width:calc(100% / 3 + .5px); transform-origin:left center;
+  transform-style:preserve-3d }
+.bk-slice .bk-slice{ width:100%; left:calc(100% - .5px) }
+.bk-face{ position:absolute; inset:0; overflow:hidden; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  background:#FBFAF6 }
+.bk-face.back{ transform:rotateY(180deg) }
+.bk-face.is-cover{ background:#0B1226 }
+/* the closed book casts a shadow; the base carries it so the turning cover never drags one */
+.bk-shell::before{ content:""; position:absolute; inset:0; border-radius:3px 9px 9px 3px;
+  box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12); transition:opacity .5s }
+.book.open .bk-shell::before{ opacity:0 }
+.bk-pg{ position:absolute; top:0; bottom:0; width:300% }
+.bk-pg img{ width:100%; height:100%; object-fit:cover; display:block }
+.bk-shade{ position:absolute; top:0; bottom:0; width:300%; opacity:0; pointer-events:none;
+  background:linear-gradient(90deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%) }
+.bk-face.back .bk-shade{ background:linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 55%) }
+/* the edge of each sheet: the cover's rounded spine-side, the paper's gutter */
+.bk-sheet > .bk-slice > .bk-face{ border-radius:3px 0 0 3px }
+.bk-sheet > .bk-slice > .bk-face.back{ border-radius:0 3px 3px 0; box-shadow:inset -14px 0 18px -14px rgba(12,24,48,.22) }
+.bk-sheet > .bk-slice > .bk-face.front:not(.is-cover){ box-shadow:inset 14px 0 18px -14px rgba(12,24,48,.22) }
+.bk-sheet > .bk-slice .bk-slice .bk-slice > .bk-face{ border-radius:0 9px 9px 0 }
+.bk-sheet > .bk-slice .bk-slice .bk-slice > .bk-face.back{ border-radius:9px 0 0 9px }
+.rd-page{ height:100%; padding:9% 10%; display:grid; align-content:start; gap:5%; box-sizing:border-box }
+.rd-tp{ height:100%; display:grid; align-content:center; justify-items:center; text-align:center; gap:6%; padding:12%; box-sizing:border-box }
+.rd-tp b{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--brass) }
+.rd-tp p{ margin:0; font-size:17px; font-weight:600; letter-spacing:-.02em; color:var(--ink-d); line-height:1.2 }
+.rd-tp span{ font-size:9.5px; color:var(--dim-lo) }
+.rd-last{ height:100%; display:grid; align-content:center; justify-items:center; text-align:center; gap:10px; padding:14%; box-sizing:border-box }
+.rd-last b{ font-size:15px; font-weight:600; color:var(--ink-d); letter-spacing:-.015em }
+.rd-last span{ font-size:10.5px; color:var(--dim-lo); line-height:1.45 }
+.rd-last .btn{ font-size:12px; padding:8px 14px; background:var(--ink-d); color:#fff }
+.bk-cap{ margin:0; min-height:1.4em; font-size:12px; color:#8595AE; transition:opacity .3s }
+.bk-cap:empty{ opacity:0 }
+.book .open-hint{ z-index:9 }
 .book.open .open-hint{ opacity:0 !important }
-@media (prefers-reduced-motion:reduce){ .bk-cover,.bk-page{ transition:none } }
+.book .cover:focus-visible{ outline:2px solid var(--brass); outline-offset:6px }
+@media (max-width:900px){ .book.open .bk{ transform:translateX(0) } .shelf .book.open{ flex-basis:96% } }
 
 /* ==========================================================================
    The footer — Apple's pattern: quiet grey, small type, everything findable

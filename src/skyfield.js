@@ -38,7 +38,12 @@ export function createSkyField(canvas, opts = {}) {
   let when = opts.when ?? new Date();
   let target = null;                       /* the graha being shown, if any */
   let cam = { az: 180, alt: 24 }, aim = { az: 180, alt: 24 };
-  const fov = 74;                          /* degrees across the taller axis */
+  let fov = opts.fov ?? 74;                /* degrees across the taller axis */
+  /* the seven that can be seen, drawn wherever they stand, when asked for all of them */
+  const ALL = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+  const allArt = {};
+  if (opts.all) for (const g of ALL) { const im = new Image(); im.src = opts.art ? opts.art(g) : `assets/graha/${g.toLowerCase()}.png`;
+    im.addEventListener("load", () => { dirty = true; kick(); }); allArt[g] = im; }
   let raf = 0, dirty = true;
 
   /* the rashi plates, loaded only if this field is asked to show the zodiac */
@@ -139,9 +144,9 @@ export function createSkyField(canvas, opts = {}) {
         if (img?.complete && img.naturalWidth) {
           /* size by the HEIGHT of the belt, not the frame's short side: a tall
              plate sized off its width grows until one sign fills the sky */
-          const h = Math.min(H, W) * .34, w = h * (img.naturalWidth / img.naturalHeight);
+          const h = Math.min(H, W) * (opts.all ? .27 : .34), w = h * (img.naturalWidth / img.naturalHeight);
           ctx.save();
-          ctx.globalAlpha = alt < -6 ? .10 : .24;
+          ctx.globalAlpha = alt < -6 ? .10 : opts.all ? .19 : .24;
           ctx.drawImage(img, p[0] - w / 2, p[1] - h / 2, w, h);
           ctx.restore();
         }
@@ -182,6 +187,22 @@ export function createSkyField(canvas, opts = {}) {
         ctx.fillStyle = "rgba(255,255,255,.3)";
         ctx.fillText(ast.nak, y[0], y[1] - 11);
       }
+    }
+
+    /* every graha, at its real place — the one under discussion drawn larger below */
+    if (opts.all) for (const g of ALL) {
+      if (target && target.graha === g) continue;
+      const { alt, az } = altAz(g, when, place.lat, place.lon);
+      const p = project(az, alt);
+      if (!p) continue;
+      const img = allArt[g], s = g === "Sun" || g === "Moon" ? 40 : g === "Jupiter" || g === "Saturn" ? 36 : 30;
+      ctx.save();
+      ctx.globalAlpha = alt < 0 ? .28 : 1;
+      if (img?.complete && img.naturalWidth) ctx.drawImage(img, p[0] - s / 2, p[1] - s / 2, s, s);
+      ctx.font = "600 11.5px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.82)"; ctx.textAlign = "center";
+      ctx.fillText(g, p[0], p[1] + s / 2 + 15);
+      ctx.restore();
     }
 
     /* the graha under discussion */
@@ -285,8 +306,36 @@ export function createSkyField(canvas, opts = {}) {
     return best.graha;
   }
 
+  /* turn the camera so as many of the seven as possible are in the frame at once:
+     the circular mean of the azimuths of those above the horizon, at a modest
+     elevation, with the field opened wide */
+  function frameAll(immediate = false) {
+    let sx = 0, sy = 0, sa = 0, n = 0;
+    for (const g of ALL) {
+      const { alt, az } = altAz(g, when, place.lat, place.lon);
+      if (alt < -4) continue;
+      const w = 1 + Math.max(0, alt) / 60;
+      sx += Math.cos(az * D) * w; sy += Math.sin(az * D) * w; sa += alt * w; n += w;
+    }
+    if (n) { aim.az = norm360(Math.atan2(sy, sx) / D); aim.alt = Math.max(10, Math.min(48, sa / n + 4)); }
+    else { aim.az = 180; aim.alt = 24; }
+    target = null;
+    if (immediate || reduce) { cam.az = aim.az; cam.alt = aim.alt; }
+    dirty = true; kick();
+  }
+
+  /* where a graha is on this canvas right now, in CSS pixels — for anything that
+     wants to fly a picture of it into place */
+  function screenPos(graha) {
+    const { alt, az } = altAz(graha, when, place.lat, place.lon);
+    const p = project(az, alt);
+    return p ? { x: p[0], y: p[1], alt, az } : null;
+  }
+
   return {
-    show, highest,
+    show, highest, frameAll, screenPos,
+    setFov(f) { fov = f; dirty = true; kick(); },
+    get camera() { return { ...aim }; },
     /* resize() clears the backing store, and the repaint it schedules only
        happens on the next animation frame — which never arrives while the tab
        is in the background. Painting once, synchronously, means the sky is

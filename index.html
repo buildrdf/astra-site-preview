@@ -4,297 +4,255 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#080F20">
 <title>Astra</title>
-<meta name="description" content="A living Vedic birth chart for iPhone and Android. See the sky you were born under, touch every planet, and find it again tonight.">
+<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that shows its reasoning.">
 <link rel="icon" href="assets/icon.png">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="next.css">
 <script>document.documentElement.className = "js"</script>
 </head>
-<body>
+<body class="next">
+
+<div class="sky-ground" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
 <header class="nav" id="nav">
   <div class="shell">
     <a class="brand" href="#top">Astra</a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#chart">Chart</a><a href="#sky">Sky</a><a href="#day">Your day</a><a href="#periods">Periods</a><a href="#reports">Reports</a>
+      <a href="#tour">The app</a><a href="#more">Everything else</a><a href="#reports">Reports</a><a href="#free">Free Kundali</a>
     </nav>
-    <a class="cta" href="#waitlist">Join the waitlist</a>
+    <div class="nav-do">
+      <button class="nav-signin" type="button" data-pop="signin" aria-haspopup="dialog">Sign in</button>
+      <a class="cta" href="#free">Free Kundali</a>
+      <button class="nav-get" type="button" data-pop="get" aria-haspopup="dialog" aria-label="Download the app for iPhone or Android">
+        <svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
+        <svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg>
+        <span>Download</span>
+      </button>
+      <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu"><i></i><i></i></button>
+    </div>
   </div>
+  <div class="nav-pop" id="navPop" role="dialog" aria-label="Get Astra" hidden></div>
 </header>
+
+<!-- the phone's menu — Apple's pattern: a full-screen sheet of big links -->
+<div class="menu" id="menu" hidden>
+  <nav class="menu-links" aria-label="Menu">
+    <a href="#tour">The app</a>
+    <a href="#more">Everything else</a>
+    <a href="#reports">Reports</a>
+    <a href="#free">Free Kundali</a>
+  </nav>
+  <div class="menu-do">
+    <p class="menu-soon">Coming to iPhone and Android</p>
+    <div class="store-row">
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>Soon on the</small>App Store</span></span>
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg><span><small>Soon on</small>Google Play</span></span>
+    </div>
+    <button class="menu-signin" type="button" data-pop="signin">Sign in</button>
+  </div>
+</div>
 
 <main id="top">
 
-<!-- ============ ACT 1 + 2 — orbit, then the chart ==================== -->
-<section class="stage-wrap" id="stage" aria-labelledby="h1">
-  <div class="stage">
+<!-- ============ 1 — the sky you were born under ====================== -->
+<section class="hero" id="hero" aria-labelledby="h1">
+  <div class="hero-view">
     <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
-    <div class="earth" aria-hidden="true"></div>
-    <svg class="orbits" aria-hidden="true" preserveAspectRatio="none"></svg>
-    <div class="stage-chart" aria-hidden="true"><svg id="stageChart"></svg></div>
-    <div class="bodies" aria-hidden="true"></div>
+    <svg class="orbits" id="orbits" aria-hidden="true"></svg>
+    <div class="earth" id="earth" aria-hidden="true"></div>
+    <div class="hero-chart" aria-hidden="true"><svg id="heroChart"></svg></div>
+    <div class="bodies" id="heroBodies" aria-hidden="true"></div>
 
-    <div class="stage-copy top">
+    <div class="hero-say">
       <div class="beat" data-on="1">
-        <p class="eyebrow">Vedic astrology, rebuilt</p>
-        <h1 id="h1">You were forged<br>from stars.</h1>
-        <p class="lede">They still hold your secrets.</p>
+        <p class="eyebrow">Vedic astrology · iPhone and Android</p>
+        <h1 id="h1">The sky remembers.</h1>
+        <p class="lede">You were born under it. It has not repeated since.</p>
       </div>
       <div class="beat" data-on="0">
-        <h2>Then they took<br>their places.</h2>
-        <p class="lede">Nine grahas, exactly where they stood the minute you were born.</p>
+        <h2>Find where they stood.</h2>
+        <p class="lede">Nine grahas. One minute. One place on Earth.</p>
       </div>
       <div class="beat" data-on="0">
-        <h2>This is your sky,<br>held still.</h2>
-        <p class="lede">Twelve houses. One moment. Yours.</p>
+        <h2>This is your Kundali.</h2>
+        <p class="lede">A whole sky, held still.</p>
       </div>
     </div>
 
-    <div class="cue" aria-hidden="true"><i></i>Scroll</div>
+    <div class="hero-foot">
+      <div class="hero-do">
+        <a class="btn" href="#free">Create my free Kundali</a>
+        <a class="btn line" href="#tour">See the app</a>
+      </div>
+    </div>
+    <div class="cue" id="cue" aria-hidden="true"><i></i>Scroll</div>
   </div>
 </section>
 
-<!-- ============ ACT 3 — then and now ================================= -->
-<section class="act act-light chart-act" id="chart" aria-labelledby="h-chart">
+<!-- ============ 2 — the app walkthrough ============================== -->
+<section class="tour" id="tour" aria-labelledby="tourHead">
+  <div class="tour-view">
+    <div class="tour-say">
+      <p class="eyebrow" id="tourEyebrow">What Astra does</p>
+      <h2 id="tourHead">&nbsp;</h2>
+      <p id="tourLine">&nbsp;</p>
+    </div>
+    <div class="tour-grid">
+      <div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
+      <div class="prod"><div class="panel" id="panel"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 — everything the walkthrough had no room for ======== -->
+<section class="act bento-act" id="more" aria-labelledby="h-more">
   <div class="wide">
     <div class="act-head">
-      <p class="eyebrow" data-in>Birth and today</p>
-      <h2 id="h-chart" data-in>The sky moved on.<br>Yours did not.</h2>
-      <p class="lede" data-in>Your birth chart is fixed. Today's sky travels across it. Switch between them, or take the years in your hand.</p>
+      <p class="eyebrow" data-in>Everything else</p>
+      <h2 id="h-more" data-in>And a great deal more.</h2>
+      <p class="lede" data-in>All of it computed. None of it guessed.</p>
     </div>
-    <div class="panel">
-      <div class="chart-hold" data-in><svg id="thenNow" role="img" aria-label="A North Indian birth chart with the nine grahas placed by our engine"></svg></div>
-      <div class="chart-side" data-in>
-        <div class="seg" role="tablist" aria-label="Which sky">
-          <span class="thumb" id="segThumb" aria-hidden="true"></span>
-          <button role="tab" aria-selected="true" id="tabBirth">Birth</button>
-          <button role="tab" aria-selected="false" id="tabNow">Today</button>
-        </div>
-        <div class="readout"><b id="scrubYear">—</b><span id="scrubSub">&nbsp;</span></div>
-        <div class="scrub">
-          <label class="sr" for="scrubber">Move through the years</label>
-          <input type="range" id="scrubber" min="0" max="1000" value="0">
-          <div class="ticks"><span id="tickA"></span><span id="tickB"></span></div>
-        </div>
-        <div class="facts" id="chartFacts"></div>
-      </div>
-    </div>
+    <div class="bento" id="bento"></div>
   </div>
 </section>
 
-<!-- ============ ACT 4 — touch ======================================== -->
-<section class="act act-light touch-act" id="touch" aria-labelledby="h-touch">
-  <div class="wide">
-    <div class="act-head">
-      <p class="eyebrow" data-in>Direct</p>
-      <h2 id="h-touch" data-in>Touch one.</h2>
-      <p class="lede" data-in>Every graha carries a meaning, a house and a reason. Reach for it and the chart answers before the words do.</p>
-    </div>
-    <div class="panel">
-      <div class="chart-hold" data-in><svg id="touchChart" role="group" aria-label="Interactive chart. Each planet is a button."></svg></div>
-      <div class="plate" data-in>
-        <span class="hintline" id="touchHint"><i></i>Tap a planet</span>
-        <div class="who"><img src="assets/graha/saturn.png" alt="" id="plateArt"><div><b id="plateName">Saturn</b><span id="plateWhere">12th house · Cancer</span></div></div>
-        <p id="plateText">Saturn is traditionally read as discipline, patience and structure built over time.</p>
-        <p class="tech" id="plateTech"></p>
-        <button class="btn line" id="toSky">See it in tonight's sky</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ACT 5 — tonight's sky ================================ -->
-<section class="sky-act" id="sky" aria-labelledby="h-sky">
-  <canvas id="skyCanvas" tabindex="0" aria-label="Tonight's sky. Drag or use the arrow keys to look around."></canvas>
-  <div class="sky-top">
-    <h2 id="h-sky" data-in>Now look up.</h2>
-    <p class="lede" data-in id="skyLede">The twenty-seven nakshatras, standing over you right now.</p>
-  </div>
-  <div class="sky-ui">
-    <p class="sky-where" id="skyWhere">&nbsp;</p>
-    <div class="row" id="skyPicks"></div>
-    <p class="fine">Drag to turn. Arrow keys work too.</p>
-  </div>
-</section>
-
-<!-- ============ ACT 6 — rarity (light) ============================== -->
-<section class="act act-light" id="rare" aria-labelledby="h-rare">
-  <div class="shell" style="text-align:center;display:grid;gap:20px;justify-items:center">
-    <p class="eyebrow" data-in>Yours alone</p>
-    <h2 id="h-rare" data-in>Your horoscope is not<br>one of twelve.</h2>
-    <p class="lede" data-in>Sun signs sort eight billion people into a dozen boxes. A real chart places nine moving bodies against twenty-seven divisions of sky, at the minute and the place you arrived. We asked our own engine how often that repeats.</p>
-    <div class="rare-num" data-in id="rareNum">0</div>
-    <p class="lede" data-in style="max-width:40ch">other days in ten thousand years put all nine grahas back in the same nakshatras.</p>
-  </div>
-  <div class="wide">
-    <div class="rare-grid" data-in>
-      <div><b id="rareDays">—</b><span>days actually computed, one by one</span></div>
-      <div><b id="rareWindow">—</b><span>years searched, either side of the moment</span></div>
-      <div><b id="rareHits">—</b><span>of them matched</span></div>
-    </div>
-    <p class="fine" data-in style="margin-top:18px;text-align:center">Measured, not asserted. The scan runs against the same engine that casts your chart, every time this page is built.</p>
-  </div>
-</section>
-
-<!-- ============ ACT 7 — your day (grey) ============================= -->
-<section class="act act-grey" id="day" aria-labelledby="h-day">
-  <div class="wide">
-    <div class="act-head">
-      <p class="eyebrow" data-in>Today</p>
-      <h2 id="h-day" data-in>The day has a shape.</h2>
-      <p class="lede" data-in>Not a paragraph of flattery. The hours worth using, the hours worth holding, and where the Moon actually is.</p>
-    </div>
-    <div class="day-grid">
-      <div class="tile full" data-in>
-        <p class="eyebrow">The day's hours</p>
-        <h3 id="dayDate">Today</h3>
-        <div class="arc" id="dayArc"></div>
-        <div class="arc-scale" id="dayScale"></div>
-        <div class="arc-keys" id="dayKeys"></div>
-        <p id="dayNote">Computed from today's sunrise and sunset where you are.</p>
-      </div>
-      <div class="tile" data-in>
-        <p class="eyebrow">Ruled by</p>
-        <div class="big" id="varaLord">—</div>
-        <p id="varaLine">The weekday's traditional ruler.</p>
-      </div>
-      <div class="tile" data-in>
-        <p class="eyebrow">Traditionally favoured</p>
-        <div class="big" id="varaColour">—</div>
-        <p id="varaNum">—</p>
-      </div>
-      <div class="tile" data-in>
-        <p class="eyebrow">The Moon</p>
-        <div class="big" id="moonPhase">—</div>
-        <p id="moonLine">—</p>
-      </div>
-      <div class="tile full" data-in>
-        <p class="eyebrow">The lunar month</p>
-        <div class="moons" id="moonStrip"></div>
-      </div>
-      <div class="tile full" data-in>
-        <p class="eyebrow">Traditionally associated with this weekday</p>
-        <div class="dodont">
-          <div><h3 style="margin-bottom:10px">Favoured</h3><ul id="dayDo"></ul></div>
-          <div><h3 style="margin-bottom:10px">Held back</h3><ul class="no" id="dayDont"></ul></div>
-        </div>
-        <p class="fine" style="margin-top:14px">Traditional associations within Vedic practice. Astra never tells you what will happen.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ACT 8 — the long periods ============================ -->
-<section class="act act-light" id="periods" aria-labelledby="h-per">
-  <div class="wide">
-    <div class="act-head">
-      <p class="eyebrow" data-in>Mahadasha</p>
-      <h2 id="h-per" data-in>Your life arrives<br>in chapters.</h2>
-      <p class="lede" data-in>The Vimshottari cycle hands your years to one graha at a time. A hundred and twenty years, nine rulers, computed from the Moon's exact place at birth.</p>
-    </div>
-    <div style="display:grid;gap:16px" data-in>
-      <div class="readout"><b id="perLord">—</b><span id="perSpan">&nbsp;</span></div>
-      <div class="river" id="river"><div class="cursor" id="perCursor"></div></div>
-      <div class="ticks" id="perTicks"></div>
-      <label class="sr" for="perRange">Move through the periods</label>
-      <input type="range" id="perRange" min="0" max="1000" value="20" class="sr">
-    </div>
-  </div>
-</section>
-
-<!-- ============ ACT 9 — reports (grey) ============================== -->
-<section class="act act-grey" id="reports" aria-labelledby="h-rep">
+<!-- ============ 4 — three reports ==================================== -->
+<section class="act shelf-act" id="reports" aria-labelledby="h-rep">
   <div class="wide">
     <div class="act-head">
       <p class="eyebrow" data-in>Reports</p>
       <h2 id="h-rep" data-in>Something to keep.</h2>
-      <p class="lede" data-in>Three readings, each computed by the engine and written in plain language. The first is free and always will be.</p>
+      <p class="lede" data-in>Open a cover. Turn the pages. Every one is computed.</p>
+      <div class="head-actions" data-in>
+        <a class="btn" href="#free">Get my free Kundali</a>
+        <span class="btn line" aria-disabled="true">Download the app · Soon</span>
+      </div>
     </div>
-    <div class="reports">
-      <article class="report" data-in>
-        <div class="cover"><img src="assets/covers/kundali-free.png" alt="Cover of the Vedic Kundali report"></div>
-        <p class="eyebrow">Free</p>
-        <h3>Kundali Report</h3>
-        <p>Your chart, your nine placements, your house lords and the full period ladder. Sixteen pages.</p>
+
+    <div class="shelf" id="shelf">
+      <article class="book" data-in data-report="essential">
+        <button class="cover" type="button" aria-label="Open the Essential Vedic Kundali and turn its pages">
+          <img src="assets/covers/essential.webp" alt="Cover of the Essential Vedic Kundali">
+          <span class="open-hint">Open it</span>
+        </button>
+        <h3>Essential Vedic Kundali</h3>
+        <p>Your birth chart, planetary placements, houses and their Vedic significance.</p>
         <div class="price">Free <span>· no sign-up, no card</span></div>
         <a class="btn" href="#free">Get mine</a>
       </article>
-      <article class="report" data-in>
-        <div class="cover"><img src="assets/covers/kundali-pro.png" alt="Cover of the Vedic Kundali Pro report"></div>
-        <p class="eyebrow">Paid</p>
-        <h3>Kundali Pro</h3>
-        <p>Every yoga your chart forms, each life area, and every period read in sequence. About fifty pages, English or Hindi.</p>
+      <article class="book" data-in data-report="complete">
+        <button class="cover" type="button" aria-label="Open the Complete Vedic Kundali and turn its pages">
+          <img src="assets/covers/complete.webp" alt="Cover of the Complete Vedic Kundali Analysis">
+          <span class="open-hint">Open it</span>
+        </button>
+        <h3>The Complete Vedic Kundali</h3>
+        <p>Your handbook for life: every placement, dasha and yoga interpreted, with guidance and traditional remedies.</p>
         <div class="price">₹499 <span>· $14.99</span></div>
         <span class="btn line" aria-disabled="true">At launch</span>
       </article>
-      <article class="report" data-in>
-        <div class="cover"><div class="pair" aria-hidden="true"><svg id="pairA"></svg><svg id="pairB"></svg></div></div>
-        <p class="eyebrow">Paid</p>
-        <h3>Relationship Report</h3>
-        <p>Two charts read together. The eight kootas, each explained, with the placements that cause them.</p>
+      <article class="book" data-in data-report="milan">
+        <button class="cover" type="button" aria-label="Open the Vedic Kundali Milan and turn its pages">
+          <img src="assets/covers/milan.webp" alt="Cover of the Vedic Kundali Milan compatibility analysis">
+          <span class="open-hint">Open it</span>
+        </button>
+        <h3>Vedic Kundali Milan</h3>
+        <p>How two charts align: compatibility, emotional connection, marriage potential, challenges and guidance.</p>
         <div class="price">₹399 <span>· $11.99</span></div>
         <span class="btn line" aria-disabled="true">At launch</span>
       </article>
     </div>
+    <div class="shelf-dots" id="shelfDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
+
 </section>
 
-<!-- ============ ACT 10 — the free chart ============================= -->
-<section class="act act-grey" id="free" aria-labelledby="h-free">
+<!-- ============ 4b — the free Kundali ================================ -->
+<section class="act free-act" id="free" aria-labelledby="h-free">
   <div class="wide">
     <div class="act-head">
       <p class="eyebrow" data-in>Free Kundali</p>
       <h2 id="h-free" data-in>Start with your own.</h2>
-      <p class="lede" data-in>Your chart is worked out on your own device, by the engine itself. Only the name of your birthplace is looked up online, to turn it into coordinates.</p>
+      <p class="lede" data-in>Cast on your own device, by the engine itself. Only your birthplace is looked up, to turn its name into coordinates.</p>
     </div>
     <div class="free-grid">
-      <form class="form" id="form" novalidate data-in>
-        <div class="field"><label for="fName">Name <span style="color:var(--dim)">(optional)</span></label><input id="fName" autocomplete="given-name" placeholder="How the report should address you"></div>
-        <div class="row2">
-          <div class="field"><label for="fDate">Date of birth</label><input id="fDate" type="date" required></div>
-          <div class="field"><label for="fTime">Time of birth</label><input id="fTime" type="time" required></div>
+      <form class="fr-form" id="freeForm" novalidate data-in>
+        <div class="fr-field"><label for="fName">Name <span>(optional)</span></label><input id="fName" autocomplete="given-name" placeholder="How the report should address you"></div>
+        <div class="fr-row2">
+          <div class="fr-field"><label for="fDate">Date of birth</label><input id="fDate" type="date" required></div>
+          <div class="fr-field"><label for="fTime">Time of birth</label><input id="fTime" type="time" required></div>
         </div>
-        <div class="field"><label for="fPlace">Place of birth</label><input id="fPlace" autocomplete="off" placeholder="City, town or village" required><div class="suggest" id="suggest" hidden></div></div>
-        <div class="promise"><span>No sign-up</span><span>No card</span><span>Your birth date and time never leave this device</span></div>
+        <div class="fr-field"><label for="fPlace">Place of birth</label><input id="fPlace" autocomplete="off" placeholder="City, town or village" required><div class="fr-suggest" id="suggest" hidden></div></div>
+        <div class="fr-promise"><span>No sign-up</span><span>No card</span><span>Your birth details never leave this device</span></div>
         <button class="btn" type="submit" id="cast">Cast my chart</button>
-        <p class="status" id="status"></p>
+        <p class="fr-status" id="fStatus" aria-live="polite"></p>
       </form>
-      <div class="result" id="result" data-in>
-        <div class="empty"><div><svg id="emptyChart" aria-hidden="true"></svg>Your chart appears here.<p class="fine" style="margin-top:10px">Lahiri ayanamsa · Placidus ascendant · whole-sign houses</p></div></div>
+      <div class="fr-result" id="freeResult" data-in>
+        <div class="fr-empty"><svg id="emptyChart" aria-hidden="true"></svg><p>Your chart appears here.</p><small>Lahiri ayanamsa · Placidus ascendant · whole-sign houses</small></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ closing ============================================= -->
-<section class="act act-dark close-act" id="waitlist" aria-labelledby="h-wl">
-  <div class="glowline" aria-hidden="true"></div>
+<!-- ============ 5 — the close ======================================== -->
+<section class="act close-act" id="close" aria-labelledby="h-close">
   <div class="shell">
     <p class="eyebrow" data-in>Coming to iPhone and Android</p>
-    <h2 id="h-wl" data-in>Be there when<br>the sky opens.</h2>
-    <p class="lede" data-in style="max-width:40ch">One email, on launch day. Nothing else, ever.</p>
+    <h2 id="h-close" data-in>Read your sky.</h2>
+    <p class="lede" data-in style="max-width:36ch">The Kundali is free. No sign-up, no card.</p>
+    <div class="close-actions" data-in>
+      <a class="btn" href="#free">Create my free Kundali</a>
+      <span class="btn line" aria-disabled="true">Download the app · Soon</span>
+    </div>
     <form class="wl" id="wlForm" data-in>
       <label class="sr" for="wlEmail">Email</label>
       <input id="wlEmail" type="email" placeholder="you@example.com" required>
-      <button class="btn" type="submit">Join</button>
+      <button class="btn line" type="submit">Tell me at launch</button>
     </form>
     <p class="status" id="wlStatus"></p>
-    <div class="badges" data-in>
-      <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1.1-2.8-4.2zM14 5.2c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.2-.6 2.9-1.4z"/></svg>App Store <em>Soon</em></span>
-      <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3 13 12l-9.4 9.7c-.4-.3-.6-.8-.6-1.4V3.7c0-.6.2-1.1.6-1.4zm11.6 7.5L5.8 4.4l7.9 7.9 1.5-2.5zM19.7 10.5c.9.5 1.3 1 1.3 1.5s-.4 1-1.3 1.5l-2.6 1.5L14.4 12l2.7-3 2.6 1.5zM5.8 19.6l9.4-5.4-1.5-2.5-7.9 7.9z"/></svg>Google Play <em>Soon</em></span>
-    </div>
   </div>
 </section>
 
 </main>
 
-<footer>
+<footer class="foot" id="contact">
   <div class="shell">
-    <span>© 2026 Reality Distortion Field · Astra</span>
-    <nav aria-label="More"><a href="#rare">How we calculate</a><a href="#free">Free Kundali</a></nav>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <b>Astra</b>
+        <p>Personal Vedic astrology. Computed, never guessed.</p>
+        <div class="store-row">
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 17 20" aria-hidden="true"><path fill="currentColor" d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.4c-1.9 3.3-.5 8.1 1.3 10.8.9 1.3 1.9 2.7 3.3 2.7 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.8c1.4 0 2.3-1.3 3.2-2.6.9-1.4 1.3-2.8 1.3-2.9 0 0-2.8-1.1-2.9-4.3zM11.6 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>Soon on the</small>App Store</span></span>
+      <span class="store" aria-disabled="true"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg><span><small>Soon on</small>Google Play</span></span>
+    </div>
+      </div>
+      <nav class="foot-col" aria-label="Astra">
+        <h4>Astra</h4><a href="#tour">The app</a><a href="#more">Everything else</a><a href="#reports">Reports</a><a href="#free">Free Kundali</a>
+      </nav>
+      <nav class="foot-col" aria-label="Read">
+        <h4>Read</h4><a href="blog.html">The Astra Journal</a>
+      </nav>
+      <nav class="foot-col" aria-label="Company">
+        <h4>Company</h4><span>Reality Distortion Field</span><a href="#contactForm">Contact us</a><a href="terms.html">Terms &amp; privacy</a>
+      </nav>
+      <form class="foot-form" id="contactForm">
+        <h4>Write to us</h4>
+        <label class="sr" for="cfName">Name</label><input id="cfName" autocomplete="name" placeholder="Name" required>
+        <label class="sr" for="cfMail">Email</label><input id="cfMail" type="email" autocomplete="email" placeholder="Email" required>
+        <label class="sr" for="cfMsg">Message</label><textarea id="cfMsg" rows="3" placeholder="Message" required></textarea>
+        <button class="btn" type="submit">Send</button>
+        <p class="foot-status" id="cfStatus" aria-live="polite"></p>
+      </form>
+    </div>
+    <div class="foot-base">
+      <span>© 2026 Reality Distortion Field · Astra</span>
+      <span>Vedic astrology is a tradition of reflection, not a forecast.</span>
+    </div>
   </div>
 </footer>
 
-<script type="module" src="src/main.js"></script>
+<script type="module" src="src/index.js"></script>
 </body>
 </html>
