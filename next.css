@@ -641,9 +641,27 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .bt .big em{ font-style:normal; font-size:.42em; font-weight:500; color:var(--sky-dim); margin-left:5px }
 .bt.w2{ grid-column:span 2 } .bt.h2{ grid-row:span 2; min-height:276px }
 .bt.mid{ align-content:center; justify-items:center; text-align:center }
-.bt img.art{ position:absolute; right:-14px; top:-10px; width:104px; height:104px;
-  opacity:.5; pointer-events:none }
-.bt.h2 img.art{ width:150px; height:150px; right:-18px; top:8px; opacity:.6 }
+/* the picture: top right, large, the words beneath it — the tile is the picture */
+.bt{ min-height:190px }
+.bt .pic{ position:absolute; right:14px; top:12px; pointer-events:none; display:grid; place-items:center }
+.bt .pic img.one{ width:112px; height:112px; filter:drop-shadow(0 10px 22px rgba(0,0,0,.45)) }
+.bt .pic img.glow{ filter:drop-shadow(0 0 22px rgba(200,215,255,.45)) }
+.bt .pic img.cover{ width:86px; height:auto; border-radius:3px; transform:rotate(6deg) translateY(-6px);
+  box-shadow:0 14px 30px -10px rgba(0,0,0,.6) }
+.pic-pair{ display:flex; align-items:center }
+.pic-pair img{ width:76px; height:76px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.45)) }
+.pic-pair img + img{ margin-left:-14px }
+.pic-pair.sunmoon img:first-child{ width:92px; height:92px; z-index:1 }
+.pic-yoga{ position:relative; width:220px; height:130px }
+.pic-yoga img{ position:absolute; filter:drop-shadow(0 10px 22px rgba(0,0,0,.45)) }
+.pic-yoga img:nth-child(1){ width:118px; height:118px; right:0; top:0 }
+.pic-yoga img:nth-child(2){ width:64px; height:64px; left:40px; top:52px }
+.pic-yoga img:nth-child(3){ width:52px; height:52px; left:0; top:8px }
+.pic-chart{ width:132px; height:132px; transform:rotate(-4deg) }
+.pic-chart svg{ width:100%; height:100%; overflow:visible }
+.pic-chart .k-line{ stroke:rgba(190,214,255,.55); stroke-width:1.1 }
+.pic-chart .k-sign{ fill:rgba(190,214,255,.55); font-size:3.2px } .pic-chart .k-asc{ fill:var(--accent); font-size:2.6px }
+.bt.w2 .pic{ right:22px; top:16px }
 .bt .row{ display:flex; gap:6px; margin-bottom:4px }
 .bt .row img{ width:26px; height:26px }
 .bt.accent{ background:linear-gradient(160deg, rgba(120,96,48,.42), rgba(20,26,44,.9));
@@ -651,10 +669,11 @@ body.next{ background:var(--light); color:var(--ink-d) }
 
 @media (max-width:900px){
   .bento{ grid-template-columns:repeat(2,1fr); gap:9px }
-  .bt{ min-height:112px; padding:13px 14px; border-radius:15px }
+  .bt{ min-height:150px; padding:13px 14px; border-radius:15px }
   .bt.h2{ min-height:112px; grid-row:span 1 }
   .bt b{ font-size:13.5px } .bt span{ font-size:11.5px }
-  .bt img.art{ width:74px; height:74px } .bt.h2 img.art{ width:74px; height:74px }
+  .bt .pic{ right:10px; top:10px; transform:scale(.72); transform-origin:top right }
+  .pic-yoga{ width:170px }
 }
 
 /* ==========================================================================
@@ -899,9 +918,8 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .book .cover{ overflow:visible; box-shadow:none; background:none; transform:none; border-radius:0; perspective:none }
 .book .cover:hover{ transform:none; box-shadow:none }
 .bk-shell{ position:relative; width:100%; aspect-ratio:2/3; perspective:2400px; perspective-origin:50% 50% }
-.bk{ position:relative; width:100%; height:100%; transform-style:preserve-3d;
-  transition:transform .9s cubic-bezier(.2,.75,.25,1) }
-.book.open .bk{ transform:translateX(50%) }
+/* the book stays where it stands: the cover opens to the left, the pages turn; nothing slides */
+.bk{ position:relative; width:100%; height:100%; transform-style:preserve-3d }
 .bk-base{ position:absolute; inset:0; background:#FBFAF6; border-radius:3px 9px 9px 3px;
   box-shadow:0 22px 44px -18px rgba(12,24,48,.42), 0 2px 6px rgba(12,24,48,.12) }
 .bk-sheet{ position:absolute; inset:0; transform-style:preserve-3d }
@@ -944,7 +962,7 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .book .open-hint{ z-index:9 }
 .book.open .open-hint{ opacity:0 !important }
 .book .cover:focus-visible{ outline:2px solid var(--brass); outline-offset:6px }
-@media (max-width:900px){ .book.open .bk{ transform:translateX(0) } .shelf .book.open{ flex-basis:96% } }
+@media (max-width:900px){ .shelf .book.open{ flex-basis:96% } }
 
 /* ==========================================================================
    The footer — Apple's pattern: quiet grey, small type, everything findable

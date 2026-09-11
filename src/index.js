@@ -355,16 +355,41 @@ const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc),
 {
   /* Three rows. The first is the lunar month — thirty true phases with tonight's
      lit — then the seven things that matter most, in two rows of four. */
+  /* Every tile carries a picture, the way Apple's do — and every picture is the
+     app's own: the graha plates, the Moon's true phases, a chart drawn by the
+     engine, a rashi figure, a cover. */
   const TILES = [
     { moons:true, cls:"w4 lunar" },
-    { big:"81", unit:"yogas", sub:"Each one named, with the rule that formed it", cls:"w2", art:"jupiter" },
-    { b:"Divisional charts", sub:"D1 through D60, Parashari rules" },
-    { b:"Sade Sati", sub:"Saturn's seven and a half years", art:"saturn" },
-    { b:"Panchang, in full", sub:"Tithi, nakshatra, yoga, karana, vara" },
-    { b:"Festivals & vrats", sub:"Amanta months, adhika included" },
-    { big:"27", unit:"lessons", sub:"Learn the craft, three levels deep" },
-    { b:"Reports in Hindi", sub:"The whole thing, not a summary", cls:"accent" }
+    { big:"81", unit:"yogas", sub:"Each one named, with the rule that formed it", cls:"w2", pic:"yoga" },
+    { b:"Divisional charts", sub:"D1 through D60, Parashari rules", pic:"chart" },
+    { b:"Sade Sati", sub:"Saturn's seven and a half years", pic:"saturn" },
+    { b:"Remedies", sub:"Traditional, and never sold on fear", cls:"accent", pic:"remedy" },
+    { b:"Panchang, in full", sub:"Tithi, nakshatra, yoga, karana, vara", pic:"panchang" },
+    { b:"Festivals & vrats", sub:"Amanta months, adhika included", pic:"festival" },
+    { b:"Reports in Hindi", sub:"The whole thing, not a summary", pic:"hindi" }
   ];
+  const plate = (src, cls) => { const im = new Image(); im.src = asset(src); im.alt = ""; im.className = cls || ""; return im; };
+  const PIC = {
+    saturn:   () => plate("assets/graha/saturn.png", "one"),
+    /* a yoga is grahas in relation: three of them, gathered */
+    yoga:     () => { const w = document.createElement("div"); w.className = "pic-yoga";
+                w.append(plate("assets/graha/jupiter.png"), plate("assets/graha/moon.png"), plate("assets/graha/venus.png")); return w; },
+    /* the engine's own drawing of the navamsa: the same chart, divided again */
+    chart:    () => { const w = document.createElement("div"); w.className = "pic-chart";
+                const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); w.append(s);
+                const nav = SAMPLE.planets.map(p => { const idx = Math.floor((p.lon % 30) / (30 / 9));
+                  const sign = (((p.sign - 1) * 9 + idx) % 12) + 1;         /* D9: sign = (9·(sign−1) + navamsa) mod 12 */
+                  return { ...p, sign, house: ((sign - SAMPLE.lagna.sign + 12) % 12) + 1 }; });
+                requestAnimationFrame(() => renderChart(s, { ...SAMPLE, planets: nav }, { assets:"assets", size:"small" })); return w; },
+    /* the nodes — what most remedies are asked for — as they are drawn in the chart */
+    remedy:   () => { const w = document.createElement("div"); w.className = "pic-pair";
+                w.append(plate("assets/graha/rahu.png"), plate("assets/graha/ketu.png")); return w; },
+    /* the five limbs all come from the Sun and the Moon */
+    panchang: () => { const w = document.createElement("div"); w.className = "pic-pair sunmoon";
+                w.append(plate("assets/graha/sun.png"), plate("assets/graha/moon.png")); return w; },
+    festival: () => plate("assets/moon/phase_15_full_moon.png", "one glow"),
+    hindi:    () => plate("assets/covers/essential.webp", "cover")
+  };
 
   const bento = $("bento");
   const moonRow = () => {
@@ -393,8 +418,7 @@ const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc),
     }
     const d = document.createElement("div");
     d.className = "bt" + (t.cls ? " " + t.cls : "");
-    if (t.art) { const im = new Image(); im.className = "art";
-      im.src = asset(`assets/graha/${t.art}.png`); im.alt = ""; d.append(im); }
+    if (t.pic) { const p = document.createElement("div"); p.className = "pic pic-" + t.pic; p.append(PIC[t.pic]()); d.append(p); }
     if (t.big) {
       const n = document.createElement("p"); n.className = "big";
       n.append(document.createTextNode(t.big));

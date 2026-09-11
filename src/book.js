@@ -21,7 +21,7 @@
    a touchscreen a tap does the same, and the first tap opens it.
    ========================================================================== */
 const SL = 3;                  /* slices per sheet */
-const DELTA = 13;              /* how far the free edge leads, in degrees */
+const DELTA = 10;              /* how far the free edge leads, in degrees — a lift, not a flap */
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
 const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
