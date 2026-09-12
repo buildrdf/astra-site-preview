@@ -75,7 +75,7 @@ export async function openRealSky({ lat, lon, name, tz, quiet = true, onClose } 
   de.style.overflow = "hidden"; body.style.overflow = "hidden";   /* the sky's wheel listener is passive: without this the page scrolls under it */
 
   mod.openSkyView({ lat: +lat, lon: +lon, from: name || "your location", tz: tz || undefined,
-                    at: new Date().toISOString(), pro: true, quiet });
+                    at: new Date().toISOString(), pro: true, quiet, explore: false });
   const root = document.getElementById("skyview");
   token.mod = mod; token.root = root;
   root.classList.add("skyembed");

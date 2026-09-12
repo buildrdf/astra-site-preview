@@ -1876,14 +1876,33 @@ function houseOf(sg){ return birthOpts&&birthOpts.lagna?((sg+1-birthOpts.lagna+1
    and the grahas are named honestly: Rahu and Ketu are nodes, not planets, and the Sun and
    Moon are luminaries (§ astrological integrity). */
 const GRAHA_KIND={Sun:"Luminary",Moon:"Luminary",Rahu:"Lunar node",Ketu:"Lunar node"};
+/* What each graha is traditionally associated with — one line, for the card when no
+   reading has arrived (the website, or the app before the session's readings load).
+   Associations only, never outcomes. */
+const GRAHA_SENSE={
+  Sun:"Vitality, purpose and the self you show the world.",
+  Moon:"The mind and its moods — how you feel your way through a day.",
+  Mars:"Drive, courage and the energy to act.",
+  Mercury:"Speech, learning and the way you connect ideas.",
+  Jupiter:"Wisdom, growth and what you come to believe.",
+  Venus:"Love, beauty and what you take pleasure in.",
+  Saturn:"Discipline, patience and structure built over time.",
+  Rahu:"Appetite, novelty and the pull of the unfamiliar.",
+  Ketu:"Detachment, and what already feels known." };
+let EXPLORE=true;   /* false when the host has no detail pages to open (the website) */
 const kindLine=t=>`<span class="skkind">${t}</span>`;
+/* The card is DOM, and while time moves it is asked to repaint six times a second. Rebuilt
+   from scratch each time, it restarted its entry animation and re-rendered its 3D art on
+   every call — a visible flicker on the desktop (Sangram, 13 Sep 2026). It is now rebuilt
+   only when its words actually change; otherwise the call is a no-op. */
+const paintFoot=(f,html)=>{ if(f.__html===html) return false; f.__html=html; f.innerHTML=html; return true; };
 function setFoot(){
   const f=document.getElementById("svfoot"); if(!f) return;
   el.root.classList.toggle("hascard",!!target);
   const chip=document.getElementById("svtrack");
-  if(!target){ f.innerHTML=""; f.hidden=true; if(chip) chip.hidden=true; return; }
+  if(!target){ f.innerHTML=""; f.__html=""; f.hidden=true; if(chip) chip.hidden=true; return; }
   f.hidden=false;
-  const p=targetPos(); if(!p){ f.innerHTML=""; return; }
+  const p=targetPos(); if(!p){ f.innerHTML=""; f.__html=""; return; }
   const dir=["N","NE","E","SE","S","SW","W","NW"][Math.round(((p.az%360)+360)%360/45)%8];
   const g=target.t==="graha"?target.g:null;
   if(g){
@@ -1900,8 +1919,10 @@ function setFoot(){
          house?`${SIGNS_EN[sg]} maps to your natal ${house}${["st","nd","rd"][house-1]||"th"} house.`:null,
          p.retro&&g!=="Rahu"&&g!=="Ketu"?`It is retrograde — matters return rather than settle first time.`:null].filter(Boolean);
     /* the peek sheet (§20-21): most of the sky stays visible; meaning first, one primary action */
-    const sentence=String(meaning||"").replace(/&#8212;/g,"—").split(/(?<=[.!?])\s/)[0];
-    f.innerHTML=`<div class="skcard peek">
+    const sentence=String(meaning||"").replace(/&#8212;/g,"—").split(/(?<=[.!?])\s/)[0]||GRAHA_SENSE[g]||"";
+    /* the second voice: where it is, and nothing more */
+    const facts=`${fmtDMS(gr.degInSign)} ${SIGNS_EN[sg]} · ${NAKS[nk]} pada ${gr.pada} · ${p.up?`${Math.round(p.alt)}° above the horizon, ${dir}`:"below the horizon"}`;
+    if(!paintFoot(f,`<div class="skcard peek">
       <div class="skcardrow">
         <div class="skart" id="skart" aria-hidden="true"></div>
         <div class="skmain">
@@ -1912,14 +1933,15 @@ function setFoot(){
         <button class="skx" id="svclear" aria-label="Clear selection">✕</button>
       </div>
       <p class="skmeaning">${sentence}</p>
+      <p class="skfacts">${facts}</p>
       <div class="skacts">
-        <button class="skact solid" id="svexplore" aria-label="See more about ${g}">See more</button>
+        ${EXPLORE?`<button class="skact solid" id="svexplore" aria-label="See more about ${g}">See more</button>`:""}
         <button class="skact${trackTarget?" on":""}" id="svtrackb">${trackTarget?"Tracking":"Track"}</button>
       </div>
-    </div>`;
+    </div>`)) return;
     /* the art in the card is the same dimensional object as in the sky */
     try{ const art=document.getElementById("skart"); const c=grahaSprite(g,44,{ground:"dark",quality:"high",tilt:22}); art.appendChild(c); }catch(_){}
-    document.getElementById("svexplore").onclick=()=>{
+    const ex=document.getElementById("svexplore"); if(ex) ex.onclick=()=>{
       const pt=targetPos(); const [x,y]=pt?project(pt):[NaN,NaN];
       const origin=Number.isFinite(x)?{x,y,r:grahaR(g,vFov)}:null;
       buzz(8);
@@ -1929,7 +1951,7 @@ function setFoot(){
     const s=target.i;
     const here=cache.grahas.filter(x=>sgOf(x.L)===s).map(x=>x.g);
     const naks=signNakshatras(s+1);
-    f.innerHTML=`<div class="skcard">
+    if(!paintFoot(f,`<div class="skcard">
       <div class="skcardrow">
         <div class="skdev">${SIGNS_DEV[s]}</div>
         <div class="skmain">${kindLine("Rashi · Zodiac sign")}<b>${SIGNS_EN[s]} · ${SIGNS_SK[s]}</b>
@@ -1942,14 +1964,14 @@ function setFoot(){
       <div class="skacts">
         ${here.map(g=>`<button class="skact" data-pick="${g}">${g}</button>`).join("")}
         <button class="skact solid" id="svexplore" aria-label="See more about ${SIGNS_EN[s]}">See more</button>
-      </div></div>`;
+      </div></div>`)) return;
     f.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>selectTarget({t:"graha",g:b.dataset.pick,label:b.dataset.pick}));
     document.getElementById("svexplore").onclick=()=>{ const m=project(cache.rashiMid[s]); const origin=Number.isFinite(m[0])?{x:m[0],y:m[1],r:28}:null; buzz(8);
       dispatchEvent(new CustomEvent("astra:open",{detail:{kind:"rashi",id:s+1,mode:mode==="birth"?"birth":"now",at:skyDate().toISOString(),from:"sky",emphasis:mode==="birth"?"birth":"now",origin}})); };
   }else if(target.t==="nakshatra"){
     const i=target.i, r=nakshatraRange(i), m=NAK_META[i];
     const here=cache.grahas.filter(x=>nkOf(x.L)===i).map(x=>x.g);
-    f.innerHTML=`<div class="skcard">
+    if(!paintFoot(f,`<div class="skcard">
       <div class="skcardrow">
         <img class="skart" src="assets/graha/${nakLord(i).toLowerCase()}.png" alt="">
         <div class="skmain">${kindLine("Nakshatra · Lunar mansion")}<b>${r.name}</b>
@@ -1962,13 +1984,13 @@ function setFoot(){
       <div class="skacts">
         ${here.map(g=>`<button class="skact" data-pick="${g}">${g}</button>`).join("")}
         <button class="skact solid" id="svexplore" aria-label="See more about ${r.name}">See more</button>
-      </div></div>`;
+      </div></div>`)) return;
     f.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>selectTarget({t:"graha",g:b.dataset.pick,label:b.dataset.pick}));
     document.getElementById("svexplore").onclick=()=>{ const m=project(cache.nakMid[i]); const origin=Number.isFinite(m[0])?{x:m[0],y:m[1],r:24}:null; buzz(8);
       dispatchEvent(new CustomEvent("astra:open",{detail:{kind:"nakshatra",id:i,mode:mode==="birth"?"birth":"now",at:skyDate().toISOString(),from:"sky",emphasis:mode==="birth"?"birth":"now",origin}})); };
   }else if(target.t==="asc"){
     const gr=pointGrid(birthOpts.asc);
-    f.innerHTML=`<div class="skcard">
+    if(!paintFoot(f,`<div class="skcard">
       <div class="skcardrow">
         <div class="skdev" style="font-size:22px">◆</div>
         <div class="skmain">${kindLine("Lagna · Rising sign")}<b>${birthOpts.sign} Lagna</b>
@@ -1977,7 +1999,7 @@ function setFoot(){
         <button class="skx" id="svclear" aria-label="Clear selection">✕</button>
       </div>
       <p class="skmeaning">${gr.signName} was rising on the eastern horizon at your birth. That point fixes your 1st house — and so every other house.</p>
-      <div class="skacts"><button class="skact solid" id="svlagna">See in birth chart</button></div></div>`;
+      <div class="skacts"><button class="skact solid" id="svlagna">See in birth chart</button></div></div>`)) return;
     document.getElementById("svlagna").onclick=()=>{ closeSkyView(); dispatchEvent(new CustomEvent("astra:openhouse",{detail:1})); };
   }
   const cb=document.getElementById("svclear"); if(cb) cb.onclick=()=>clearTarget();
@@ -2525,7 +2547,7 @@ function showHints(){
    ==================================================================== */
 export function openSkyView(opts={}){
   reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  QUIET=!!opts.quiet; ART_PENDING=!!opts.artPending;
+  QUIET=!!opts.quiet; ART_PENDING=!!opts.artPending; EXPLORE=opts.explore!==false;
   loadLayers(); loadRashiArt();
   if(opts.lat!=null) spot={lat:opts.lat,lon:opts.lon,from:opts.from||"your location",tz:opts.tz||Intl.DateTimeFormat().resolvedOptions().timeZone};
   birthOpts=opts.birth||null; proUser=!!opts.pro;

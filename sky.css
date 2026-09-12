@@ -359,3 +359,5 @@
 .skyview .skembedhint b{color:#F1E7C9;font-weight:650}
 .skyview.hascard .skembedhint,.skyview.haslayers .skembedhint{opacity:0}
 @media (prefers-reduced-motion: reduce){ .skyview .skembedhint{transition:opacity .2s;transform:translate(-50%,0)} }
+
+.skyview .skfacts{margin:0 0 10px;padding-top:7px;border-top:1px solid rgba(255,255,255,.12);font-size:calc(12*var(--u));line-height:1.5;color:var(--ink-3);font-variant-numeric:tabular-nums}

@@ -486,36 +486,33 @@ const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc),
   const ORDS = n => n + (["th","st","nd","rd"][(n % 100 - 20) % 10] || ["th","st","nd","rd"][n % 100] || "th");
   const page = (tag, title, body) => () => { const w = el("div", "rd-page");
     w.append(el("p", "rd-tag", tag), el("p", "rd-title", title), body()); return w; };
-  const title = name => () => { const w = el("div", "rd-tp");
-    w.append(el("b", null, "Astra"), el("p", null, name), el("span", null, "Prepared for Aarav · 9 May 2007 · Mumbai")); return w; };
   const last = () => { const w = el("div", "rd-last");
     w.append(el("b", null, "The rest is yours to read."), el("span", null, "Every page is computed from the birth details, then written in plain language."));
     const a = el("a", "btn", "Get my free Kundali"); a.href = "#free"; w.append(a); return w; };
 
-  /* the pages under each cover: contents, then real pages, computed */
+  /* the pages under each cover: contents first, then real pages, computed */
   const BOOKS = {
-    essential: { name: "Essential Vedic Kundali", sheets: [
-      { name: ["Contents", "The birth chart"], front: page("Contents", "Essential Vedic Kundali", () => contents([["Your birth details", 3], ["The birth chart", 4],
-          ["Ascendant & Moon", 5], ["The nine grahas", 6], ["House by house", 8], ["Vimshottari dasha", 13], ["Glossary", 16]])),
-        back: page("Page 4", "The birth chart", chartPage) },
-      { name: ["The nine grahas", "House by house"], front: page("Page 6", "The nine grahas", planetPage), back: page("Page 8", "House by house", housePage) } ] },
-    complete: { name: "The Complete Vedic Kundali", sheets: [
-      { name: ["Contents", "The chart, read whole"], front: page("Contents", "The Complete Vedic Kundali", () => contents([["The chart, read whole", 4], ["Every graha in turn", 9],
-          ["The twelve houses", 21], ["Yogas in your chart", 34], ["The dasha years ahead", 41], ["Remedies", 57], ["Glossary", 62]])),
-        back: page("Page 4", "The chart, read whole", chartPage) },
-      { name: ["Every graha in turn", "The dasha years ahead"], front: page("Page 9", "Every graha in turn", planetPage), back: page("Page 41", "The dasha years ahead", dashaPage) } ] },
-    milan: { name: "Vedic Kundali Milan", sheets: [
-      { name: ["Contents", "Both charts"], front: page("Contents", "Vedic Kundali Milan", () => contents([["Both charts, side by side", 4], ["The eight kootas", 7],
-          ["Gun Milan score", 12], ["Manglik, read carefully", 15], ["Where you differ", 19], ["Guidance", 24]])),
-        back: page("Page 4", "Both charts, side by side", chartPage) },
-      { name: ["The eight kootas", "Gun Milan score"], front: page("Page 7", "The eight kootas", kootaPage), back: page("Page 12", "Gun Milan score", kootaPage) } ] }
+    essential: [
+      { name: "Contents", front: page("Contents", "Essential Vedic Kundali", () => contents([["Your birth details", 3], ["The birth chart", 4],
+          ["Ascendant & Moon", 5], ["The nine grahas", 6], ["House by house", 8], ["Vimshottari dasha", 13], ["Glossary", 16]])) },
+      { name: "The birth chart", front: page("Page 4", "The birth chart", chartPage) },
+      { name: "The nine grahas", front: page("Page 6", "The nine grahas", planetPage) } ],
+    complete: [
+      { name: "Contents", front: page("Contents", "The Complete Vedic Kundali", () => contents([["The chart, read whole", 4], ["Every graha in turn", 9],
+          ["The twelve houses", 21], ["Yogas in your chart", 34], ["The dasha years ahead", 41], ["Remedies", 57], ["Glossary", 62]])) },
+      { name: "The chart, read whole", front: page("Page 4", "The chart, read whole", chartPage) },
+      { name: "The dasha years ahead", front: page("Page 41", "The dasha years ahead", dashaPage) } ],
+    milan: [
+      { name: "Contents", front: page("Contents", "Vedic Kundali Milan", () => contents([["Both charts, side by side", 4], ["The eight kootas", 7],
+          ["Gun Milan score", 12], ["Manglik, read carefully", 15], ["Where you differ", 19], ["Guidance", 24]])) },
+      { name: "Both charts, side by side", front: page("Page 4", "Both charts, side by side", chartPage) },
+      { name: "The eight kootas", front: page("Page 7", "The eight kootas", kootaPage) } ]
   };
 
   const touch = matchMedia("(hover: none)").matches;
   document.querySelectorAll(".book").forEach(book => {
     const img = book.querySelector(".cover img");
-    const spec = BOOKS[book.dataset.report];
-    mountBook(book, { cover: img, touch, title: title(spec.name), sheets: spec.sheets, base: last });
+    mountBook(book, { cover: img, touch, sheets: BOOKS[book.dataset.report], base: last });
   });
 }
 
