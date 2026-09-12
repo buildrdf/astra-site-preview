@@ -188,10 +188,10 @@ export function dayPanel(host, place, sample) {
     g.append(el("span", null, `${t12(w.a)} – ${t12(w.b)}`));
     const nm = el("p", "rname");
     nm.append(el("b", null, w.name), document.createTextNode(sense ? " · " + sense : ""));
-    const why = el("p", "rwhy", `Why: the ${w.name} window, shaded by your tara bala (${model.tara.name}) `
-      + `and the Moon's ${model.moonFav ? "supportive" : "unsupportive"} count from your natal Moon`
-      + `${model.chandrashtama ? ", with the whole day capped by Chandrashtama" : ""}.`);
-    read.replaceChildren(g, nm, why);
+    /* the second voice: what it was read from, and nothing more */
+    const tech = el("p", "rtech", `${w.name} window · tara bala ${model.tara.name} · Moon ${model.moonFav ? "supportive" : "unsupportive"} from your natal Moon`
+      + `${model.chandrashtama ? " · Chandrashtama" : ""}`);
+    read.replaceChildren(g, nm, tech);
   }
 
   function mark(t, up) {
@@ -340,11 +340,11 @@ export function timelinePanel(host, sample) {
 
   const title = el("div", "tl-title"), dates = el("p", "tl-dates");
   const prog = el("div", "tl-prog"), progI = el("i"); prog.append(progI);
-  const pct = el("p", "tl-pct"), sub = el("p", "tl-sub"), read = el("p", "tl-read");
+  const pct = el("p", "tl-pct"), sub = el("p", "tl-sub"), read = el("p", "tl-read"), tech = el("p", "tl-tech");
   const go = el("button", "tl-go", "Understand this period in detail ›"); go.type = "button";
   /* in the app this opens the period's own page; here it says where to get the app */
   go.addEventListener("click", e => { e.stopPropagation(); document.querySelector(".nav-get")?.click(); });
-  right.append(title, dates, prog, pct, sub, read, go);
+  right.append(title, dates, prog, pct, sub, read, tech, go);
 
   wrap.append(left, right);
   host.append(wrap);
@@ -408,7 +408,8 @@ export function timelinePanel(host, sample) {
 
     const natal = sample.planets.find(p => p.graha === maha.lord);
     read.textContent = `${maha.lord} years are traditionally read as a season of ${DASHA_TONE[maha.lord]}.`
-      + (natal ? ` Here ${maha.lord} sits in the ${ORD(natal.house)} house, so that season gathers around ${HOUSE_THEME[natal.house][0]}.` : "");
+      + (natal ? ` Here that season gathers around ${HOUSE_THEME[natal.house][0]}.` : "");
+    tech.textContent = natal ? `${maha.lord} in your ${ORD(natal.house)} house · ${natal.signName} · ${natal.nakshatra}${natal.retro ? " · retrograde" : ""}` : "";
   }
 
   for (const R of [R1, R2, R3]) {
@@ -648,23 +649,19 @@ export function askPanel(host, sample) {
 
   const QS = [
     { q: "What period am I in?", build: () => ({
-        text: `A ${at.maha.lord} mahadasha with ${at.antar.lord} antardasha`
-          + `${at.pratyantar ? `, and a ${at.pratyantar.lord} pratyantardasha inside that` : ""}. `
-          + `The sequence started from your Moon in ${moon.nakshatra} — that nakshatra alone fixes both the order and the starting point.`,
-        chips: [`${at.maha.lord} maha`, `${at.antar.lord} antar`, moon.nakshatra] }) },
+        text: `${at.maha.lord} years — traditionally a season of ${DASHA_TONE[at.maha.lord]}. Inside it, ${at.antar.lord} colours these months`
+          + `${at.pratyantar ? `, and ${at.pratyantar.lord} these weeks` : ""}.`,
+        tech: `${at.maha.lord} mahadasha · ${at.antar.lord} antardasha${at.pratyantar ? ` · ${at.pratyantar.lord} pratyantardasha` : ""} · counted from your Moon in ${moon.nakshatra}` }) },
     { q: "Explain my seventh house.", build: () => {
         const h7 = sample.houses.find(h => h.house === 7);
         const lord = sample.planets.find(p => p.graha === h7.lord);
-        return { text: `Your 7th carries ${h7.signName}, ruled by ${h7.lord}`
-          + `${lord ? `, which sits in your ${ORD(lord.house)} house in ${lord.signName}` : ""}. `
-          + `Marriage and partnership are therefore read through where ${h7.lord} landed, not through the 7th alone.`,
-          chips: ["7th house", h7.signName, h7.lord] }; } },
+        return { text: `Partnership is read through ${h7.signName} here`
+          + `${lord ? `, and its lord ${h7.lord} has gone to your ${ORD(lord.house)} house — so, traditionally, it is coloured by ${HOUSE_THEME[lord.house][0]} as much as by the house itself.` : "."}`,
+          tech: `7th house ${h7.signName} · lord ${h7.lord}${lord ? ` in ${lord.signName}, ${ORD(lord.house)} house` : ""}` }; } },
     { q: "What should I pay attention to right now?", build: () => {
         const s = tr("Saturn"), [theme] = HOUSE_THEME[s.house];
-        return { text: `Saturn is crossing your ${ORD(s.house)} house — ${theme}. `
-          + `It is at ${fmtDeg(s.deg)} ${s.signName}, in ${s.nakshatra}${s.retro ? ", retrograde" : ""}. `
-          + `Within the tradition a passage this slow is read as a long emphasis, never an event on a date.`,
-          chips: ["Saturn transit", `${ORD(s.house)} house`, s.signName] }; } }
+        return { text: `Saturn is crossing your ${ORD(s.house)} house — ${theme}. A passage this slow is read as a long emphasis, never an event on a date.`,
+          tech: `Saturn at ${fmtDeg(s.deg)} ${s.signName} · ${s.nakshatra}${s.retro ? " · retrograde" : ""} · transiting your ${ORD(s.house)} house` }; } }
   ];
 
   host.replaceChildren();
@@ -679,12 +676,12 @@ export function askPanel(host, sample) {
   const head = el("div", "astrahead");
   head.append(el("i", "orbdot"), document.createTextNode("Astra"));
   const atext = el("p", "astratext");
-  const chips = el("div", "gchips");
+  const chips = el("p", "astratech");
   answer.append(head, atext, chips);
   thread.append(bubble, answer);
   const dots = el("div", "gdots");
   QS.forEach(() => dots.append(el("i")));
-  wrap.append(moonWrap, thread, dots, el("p", "lv-foot", "Keep scrolling: three questions, three answers, each assembled from the chart and naming what it used."));
+  wrap.append(moonWrap, thread, dots);
   host.append(wrap);
 
   const setState = s => { if (!orb.classList.contains(s)) orb.className = "gmoon " + s; };
@@ -701,7 +698,7 @@ export function askPanel(host, sample) {
     if (shownQ !== i) {
       shownQ = i; shownA = -1;
       bubble.textContent = QS[i].q;
-      atext.textContent = ""; chips.replaceChildren();
+      atext.textContent = ""; chips.textContent = "";
       answer.classList.remove("on");
       bubble.classList.remove("on");
       requestAnimationFrame(() => bubble.classList.add("on"));
@@ -713,7 +710,7 @@ export function askPanel(host, sample) {
         shownA = i;
         const b = built[i] || (built[i] = QS[i].build());
         atext.textContent = b.text;
-        chips.replaceChildren(...b.chips.map(c => el("span", "gchip", c)));
+        chips.textContent = b.tech;
         answer.classList.add("on");
       }
       setState(k < .7 ? "speaking" : "idle");

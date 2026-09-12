@@ -47,7 +47,8 @@ export function freeKundali(root) {
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
-    const d = $("#fDate").value, t = $("#fTime").value, mail = $("#fMail").value.trim();
+    const name = $("#fName").value.trim(), d = $("#fDate").value, t = $("#fTime").value, mail = $("#fMail").value.trim();
+    if (!name) return say("We need the name to print on the report.");
     if (!d || !t) return say("We need both the date and the time of birth.");
     if (!picked) {
       const list = place.value.trim().length > 1 ? await geocode(place.value.trim()).catch(() => []) : [];
@@ -57,7 +58,7 @@ export function freeKundali(root) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return say("We need an email to send the report to.");
     say("");
     const chart = castChart(utcFromLocal(d, t, picked.tz), picked.lat, picked.lon);
-    show(chart, { name: $("#fName").value.trim(), place: picked, mail });
+    show(chart, { name, place: picked, mail });
   });
 
   /* what the visitor sees once it is cast: that it WAS cast — one true line from the
@@ -69,10 +70,10 @@ export function freeKundali(root) {
     const im = new Image(); im.src = asset(`assets/graha/${moon.graha.toLowerCase()}.png`); im.alt = "";
     seal.append(im);
     card.append(seal,
-      el("b", null, `${meta.name ? meta.name + "'s" : "Your"} Kundali is cast.`),
+      el("b", null, `${meta.name}'s Kundali is cast.`),
       el("p", "fr-cast", `${chart.lagna.signName} rising · Moon in ${moon.nakshatra} · ${chart.now ? chart.now.maha.lord + " mahadasha" : ""}`.replace(/ · $/, "")),
-      el("p", null, `The sixteen-page report is on its way to ${meta.mail}. Open the app and sign in with the same email, and the whole chart is already there.`),
-      el("span", "fr-tag", "Preview build · email delivery connects at launch. Nothing was sent."));
+      el("p", null, `The sixteen-page report is on its way to ${meta.mail}. Sign in to the app with the same email and the whole chart is already there.`),
+      el("span", "fr-tag", "Preview build · delivery connects at launch"));
     card.append(storeRow.cloneNode(true));
     result.replaceChildren(card);
     result.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });

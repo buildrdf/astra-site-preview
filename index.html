@@ -177,14 +177,14 @@
     </div>
     <div class="free-grid">
       <form class="fr-form" id="freeForm" novalidate data-in>
-        <div class="fr-field"><label for="fName">Name <span>(optional)</span></label><input id="fName" autocomplete="given-name" placeholder="How the report should address you"></div>
+        <div class="fr-field"><label for="fName">Name</label><input id="fName" autocomplete="name" placeholder="As it will be printed on the report" required></div>
         <div class="fr-row2">
           <div class="fr-field"><label for="fDate">Date of birth</label><input id="fDate" type="date" required></div>
           <div class="fr-field"><label for="fTime">Time of birth</label><input id="fTime" type="time" required></div>
         </div>
         <div class="fr-field"><label for="fPlace">Place of birth</label><input id="fPlace" autocomplete="off" placeholder="City, town or village" required><div class="fr-suggest" id="suggest" hidden></div></div>
         <div class="fr-field"><label for="fMail">Email</label><input id="fMail" type="email" autocomplete="email" placeholder="Where the report should go" required></div>
-        <div class="fr-promise"><span>No sign-up</span><span>No card</span><span>Deleted after it is sent</span></div>
+        <p class="fr-note">Sent to your inbox the moment it is cast. No sign-up or payment needed.</p>
         <button class="btn" type="submit" id="cast">Email my free Kundali</button>
         <p class="fr-status" id="fStatus" aria-live="polite"></p>
       </form>

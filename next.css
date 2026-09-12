@@ -302,7 +302,11 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .g-steady{ color:var(--t-steady) } .g-caution{ color:var(--t-care) } .g-avoid{ color:var(--t-avoid) }
 .rread .rname{ margin:0; font-size:14px; color:var(--ink-d) }
 .rread .rname b{ font-weight:600 }
-.rread .rwhy{ margin:0; font-size:12.5px; color:#8595AE; max-width:56ch; line-height:1.45 }
+/* the second voice, everywhere a reading appears: what it was read from, muted, under a hairline */
+.rtech,.tl-tech,.astratech{ margin:6px 0 0; padding-top:6px; border-top:1px solid rgba(12,24,48,.09);
+  font-size:12.5px; line-height:1.45; color:#8595AE; font-variant-numeric:tabular-nums }
+.rtech:empty,.tl-tech:empty,.astratech:empty{ display:none }
+.astratech{ align-self:stretch; width:100% }
 
  
 
@@ -335,7 +339,7 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .lv-day .rscale span{ position:absolute; top:0; transform:translateX(-50%) }
 .lv-day .rscale span:first-child{ transform:none } .lv-day .rscale span:last-child{ transform:translateX(-100%) }
 .lv-day .rread{ justify-items:start; text-align:left; min-height:76px; margin-top:4px }
-.lv-day .rread .rwhy{ max-width:none }
+.lv-day .rread .rtech{ width:100% }
 .dy-h{ margin:0; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--brass) }
 .dy-areas{ display:grid; border-top:1px solid rgba(12,24,48,.08) }
 .dy-area{ display:grid; grid-template-columns:1fr auto 96px; align-items:center; gap:10px;
@@ -863,9 +867,7 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .fr-suggest button{ display:block; width:100%; text-align:left; background:none; border:0; padding:11px 15px; font-size:14.5px; cursor:pointer; color:var(--ink-d) }
 .fr-suggest button:hover,.fr-suggest button:focus{ background:var(--light-2) }
 .fr-suggest small{ color:#8595AE; margin-left:6px }
-.fr-promise{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--dim-lo) }
-.fr-promise span{ display:flex; gap:7px; align-items:center }
-.fr-promise span::before{ content:""; width:12px; height:12px; border-radius:50%; border:1px solid var(--dim-lo); flex:none }
+.fr-note{ margin:0; font-size:13px; color:var(--dim-lo) }
 .free-act .btn{ background:var(--ink-d); color:#fff; justify-self:start }
 .fr-status{ margin:0; font-size:13px; color:var(--dim-lo); min-height:1.4em }
 .fr-result{ display:grid; gap:18px }
