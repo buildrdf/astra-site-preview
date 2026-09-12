@@ -44,6 +44,64 @@ export function createSkyField(canvas, opts = {}) {
   const allArt = {};
   if (opts.all) for (const g of ALL) { const im = new Image(); im.src = opts.art ? opts.art(g) : `assets/graha/${g.toLowerCase()}.png`;
     im.addEventListener("load", () => { dirty = true; kick(); }); allArt[g] = im; }
+
+  /* The land: the app's own approved horizon panorama (assets/gen/land-day). One strip
+     is 90° of azimuth, four tiles wrap the viewer with alternate tiles mirrored so every
+     seam meets itself, and the image row at LEYE sits on the true horizon — the same
+     rules skyview.js uses. Drawn in slices of azimuth, each a parallelogram between the
+     horizon and a row 30° below it (and 26° above, for the peaks), then tinted for the
+     night in one pass so the ground reads as ground, not as a daytime postcard. */
+  let land = null, LW = 0, LH = 0;
+  const LEYE = .46, LSLICE = 2, LAND_UP = 26, LAND_DOWN = 30, LPAD = 14;
+  if (opts.land) { const im = new Image(); im.src = opts.land;
+    im.addEventListener("load", () => {
+      /* baked once with mirrored columns either side, so a slice at a tile seam can
+         read a little past the edge and meet its mirrored neighbour without a gap */
+      LW = im.naturalWidth; LH = im.naturalHeight;
+      const cv = document.createElement("canvas"); cv.width = LW + 2 * LPAD; cv.height = LH;
+      const g = cv.getContext("2d");
+      g.drawImage(im, LPAD, 0);
+      g.save(); g.translate(LPAD, 0); g.scale(-1, 1); g.drawImage(im, 0, 0, LPAD, LH, 0, 0, LPAD, LH); g.restore();
+      g.save(); g.translate(LW + 2 * LPAD, 0); g.scale(-1, 1); g.drawImage(im, LW - LPAD, 0, LPAD, LH, 0, 0, LPAD, LH); g.restore();
+      land = cv; dirty = true; kick(); }); }
+  let off = null;
+  function drawLand() {
+    if (!land) return;
+    if (!off) off = document.createElement("canvas");
+    if (off.width !== canvas.width || off.height !== canvas.height) { off.width = canvas.width; off.height = canvas.height; }
+    const g = off.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = LW, h = LH, ppd = w / 90, eye = LEYE * h;
+    const slab = (a0, a1, altA, altB, sy, sh) => {
+      /* the quad between azimuths a0..a1 at altitudes altA (near the horizon) and altB */
+      const p0 = project(a0, altA), p1 = project(a1, altA), q0 = project(a0, altB), q1 = project(a1, altB);
+      if (!p0 || !p1 || !q0 || !q1) return;
+      const t = Math.floor(a0 / 90), u0 = (a0 - 90 * t) * ppd, u1 = u0 + LSLICE * ppd;
+      const x0 = LPAD + ((t & 1) ? w - u0 : u0), x1 = LPAD + ((t & 1) ? w - u1 : u1);
+      const dx = x1 - x0;
+      /* affine: source (x, y) → screen, x along the horizon, y down the slope */
+      const a = (p1[0] - p0[0]) / dx, b = (p1[1] - p0[1]) / dx;
+      const c = (q0[0] - p0[0]) / (sh * (altB < altA ? 1 : -1)), d = (q0[1] - p0[1]) / (sh * (altB < altA ? 1 : -1));
+      /* no clip per slice: neighbours overlap by a couple of source pixels instead, so the
+         anti-aliased edge of one never shows as a hairline against the next */
+      g.save();
+      g.transform(a, b, c, d, p0[0] - a * x0 - c * eye, p0[1] - b * x0 - d * eye);
+      const xl = Math.min(x0, x1) - 10, sw = Math.abs(dx) + 20;
+      g.drawImage(land, xl, sy, sw, sh, xl, sy, sw, sh);
+      g.restore();
+    };
+    for (let a0 = 0; a0 < 360; a0 += LSLICE) {
+      const a1 = a0 + LSLICE;
+      slab(a0, a1, 0, -LAND_DOWN, eye - 8, h - eye + 8);    /* the ground below the line first … */
+      slab(a0, a1, 0, LAND_UP, 0, eye + 8);                 /* … then the peaks over its top edge */
+    }
+    /* one tint over the whole land: deep at night, almost none by day */
+    g.globalCompositeOperation = "source-atop";
+    g.fillStyle = `rgba(12,16,40,${(.74 * (1 - dayK) + .08 * dayK).toFixed(3)})`; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = "source-over";
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(off, 0, 0); ctx.restore();
+  }
   let raf = 0, dirty = true;
 
   /* the rashi plates, loaded only if this field is asked to show the zodiac */
@@ -74,18 +132,24 @@ export function createSkyField(canvas, opts = {}) {
     return [W / 2 + x * f, H / 2 - y * f];
   }
 
+  /* how much of a day it is: the Sun's altitude, eased between civil dusk and full sun */
+  let dayK = 0;
+  const mix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+  const rgb = c => `rgb(${c.join(",")})`;
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    const sunAlt = altAz("Sun", when, place.lat, place.lon).alt;
+    dayK = Math.max(0, Math.min(1, (sunAlt + 6) / 14)); dayK = dayK * dayK * (3 - 2 * dayK);
 
     /* the ground: everything below altitude zero, so the horizon is real */
     const horizon = [];
     for (let a = 0; a <= 360; a += 2) { const p = project(a, 0); if (p) horizon.push(p); }
-    /* the night sky's own gradient — zenith, middle, horizon — from the app's
-       SKY_KEYS (skyview.js). Flat black reads as a void, not as a sky. */
+    /* the sky's own gradient — zenith, middle, horizon — the app's night keys
+       (skyview.js SKY_KEYS), lifting to its day blue as the Sun comes up. */
     const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, "rgb(3,4,14)");
-    sky.addColorStop(.58, "rgb(13,17,44)");
-    sky.addColorStop(1, "rgb(26,30,66)");
+    sky.addColorStop(0,   rgb(mix([3, 4, 14],   [52, 110, 190], dayK)));
+    sky.addColorStop(.58, rgb(mix([13, 17, 44], [120, 170, 226], dayK)));
+    sky.addColorStop(1,   rgb(mix([26, 30, 66], [190, 214, 240], dayK)));
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
     if (horizon.length > 1) {
@@ -96,13 +160,16 @@ export function createSkyField(canvas, opts = {}) {
       ctx.lineTo(horizon[horizon.length - 1][0], H + 40);
       ctx.lineTo(horizon[0][0], H + 40);
       ctx.closePath();
-      ctx.fillStyle = "#050506";
+      ctx.fillStyle = rgb(mix([5, 5, 6], [40, 52, 40], dayK));
       ctx.fill();
       ctx.restore();
-      ctx.beginPath();
-      ctx.moveTo(horizon[0][0], horizon[0][1]);
-      for (const p of horizon) ctx.lineTo(p[0], p[1]);
-      ctx.strokeStyle = "rgba(255,255,255,.24)"; ctx.lineWidth = 1; ctx.stroke();
+      if (land) drawLand();
+      else {
+        ctx.beginPath();
+        ctx.moveTo(horizon[0][0], horizon[0][1]);
+        for (const p of horizon) ctx.lineTo(p[0], p[1]);
+        ctx.strokeStyle = "rgba(255,255,255,.24)"; ctx.lineWidth = 1; ctx.stroke();
+      }
     }
 
     /* the compass, written on the horizon where it actually lies */
@@ -166,7 +233,7 @@ export function createSkyField(canvas, opts = {}) {
         const { alt, az } = raDecToAltAz(s.ra, s.dec, when, place.lat, place.lon);
         return { p: project(az, alt), m: s.m, alt };
       });
-      ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = `rgba(255,255,255,${(.16 * (1 - dayK)).toFixed(3)})`; ctx.lineWidth = 1;
       for (const [i, j] of ast.lines) {
         const a = pts[i]?.p, b = pts[j]?.p;
         if (!a || !b) continue;
@@ -175,7 +242,7 @@ export function createSkyField(canvas, opts = {}) {
       for (const s of pts) {
         if (!s.p) continue;
         const r = Math.max(.9, 3.1 - s.m * .42);
-        const dim = s.alt < 0 ? .22 : 1;
+        const dim = (s.alt < 0 ? .22 : 1) * (1 - dayK * .92);      /* stars go with the day */
         ctx.beginPath(); ctx.arc(s.p[0], s.p[1], r, 0, 7);
         ctx.fillStyle = `rgba(255,255,255,${(.55 + (4.6 - s.m) * .11) * dim})`;
         ctx.fill();
@@ -317,8 +384,9 @@ export function createSkyField(canvas, opts = {}) {
       const w = 1 + Math.max(0, alt) / 60;
       sx += Math.cos(az * D) * w; sy += Math.sin(az * D) * w; sa += alt * w; n += w;
     }
-    if (n) { aim.az = norm360(Math.atan2(sy, sx) / D); aim.alt = Math.max(10, Math.min(48, sa / n + 4)); }
-    else { aim.az = 180; aim.alt = 24; }
+    /* the eye stays low enough that the ground is always in the frame */
+    if (n) { aim.az = norm360(Math.atan2(sy, sx) / D); aim.alt = Math.max(12, Math.min(24, sa / n * .5)); }
+    else { aim.az = 180; aim.alt = 18; }
     target = null;
     if (immediate || reduce) { cam.az = aim.az; cam.alt = aim.alt; }
     dirty = true; kick();

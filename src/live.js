@@ -544,34 +544,81 @@ export function skyPanel(host, place) {
   cv.setAttribute("aria-label", "The sky over you now. Drag, or use the arrow keys, to look around.");
   const bar = el("div", "sk-bar");
   const where = el("p", "sk-where");
-  const step = el("button", "uv-step", "Step outside"); step.type = "button";
+  const step = el("button", "uv-step", "Full screen"); step.type = "button";
   step.addEventListener("pointerenter", () => import("./sky-embed.js").then(m => m.preloadRealSky?.()), { once: true });
   step.onclick = async () => {
     const { openRealSky } = await import("./sky-embed.js");
     openRealSky({ lat:place.lat, lon:place.lon, name:place.name, tz:place.tz });
   };
   bar.append(where, step);
-  const hint = el("p", "sk-hint", "Drag to look around · Zoom out to the Earth, scrub through the night and point your phone at the sky in the app");
-  wrap.append(cv, bar, hint);
+
+  /* the app's time seeker, on the right: drag up and down through the night; the
+     pill says the time. Twelve hours either side of now; ↑ ↓ step fifteen minutes. */
+  const SPAN = 12 * 60;                                   /* minutes either side of now */
+  let offsetMin = 0;
+  const seek = el("div", "sk-seek");
+  const track = el("div", "sk-track"); track.tabIndex = 0;
+  track.setAttribute("role", "slider"); track.setAttribute("aria-label", "Time of night");
+  track.setAttribute("aria-valuemin", "-720"); track.setAttribute("aria-valuemax", "720");
+  const knob = el("i", "sk-knob"), pill = el("span", "sk-pill"), nowMark = el("i", "sk-now");
+  track.append(nowMark, knob); seek.append(pill, track);
+  const backNow = el("button", "sk-back", "Now"); backNow.type = "button"; backNow.hidden = true;
+  seek.append(backNow);
+
+  const hint = el("p", "sk-hint", "Drag to look around · Slide the time · Zoom out to the Earth and point your phone at the sky in the app");
+  wrap.append(cv, bar, seek, hint);
   host.append(wrap);
 
   let field = null, started = false;
   const t12 = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", hour12:true, timeZone:place.tz });
+  const whenAt = () => new Date(Date.now() + offsetMin * 6e4);
   const ensure = () => {
     if (field) return field;
-    field = createSkyField(cv, { place, when:new Date(), zodiac:true, all:true, fov:92, art:GRAHA_ART });
+    field = createSkyField(cv, { place, when:whenAt(), zodiac:true, all:true, fov:92, art:GRAHA_ART,
+      land: asset("assets/gen/land-day.webp") });
     return field;
   };
-  const paintWhere = () => { where.textContent = `${place.name} · ${t12(Date.now())} ${tzAbbr(place.tz)} · looking ${compass(field.camera.az)}`; };
   const compass = az => ["north","north-east","east","south-east","south","south-west","west","north-west"][Math.round((((az % 360) + 360) % 360) / 45) % 8];
+  const paintWhere = () => { where.textContent = `${place.name} · ${t12(whenAt())} ${tzAbbr(place.tz)} · looking ${compass(field.camera.az)}`; };
+  function paintSeek() {
+    const f = (offsetMin + SPAN) / (2 * SPAN);              /* 0 at the top = twelve hours back */
+    knob.style.top = pill.style.top = (f * 100) + "%";
+    nowMark.style.top = "50%";
+    pill.textContent = t12(whenAt());
+    track.setAttribute("aria-valuenow", String(offsetMin));
+    backNow.hidden = offsetMin === 0;
+  }
+  function setOffset(m) {
+    offsetMin = Math.max(-SPAN, Math.min(SPAN, Math.round(m)));
+    if (field) { field.setWhen(whenAt()); paintWhere(); }
+    paintSeek();
+  }
+  const atY = y => { const r = track.getBoundingClientRect(); return (Math.min(1, Math.max(0, (y - r.top) / r.height)) * 2 - 1) * SPAN; };
+  let drag = false;
+  track.addEventListener("pointerdown", e => { drag = true; track.setPointerCapture(e.pointerId); setOffset(atY(e.clientY)); e.preventDefault(); });
+  track.addEventListener("pointermove", e => { if (drag) setOffset(atY(e.clientY)); });
+  track.addEventListener("pointerup", () => { drag = false; });
+  track.addEventListener("pointercancel", () => { drag = false; });
+  const onKeys = e => {
+    const stepM = e.shiftKey ? 60 : 15;
+    if (e.key === "ArrowUp") setOffset(offsetMin - stepM);
+    else if (e.key === "ArrowDown") setOffset(offsetMin + stepM);
+    else return;
+    e.preventDefault();
+  };
+  track.addEventListener("keydown", onKeys);
+  cv.addEventListener("keydown", onKeys);
+  backNow.onclick = () => setOffset(0);
+  paintSeek();
+
   let tick = 0;
   return {
     start() {
       ensure();
       /* paint synchronously: the fly-in that follows needs the positions now */
-      field.resize(); field.frameAll(!started); paintWhere();
+      field.resize(); field.frameAll(!started); paintWhere(); paintSeek();
       started = true;
-      clearInterval(tick); tick = setInterval(() => { field.setWhen(new Date()); paintWhere(); }, 30000);
+      clearInterval(tick); tick = setInterval(() => { field.setWhen(whenAt()); paintWhere(); paintSeek(); }, 30000);
     },
     stop() { clearInterval(tick); },
     /* the screen's own coordinates for each graha, for the fly-in */

@@ -366,7 +366,7 @@ const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc),
     { b:"Remedies", sub:"Traditional, and never sold on fear", cls:"accent", pic:"remedy" },
     { b:"Panchang, in full", sub:"Tithi, nakshatra, yoga, karana, vara", pic:"panchang" },
     { b:"Festivals & vrats", sub:"Amanta months, adhika included", pic:"festival" },
-    { b:"Reports in Hindi", sub:"The whole thing, not a summary", pic:"hindi" }
+    { big:"27", unit:"lessons", sub:"Learn the craft, three levels deep", pic:"lessons" }
   ];
   const plate = (src, cls) => { const im = new Image(); im.src = asset(src); im.alt = ""; im.className = cls || ""; return im; };
   const PIC = {
@@ -388,7 +388,8 @@ const CUM = WEIGHTS.reduce((acc, w) => (acc.push(acc[acc.length - 1] + w), acc),
     panchang: () => { const w = document.createElement("div"); w.className = "pic-pair sunmoon";
                 w.append(plate("assets/graha/sun.png"), plate("assets/graha/moon.png")); return w; },
     festival: () => plate("assets/moon/phase_15_full_moon.png", "one glow"),
-    hindi:    () => plate("assets/covers/essential.webp", "cover")
+    /* the first lesson is the signs: the ram, drawn in starlight as the sky shows it */
+    lessons:  () => plate("assets/rashi/mesha.png", "rashi")
   };
 
   const bento = $("bento");

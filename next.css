@@ -648,6 +648,7 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .bt .pic img.glow{ filter:drop-shadow(0 0 22px rgba(200,215,255,.45)) }
 .bt .pic img.cover{ width:86px; height:auto; border-radius:3px; transform:rotate(6deg) translateY(-6px);
   box-shadow:0 14px 30px -10px rgba(0,0,0,.6) }
+.bt .pic img.rashi{ width:136px; height:136px; object-fit:contain; opacity:.9; filter:drop-shadow(0 0 18px rgba(200,215,255,.35)) }
 .pic-pair{ display:flex; align-items:center }
 .pic-pair img{ width:76px; height:76px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.45)) }
 .pic-pair img + img{ margin-left:-14px }
@@ -787,13 +788,28 @@ body.next{ background:var(--light); color:var(--ink-d) }
 .sk-where{ margin:0; font-size:12.5px; font-weight:600; color:#EEF3FB; letter-spacing:-.005em; text-shadow:0 1px 8px rgba(0,0,0,.6) }
 .sk-hint{ position:absolute; left:0; right:0; bottom:0; margin:0; padding:36px 18px 14px; text-align:center; font-size:11.5px;
   color:#9DB2D0; pointer-events:none; background:linear-gradient(rgba(4,7,16,0), rgba(4,7,16,.7)) }
+/* the time seeker, as the app draws it: a thin line down the right, a knob, a pill that says the time */
+.sk-seek{ position:absolute; right:16px; top:64px; bottom:56px; width:44px; pointer-events:none }
+.sk-track{ position:absolute; right:12px; top:0; bottom:0; width:20px; margin-right:-10px; pointer-events:auto; cursor:ns-resize; touch-action:none }
+.sk-track::before{ content:""; position:absolute; left:50%; top:0; bottom:0; width:1.5px; margin-left:-.75px; background:rgba(238,243,251,.28) }
+.sk-track:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:10px }
+.sk-now{ position:absolute; left:50%; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:rgba(238,243,251,.5) }
+.sk-knob{ position:absolute; left:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:var(--accent);
+  box-shadow:0 0 0 3px rgba(4,7,16,.6), 0 2px 8px rgba(0,0,0,.5); transition:transform .15s }
+.sk-track:active .sk-knob{ transform:scale(1.15) }
+.sk-pill{ position:absolute; right:26px; transform:translateY(-50%); padding:4px 10px; border-radius:999px; white-space:nowrap;
+  background:rgba(14,20,38,.86); color:#EEF3FB; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums;
+  border:1px solid rgba(169,203,232,.18); backdrop-filter:blur(8px) }
+.sk-back{ position:absolute; right:26px; bottom:-30px; pointer-events:auto; background:none; border:0; padding:2px 4px; cursor:pointer;
+  color:#9DB2D0; font-size:11.5px; text-decoration:underline; text-underline-offset:2px }
 .uv-step{ pointer-events:auto; height:34px; padding:0 16px; border-radius:999px; border:0; cursor:pointer; flex:none;
   background:#EEF3FB; color:#0B1226; font-size:13px; font-weight:600; transition:transform .25s var(--ease) }
 .uv-step:hover{ transform:scale(1.03) }
 /* the grahas in flight between the chart and the sky */
 .flight{ position:absolute; inset:0; pointer-events:none; z-index:20; overflow:visible }
 .flight img{ position:absolute; left:0; top:0; will-change:transform, opacity; filter:drop-shadow(0 6px 14px rgba(12,24,48,.45)) }
-@media (max-width:900px){ .sk-hint{ display:none } .sk-bar{ padding:10px 12px } .sk-where{ font-size:11px } }
+@media (max-width:900px){ .sk-hint{ display:none } .sk-bar{ padding:10px 12px } .sk-where{ font-size:11px }
+  .sk-seek{ right:10px; top:56px; bottom:40px } }
 
 /* ---------- Ask Astra: three exchanges, marked --------------------------- */
 .gdots{ display:flex; gap:6px; justify-content:center }
