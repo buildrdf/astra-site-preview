@@ -609,6 +609,9 @@ export function skyPanel(host, place) {
   };
   track.addEventListener("keydown", onKeys);
   cv.addEventListener("keydown", onKeys);
+  /* the heading follows the drag */
+  cv.addEventListener("pointermove", e => { if (e.buttons && field) paintWhere(); });
+  cv.addEventListener("keyup", () => { if (field) setTimeout(paintWhere, 300); });
   backNow.onclick = () => setOffset(0);
   paintSeek();
 

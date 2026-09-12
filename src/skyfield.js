@@ -63,6 +63,11 @@ export function createSkyField(canvas, opts = {}) {
       g.drawImage(im, LPAD, 0);
       g.save(); g.translate(LPAD, 0); g.scale(-1, 1); g.drawImage(im, 0, 0, LPAD, LH, 0, 0, LPAD, LH); g.restore();
       g.save(); g.translate(LW + 2 * LPAD, 0); g.scale(-1, 1); g.drawImage(im, LW - LPAD, 0, LPAD, LH, 0, 0, LPAD, LH); g.restore();
+      /* the lowest rows fade out, so the strip melts into the earth colour beneath it
+         rather than ending on a line when the view tilts down (skyview.js does the same) */
+      const fd = g.createLinearGradient(0, LH * .84, 0, LH); fd.addColorStop(0, "rgba(0,0,0,0)"); fd.addColorStop(1, "rgba(0,0,0,1)");
+      g.globalCompositeOperation = "destination-out"; g.fillStyle = fd; g.fillRect(0, LH * .84, cv.width, LH * .16);
+      g.globalCompositeOperation = "source-over";
       land = cv; dirty = true; kick(); }); }
   let off = null;
   function drawLand() {
@@ -83,17 +88,24 @@ export function createSkyField(canvas, opts = {}) {
       /* affine: source (x, y) → screen, x along the horizon, y down the slope */
       const a = (p1[0] - p0[0]) / dx, b = (p1[1] - p0[1]) / dx;
       const c = (q0[0] - p0[0]) / (sh * (altB < altA ? 1 : -1)), d = (q0[1] - p0[1]) / (sh * (altB < altA ? 1 : -1));
-      /* no clip per slice: neighbours overlap by a couple of source pixels instead, so the
-         anti-aliased edge of one never shows as a hairline against the next */
+      /* clipped to its own quad, grown by a pixel so the anti-aliased edges of neighbours
+         overlap rather than leave a hairline; without the clip the transformed rectangle
+         overshoots the far edge and the skyline grows teeth at steep angles */
+      const cx = (p0[0] + p1[0] + q0[0] + q1[0]) / 4, cy = (p0[1] + p1[1] + q0[1] + q1[1]) / 4;
+      const grow = (pt) => { const vx = pt[0] - cx, vy = pt[1] - cy, l = Math.hypot(vx, vy) || 1; return [pt[0] + vx / l * 1.2, pt[1] + vy / l * 1.2]; };
+      const [G0, G1, G2, G3] = [p0, p1, q1, q0].map(grow);
       g.save();
+      g.beginPath(); g.moveTo(G0[0], G0[1]); g.lineTo(G1[0], G1[1]); g.lineTo(G2[0], G2[1]); g.lineTo(G3[0], G3[1]); g.closePath(); g.clip();
       g.transform(a, b, c, d, p0[0] - a * x0 - c * eye, p0[1] - b * x0 - d * eye);
       const xl = Math.min(x0, x1) - 10, sw = Math.abs(dx) + 20;
       g.drawImage(land, xl, sy, sw, sh, xl, sy, sw, sh);
       g.restore();
     };
+    /* below the panorama's lowest row the ground polygon's own colour carries on to the
+       nadir — the same earth the strip fades into, so looking down never finds the sky */
     for (let a0 = 0; a0 < 360; a0 += LSLICE) {
       const a1 = a0 + LSLICE;
-      slab(a0, a1, 0, -LAND_DOWN, eye - 8, h - eye + 8);    /* the ground below the line first … */
+      slab(a0, a1, 0, -LAND_DOWN, eye - 8, h - eye + 8);    /* the ground below the line … */
       slab(a0, a1, 0, LAND_UP, 0, eye + 8);                 /* … then the peaks over its top edge */
     }
     /* one tint over the whole land: deep at night, almost none by day */
@@ -142,8 +154,11 @@ export function createSkyField(canvas, opts = {}) {
     dayK = Math.max(0, Math.min(1, (sunAlt + 6) / 14)); dayK = dayK * dayK * (3 - 2 * dayK);
 
     /* the ground: everything below altitude zero, so the horizon is real */
+    /* walked from directly behind the camera round to behind it again, so the visible
+       arc is one run of points — started at 0° it wrapped mid-screen whenever the view
+       faced north, the polygon crossed itself, and the ground came out sky-coloured */
     const horizon = [];
-    for (let a = 0; a <= 360; a += 2) { const p = project(a, 0); if (p) horizon.push(p); }
+    for (let a = cam.az - 180; a <= cam.az + 180; a += 2) { const p = project(norm360(a), 0); if (p) horizon.push(p); }
     /* the sky's own gradient — zenith, middle, horizon — the app's night keys
        (skyview.js SKY_KEYS), lifting to its day blue as the Sun comes up. */
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -160,7 +175,7 @@ export function createSkyField(canvas, opts = {}) {
       ctx.lineTo(horizon[horizon.length - 1][0], H + 40);
       ctx.lineTo(horizon[0][0], H + 40);
       ctx.closePath();
-      ctx.fillStyle = rgb(mix([5, 5, 6], [40, 52, 40], dayK));
+      ctx.fillStyle = rgb(mix([9, 10, 18], [58, 70, 46], dayK));
       ctx.fill();
       ctx.restore();
       if (land) drawLand();
@@ -194,7 +209,7 @@ export function createSkyField(canvas, opts = {}) {
       ctx.beginPath();
       let pen = false;
       for (const e of ecl) {
-        if (!e.p) { pen = false; continue; }
+        if (!e.p || (land && e.alt < -2)) { pen = false; continue; }
         pen ? ctx.lineTo(e.p[0], e.p[1]) : ctx.moveTo(e.p[0], e.p[1]);
         pen = true;
       }
@@ -208,6 +223,7 @@ export function createSkyField(canvas, opts = {}) {
         const p = project(az, alt);
         if (!p) continue;
         const img = rashiArt[s];
+        if (land && alt < -4) continue;                     /* the ground is opaque */
         if (img?.complete && img.naturalWidth) {
           /* size by the HEIGHT of the belt, not the frame's short side: a tall
              plate sized off its width grows until one sign fills the sky */
@@ -236,12 +252,13 @@ export function createSkyField(canvas, opts = {}) {
       ctx.strokeStyle = `rgba(255,255,255,${(.16 * (1 - dayK)).toFixed(3)})`; ctx.lineWidth = 1;
       for (const [i, j] of ast.lines) {
         const a = pts[i]?.p, b = pts[j]?.p;
-        if (!a || !b) continue;
+        if (!a || !b || (land && (pts[i].alt < -1 || pts[j].alt < -1))) continue;
         ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
       }
       for (const s of pts) {
         if (!s.p) continue;
         const r = Math.max(.9, 3.1 - s.m * .42);
+        if (land && s.alt < -1) continue;                           /* nothing shines through the ground */
         const dim = (s.alt < 0 ? .22 : 1) * (1 - dayK * .92);      /* stars go with the day */
         ctx.beginPath(); ctx.arc(s.p[0], s.p[1], r, 0, 7);
         ctx.fillStyle = `rgba(255,255,255,${(.55 + (4.6 - s.m) * .11) * dim})`;
