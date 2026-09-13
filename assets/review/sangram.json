@@ -1,0 +1,128 @@
+{
+ "screen": {
+  "yogas": [
+   {
+    "name": "Budha-Aditya Yoga",
+    "sanskrit": "बुधादित्य योग",
+    "strength": "moderate",
+    "planets": [
+     "Sun",
+     "Mercury"
+    ]
+   },
+   {
+    "name": "Sunapha Yoga",
+    "sanskrit": "सुनफा योग",
+    "strength": "strong",
+    "planets": [
+     "Moon",
+     "Saturn"
+    ]
+   },
+   {
+    "name": "Vosi Yoga",
+    "sanskrit": "वोशि योग",
+    "strength": "moderate",
+    "planets": [
+     "Sun",
+     "Mars",
+     "Venus"
+    ]
+   },
+   {
+    "name": "Vasumathi Yoga",
+    "sanskrit": "वसुमती योग",
+    "strength": "strong",
+    "planets": [
+     "Venus",
+     "Mercury"
+    ]
+   },
+   {
+    "name": "Lakshmi Yoga",
+    "sanskrit": "लक्ष्मी योग",
+    "strength": "strong",
+    "planets": [
+     "Saturn",
+     "Venus"
+    ]
+   },
+   {
+    "name": "Parivartana Yoga (Maha)",
+    "sanskrit": "परिवर्तन योग",
+    "strength": "strong",
+    "planets": [
+     "Sun",
+     "Jupiter"
+    ]
+   },
+   {
+    "name": "Amala Yoga",
+    "sanskrit": "अमल योग",
+    "strength": "weak",
+    "planets": [
+     "Venus"
+    ]
+   },
+   {
+    "name": "Parvata Yoga",
+    "sanskrit": "पर्वत योग",
+    "strength": "moderate",
+    "planets": [
+     "Venus",
+     "Mars",
+     "Jupiter"
+    ]
+   },
+   {
+    "name": "Neecha Bhanga Raja Yoga",
+    "sanskrit": "नीचभङ्ग राजयोग",
+    "strength": "strong",
+    "planets": [
+     "Mercury",
+     "Jupiter",
+     "Venus"
+    ]
+   },
+   {
+    "name": "Raja Yoga (Kendra-Trikona)",
+    "sanskrit": "राजयोग (केन्द्र-त्रिकोण)",
+    "strength": "strong",
+    "planets": [
+     "Sun",
+     "Mercury",
+     "Mars",
+     "Venus",
+     "Saturn"
+    ]
+   },
+   {
+    "name": "Bheri Yoga",
+    "sanskrit": "भेरी योग",
+    "strength": "strong",
+    "planets": [
+     "Jupiter",
+     "Venus",
+     "Saturn"
+    ]
+   }
+  ],
+  "doshas": [
+   {
+    "name": "Kalsarpa",
+    "sanskrit": "कालसर्प",
+    "present": false
+   },
+   {
+    "name": "Guru Chandal",
+    "sanskrit": "गुरु चाण्डाल",
+    "present": false
+   },
+   {
+    "name": "Chandra Grahan",
+    "sanskrit": "चन्द्र ग्रहण",
+    "present": true
+   }
+  ]
+ }
+}
