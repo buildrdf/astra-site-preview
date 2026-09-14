@@ -124,5 +124,136 @@
     "present": true
    }
   ]
+ },
+ "text": {
+  "lordIn": {
+   "1": "The lord of the 1st in the 10th is traditionally read as self-realization through career and public life — your identity is shaped by your ambitions and achievements.",
+   "2": "The lord of the 2nd in the 11th is traditionally read as family and stored wealth contributing to gains and networks — resources and speech can foster friendships and community ties.",
+   "3": "The lord of the 3rd house in the 8th is traditionally read as depth and transformation influencing your communication and sibling relations — courage is often tested through shared resources and profound changes.",
+   "4": "The lord of the 4th in the 11th is traditionally read as home and inner ground shaping gains and networks — social circles and aspirations might be rooted in shared family values or home-based connections.",
+   "5": "The lord of the 5th in the 11th is traditionally read as creativity and learning enhanced by networks and gains — your social circles and aspirations may provide fertile ground for your creative and educational pursuits.",
+   "6": "The lord of the 6th in the 10th is traditionally read as work and service contributing to career and public standing — your daily efforts may build your reputation and professional identity.",
+   "7": "The lord of the 7th in the 10th is traditionally read as partnership influencing career and public standing — professional relationships might boost your reputation or lead to visible accomplishments.",
+   "8": "The lord of the 8th in the 4th is traditionally read as transformation and shared depths influencing home and inner ground — changes within can reshape the sense of foundation and family.",
+   "9": "The lord of the 9th in the 9th is traditionally read as fortune and belief finding their home — your natural inclination towards philosophical pursuits and teaching is emphasized.",
+   "10": "The lord of your 10th in the 9th is traditionally read as career connected to belief and higher learning — your professional path may be guided by teachers and philosophy.",
+   "11": "The lord of the 11th in the 4th is traditionally read as social networks grounding you at home — friendships and gains find their roots in your private and inner life, shaping your sense of security.",
+   "12": "The lord of the 12th in the 10th is traditionally read as retreat affecting career visibility — your professional standing may gain depth from private reflection, and public achievements often root in quiet moments."
+  },
+  "planetIn": {
+   "Sun": "The Sun in the 11th is traditionally read as shining through networks and shared ambitions — a natural centre of gravity among friends.",
+   "Moon": "The Moon in the 8th is traditionally read as a deep-running emotional life — feelings arrive in tides, and privacy is not secrecy but shelter.",
+   "Mars": "Mars in the 10th is traditionally read as ambition in motion — a career built by doing, and authority earned through visible effort.",
+   "Mercury": "Mercury in the 11th is traditionally read as a networked mind — wide circles, many conversations, and gains arriving through information.",
+   "Jupiter": "Jupiter in the 4th is traditionally read as abundance at home — a full house, comfort that expands, and peace treated as wealth.",
+   "Venus": "Venus in the 10th is traditionally read as charm in public — a career touched by art or diplomacy, and a reputation for being pleasant to deal with.",
+   "Saturn": "Saturn in the 9th is traditionally read as faith tested into strength — beliefs earned rather than inherited, and wisdom from hard teachers.",
+   "Rahu": "Rahu in the 8th is traditionally read as hunger for the hidden — drawn to mysteries, research and transformation, rarely content with surfaces.",
+   "Ketu": "Ketu in the 2nd is traditionally read as detachment from accumulation — money held loosely, and speech that is spare but cuts to the point."
+  },
+  "planetSign": {
+   "Sun": "The Sun in Pisces is traditionally read as identity dissolved into compassion and imagination — empathy and creativity weave through your life, inviting connection and dreams.",
+   "Moon": "The Moon in Sagittarius is traditionally read as emotions that wander through exploration and adventure — feelings often buoyant and expansive, with a thirst for discovery.",
+   "Mars": "Mars in Aquarius is traditionally read as innovative and unconventional drive — your energy is directed toward progressive ideas and collective endeavors, with originality leading the way.",
+   "Mercury": "Mercury in Pisces is traditionally read as communication that flows with imagination and empathy — words often interwoven with dreams and intuition. The tradition suggests that your thoughts may be vivid and poetic, with clarity enhanced by grounding in reality.",
+   "Jupiter": "Jupiter in Leo is traditionally read as confidence radiating into growth — your expansion often feels like a grand performance, with creativity fueling your sense of purpose.",
+   "Venus": "Venus in Aquarius is traditionally read as love expressed with innovation and independence — relationships value individuality and unconventional paths, often with a social or intellectual focus.",
+   "Saturn": "Saturn in Capricorn is traditionally read as focused ambition, where achievement is built on perseverance — goals are pursued steadily, and success is crafted with care.",
+   "Rahu": "Rahu in Sagittarius is traditionally read as an adventurous pursuit of truth and freedom — a philosophical spirit with a thirst for exploration and broad horizons.",
+   "Ketu": "Ketu in Gemini is traditionally read as a mind drawn to diverse ideas and communication, where focus and clarity are cultivated through steady engagement."
+  },
+  "opener": {
+   "Sun": "Every chart has exactly one Sun, and its house answers a simple question: where do you need to shine to feel like yourself? The tradition treats it as the king of the nine — wherever it sits, that part of life refuses to stay in the background.",
+   "Moon": "In Vedic astrology the Moon nearly outranks the Sun: it is the mind itself, and a whole layer of the tradition is counted from wherever yours sits. Its house shows what your feelings orbit — what you reach for when nobody is watching.",
+   "Mars": "Mars is the chart's supply of nerve — the willingness to push, compete and cut through. Its house shows where you fight, and the tradition is even-handed about it: the same heat that wins battles can start them.",
+   "Mercury": "Mercury is the fastest planet and the chart's translator — everything that involves words, numbers and quick connections runs through it. Its house shows where your mind does its best trading.",
+   "Jupiter": "Jupiter is the great benefic — the planet of more. Whichever house holds it is traditionally where life is generous with you, and where you in turn find it easiest to be generous.",
+   "Venus": "Venus is the planet of what delights you — love, art, comfort and taste. Its house is traditionally where life is at its most pleasant, and where you have an eye others lack.",
+   "Saturn": "Saturn is the slowest of the classical planets, and the tradition calls it the great teacher. Its house is where life makes you wait — and where, after the waiting, you end up more solid than anyone else in the room.",
+   "Rahu": "Rahu is not a planet but a point — the lunar node where eclipses occur — and the tradition treats it as pure appetite. Its house shows what you hunger for beyond reason, and where this life keeps pulling you toward the unfamiliar.",
+   "Ketu": "Ketu is Rahu's opposite point — the south node — and the tradition reads it as what you have already mastered and are half-finished wanting. Its house shows where you carry skill without hunger, and detachment that others mistake for distance."
+  },
+  "meaning": {
+   "Sun": "the self, vitality and authority",
+   "Moon": "the mind, mood and memory",
+   "Mars": "drive, courage and conflict",
+   "Mercury": "intellect, speech and commerce",
+   "Jupiter": "wisdom, growth and grace",
+   "Venus": "love, beauty and value",
+   "Saturn": "time, discipline and endurance",
+   "Rahu": "appetite, obsession and the foreign",
+   "Ketu": "detachment, release and past mastery"
+  },
+  "conj": {
+   "Sun+Mercury": "The Sun and Mercury together in a sign is traditionally read as a fusion of identity and intellect — communication becomes a key part of self-expression. Clarity and confidence in conveying ideas are strengths, while listening actively may require practice.",
+   "Moon+Rahu": "The Moon with Rahu is traditionally read with an emphasis on emotional intensity — imagination is heightened, but grounding these feelings can require careful management.",
+   "Mars+Venus": "The conjunction of Mars and Venus is traditionally viewed as desire blending with action — passion and charm are enhanced, though balancing assertiveness with sensitivity may take practice."
+  },
+  "houseStory": {
+   "1": "The first house is traditionally associated with self, body, and bearing. It governs how you step into the world, your physical presence, and how others first perceive you. Listen for themes of identity and self-expression in your life, as this house sets the stage for your personal journey.",
+   "2": "The second house is traditionally read as the domain of speech, family, and stored wealth. It speaks to how you voice your values and what you consider your material worth. Pay attention to your relationship with possessions and your family ties, as they shape the foundation of your security.",
+   "3": "The third house is traditionally associated with courage, siblings, and skill of hand. It governs your ability to learn, communicate, and connect with those close to you. Consider how you express your skills and courage in daily life — this house highlights the ties that bind your immediate world.",
+   "4": "The fourth house is traditionally associated with home, mother, and inner ground. It touches on your roots, emotional security, and the place you call sanctuary. Reflect on your sense of belonging and how you nurture your inner self, as this house speaks to where you find comfort and stability.",
+   "5": "The fifth house is traditionally read as encompassing creativity, children, and learning. It governs your expressions of joy, romantic inclinations, and intellectual pursuits. Look for where your heart finds delight and how you share that spark with the world, as this house captures your creative drive.",
+   "6": "The sixth house is traditionally associated with work, service, and obstacles met. It deals with daily routines, health, and how you tackle challenges. Consider the rhythms of your work life and how you balance service with self-care — this house speaks to your approach to life's demands.",
+   "7": "The seventh house is traditionally read as the realm of partnership and the other. It governs your relationships, both personal and professional, and how you navigate shared space. Reflect on the balance of give and take in your connections, as this house highlights the dance of togetherness.",
+   "8": "The eighth house is traditionally associated with depth, change, and what is shared. It invites you to explore transformation, intimacy, and the resources you merge with others. Look at the ways you handle change and shared commitments, as this house digs into the deeper currents of life.",
+   "9": "The ninth house is traditionally read as the domain of fortune, teachers, and belief. It covers your quests for knowledge, spiritual truths, and broader horizons. Tune into your search for meaning and how you expand your worldview, as this house speaks to the journey of discovery and faith.",
+   "10": "The tenth house is traditionally associated with career, standing, and visible work. It governs your public role, ambitions, and the legacy you build over time. Consider how you pursue goals and the image you project to the world, as this house highlights your professional path and achievements.",
+   "11": "The eleventh house is traditionally read as encompassing gains, friends, and networks. It speaks to the support systems that help you grow and the aspirations you share with others. Reflect on the community you build and the dreams you chase, as this house celebrates collective success and friendships.",
+   "12": "The twelfth house is traditionally associated with retreat, expense, and release. It touches on the hidden corners of the psyche, solitude, and the process of letting go. Consider how you find peace and the ways you seek closure, as this house guides you through the cycles of rest and renewal."
+  },
+  "dashaTheme": {
+   "Sun": "Sun periods are traditionally read as years of definition — authority, visibility and the slow clarifying of who you are when people are watching. Work tends to move toward the centre of life, and recognition matters more than it used to.",
+   "Moon": "Moon periods are traditionally read as years lived close to the skin — home, family, feeling and belonging come forward, and life is steered more by tides than by plans. Care, rest and the people who feel like harbour set the tone.",
+   "Mars": "Mars periods are traditionally read as years of drive — effort, competition, property and physical energy. Things move fast when they move; the classical advice is to give the heat somewhere useful to go.",
+   "Mercury": "Mercury periods are traditionally read as years of exchange — learning, trade, writing, networks and quick adaptation. Skills sharpen and doors open through conversation rather than force.",
+   "Jupiter": "Jupiter periods are traditionally read as expansive years — teachers, faith, children, growth and luck that arrives looking like good judgement. What you believe in tends to grow, so the tradition asks you to choose it carefully.",
+   "Venus": "Venus periods are traditionally read as years of relationship and refinement — partnership, beauty, comfort, art and the pleasures of a settled life. What you love takes the wheel.",
+   "Saturn": "Saturn periods are traditionally read as the great structural years — discipline, duty, endurance and work that compounds slowly. The tradition regards them as demanding, and reads what they build as built to last.",
+   "Rahu": "Rahu periods are traditionally read as years of appetite — ambition, foreign ground, unconventional routes and a hunger for what is just out of reach. They can carry you far; the classical caution is to check the map while moving.",
+   "Ketu": "Ketu periods are traditionally read as years of release — insight, detachment, spiritual pull and the quiet dismantling of what no longer fits. Less is gained than clarified."
+  },
+  "antar": {
+   "Sun": "brings matters of standing and direction to a head",
+   "Moon": "softens the stretch toward feeling, home and rest",
+   "Mars": "quickens it — effort, urgency and courage rise",
+   "Mercury": "turns it toward talk, trade, study and paperwork",
+   "Jupiter": "opens it out — growth, guidance and opportunity",
+   "Venus": "sweetens it — relationship, comfort and taste lead",
+   "Saturn": "slows and tests it — patient work is favoured",
+   "Rahu": "amplifies it — ambition and unusual routes call",
+   "Ketu": "loosens it — endings, insight and simplification"
+  },
+  "vara": {
+   "Sun": {
+    "day": "Sunday",
+    "practice": "Offering water to the rising sun — surya arghya — is one of the most widely documented daily practices in the tradition: water poured from a small vessel toward the morning sun. The navagraha mantra Om Suryaya Namah is traditionally recited. Failing either, a few quiet minutes facing the morning light serves the same spirit."
+   },
+   "Moon": {
+    "day": "Monday",
+    "practice": "Monday is traditionally kept simple: light eating, and an evening quiet enough to actually notice the Moon. Many observe a partial fast; the mantra Om Chandraya Namah is traditionally recited. A plainer version — step outside after dark and find the Moon — loses nothing essential."
+   },
+   "Mars": {
+    "day": "Tuesday",
+    "practice": "Tuesday is widely associated with Hanuman, and visiting a Hanuman temple on this day is a long-documented custom. In behavioural terms the day suits physical effort and deliberate restraint from argument — spending Mars rather than being spent by it. The mantra Om Angarakaya Namah is traditionally recited."
+   },
+   "Mercury": {
+    "day": "Wednesday",
+    "practice": "Wednesday traditionally favours Mercury's own work: study, writing, accounts, and tidying whatever involves words or numbers. Giving green gram or fresh greens in charity is a widely documented observance. The mantra Om Budhaya Namah is traditionally recited."
+   },
+   "Jupiter": {
+    "day": "Thursday",
+    "practice": "Thursday is Guruvara — the teacher's day. Honouring a teacher, in person or by message, is the most portable of its traditional observances; charity of yellow foods such as chana dal or turmeric is widely documented. The mantra Om Brihaspataye Namah is traditionally recited."
+   },
+   "Venus": {
+    "day": "Friday",
+    "practice": "Friday is widely associated with Lakshmi, and keeping the home clean and welcoming on this day is a long-documented custom. The day traditionally suits art, music and small acts of beauty — making something pleasing rather than merely consuming it. The mantra Om Shukraya Namah is traditionally recited."
+   },
+   "Saturn": {
+    "day": "Saturday",
+    "practice": "Saturday's most widely documented observances are practical: charity to labourers and those who work hard for little, and lighting a sesame-oil lamp for Shani in the evening. Finishing a neglected duty is very much in the day's spirit. The mantra Om Shanaishcharaya Namah is traditionally recited."
+   }
+  }
  }
 }
