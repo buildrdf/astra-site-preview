@@ -1,1 +1,1 @@
-const S=s=>globalThis.__ASTRA_ASSETS?.[s]??s;export{S as asset};
+const _=T=>globalThis.__ASTRA_ASSETS?.[T]??(globalThis.__ASTRA_ROOT||"")+T;export{_ as asset};
