@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#080F20">
 <title>Astra · V2</title>
-<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life chapters.">
+<meta name="description" content="Personal Vedic astrology for iPhone and Android. Your birth chart, your day, your life periods, and an app that shows its reasoning.">
 <link rel="icon" href="../assets/icon.png">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../next.css">
@@ -63,34 +63,104 @@
 <div class="beat" data-on="1">
 <p class="eyebrow">Vedic astrology. Made personal.</p>
 <h1 id="h1">Your chart. Your way forward.</h1>
-<p class="lede">Your birth chart, your day and your life chapters, explained by Astra.</p>
+<p class="lede">Your birth chart, your day and your life chapters, explained by Astra. The sky you were born under is where it starts.</p>
 </div>
 <div class="beat" data-on="0">
 <p class="eyebrow">Your birth chart</p>
 <h2>The sky at your first breath.</h2>
-<p class="lede">The planets, where they stood the minute you were born, become the chart Astra reads.</p>
+<p class="lede">Vedic astrology reads this planetary arrangement as a map of your strengths, challenges and the direction your life may take.</p>
 </div>
 <div class="beat" data-on="0">
 <p class="eyebrow">Introducing Astra</p>
 <h2>Calculated from your birth details. Explained through Vedic astrology.</h2>
-<p class="lede">Scroll on and watch a sample chart become a reading.</p>
+<p class="lede">Your strengths, challenges and life chapters, decoded into personal guidance with Astra.</p>
 </div>
 </div>
 <div class="hero-foot">
 <div class="hero-do">
-<a class="btn" href="../download/">Download Astra</a>
+<a class="btn" href="#free">Create my free Kundali</a>
 <button class="cue" id="cue" type="button" aria-label="Watch the chart form"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 7 9.5 11.5 5"/></svg></button>
-<a class="btn line" href="#born">Explore my birth chart</a>
+<button class="btn line" type="button" data-pop="get">Download Astra</button>
 </div>
 </div>
 </div>
 </section>
-<section class="act free-act v2-light v2-born" id="born" aria-labelledby="h-born">
+<section class="tour" id="tour" aria-labelledby="tourHead">
+<div class="tour-view">
+<div class="tour-say">
+<p class="eyebrow" id="tourEyebrow">What Astra does</p>
+<h2 id="tourHead">&nbsp;</h2>
+<p id="tourLine">&nbsp;</p>
+<button class="btn tour-cta" id="tourCta" type="button" data-pop="get" hidden>Explore my chart in Astra</button>
+</div>
+<div class="tour-grid">
+<div class="tour-nav" id="tourNav" role="tablist" aria-label="What Astra does"></div>
+<div class="prod"><div class="panel" id="panel"></div></div>
+</div>
+</div>
+</section>
+<section class="act shelf-act" id="reports" aria-labelledby="h-rep">
 <div class="wide">
 <div class="act-head">
-<p class="eyebrow" data-in>Personal, from the first minute</p>
-<h2 id="h-born" data-in>A moment in time. A chart of your own.</h2>
-<p class="lede" data-in>A sample person, born 10 January 1993 at 9:00 AM in Mumbai. Watch the sky of that minute become a chart, then touch any graha for its reading.</p>
+<p class="eyebrow" data-in>Your personal Kundali report</p>
+<h2 id="h-rep" data-in>Know yourself. Navigate your life.</h2>
+<p class="lede" data-in>An in-depth reading of your strengths, relationships and life chapters—with guidance you can return to.</p>
+<div class="head-actions" data-in>
+<a class="btn" href="../reports/essential-vedic-kundali/">Get my free report</a>
+<a class="btn line" href="../reports/">Compare the reports</a>
+</div>
+</div>
+<div class="shelf" id="shelf">
+<article class="book" data-in data-report="essential">
+<button class="cover" type="button" aria-label="Open the Essential Vedic Kundali and turn its pages">
+<img src="../assets/covers/essential.webp" alt="Cover of the Essential Vedic Kundali">
+<span class="open-hint">Open it</span>
+</button>
+<h3>Essential Vedic Kundali</h3>
+<p>Your first look at the bigger picture. Discover your planetary placements, houses and their traditional meanings in a free personal report.</p>
+<div class="price">Free <span>· no sign-up, no card</span></div>
+<a class="btn" href="../reports/essential-vedic-kundali/">Get mine</a>
+</article>
+<article class="book" data-in data-report="complete">
+<button class="cover" type="button" aria-label="Open the Complete Vedic Kundali and turn its pages">
+<img src="../assets/covers/complete.webp" alt="Cover of the Complete Vedic Kundali Analysis">
+<span class="open-hint">Open it</span>
+</button>
+<h3>The Complete Vedic Kundali</h3>
+<p>A deeper reading of your strengths, relationships and changing planetary periods, with guidance and traditional practices explained through your chart.</p>
+<div class="price">₹499 <span>· $14.99</span></div>
+<button class="btn line" type="button" data-pop="get" data-say="Get the Complete Vedic Kundali in Astra.">Get it in the app</button>
+</article>
+<article class="book" data-in data-report="milan">
+<button class="cover" type="button" aria-label="Open the Vedic Kundali Milan and turn its pages">
+<img src="../assets/covers/milan.webp" alt="Cover of the Vedic Kundali Milan compatibility analysis">
+<span class="open-hint">Open it</span>
+</button>
+<h3>Vedic Kundali Milan</h3>
+<p>Understand the relationship behind the score. Explore traditional compatibility, differences and questions worth discussing together.</p>
+<div class="price">₹399 <span>· $11.99</span></div>
+<button class="btn line" type="button" data-pop="get" data-say="Get the Vedic Kundali Milan in Astra.">Get it in the app</button>
+</article>
+</div>
+<div class="shelf-dots" id="shelfDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+</div>
+</section>
+<section class="act bento-act" id="more" aria-labelledby="h-more">
+<div class="wide">
+<div class="act-head">
+<p class="eyebrow" data-in>Go deeper with Astra</p>
+<h2 id="h-more" data-in>More insight. More ways forward.</h2>
+<p class="lede" data-in>From yogas and Sade Sati to lunar calendars and guided lessons, build the understanding to use your chart with confidence.</p>
+</div>
+<div class="bento" id="bento"></div>
+</div>
+</section>
+<section class="act free-act" id="free" aria-labelledby="h-free">
+<div class="wide">
+<div class="act-head">
+<p class="eyebrow" data-in>Your free birth chart</p>
+<h2 id="h-free" data-in>Your next insight starts at birth.</h2>
+<p class="lede" data-in>Enter when and where you were born. See your Kundali take shape and receive your free personal report.</p>
 </div>
 <div class="fr-stage" id="freeStage">
 <div class="fr-left">
@@ -118,99 +188,21 @@
 <div class="fr-offers" id="frOffers" hidden></div>
 </div>
 </div>
-<p class="v2-note">A sample chart. Yours is cast the same way, from your own minute and place.</p>
 </div>
 </section>
-<section class="act v2-light v2-sec" id="today" aria-labelledby="h-today">
-<div class="wide v2-two">
-<div class="v2-say">
-<p class="eyebrow" data-in>Daily guidance</p>
-<h2 id="h-today" data-in>What does today hold?</h2>
-<p class="lede" data-in>Your daily reading, grounded in your birth chart and today's planets.</p>
-<a class="btn v2-cta" data-in href="../download/">Read today's guidance in Astra</a>
-</div>
-<div class="v2-stage v2-stage-card" id="dailyHost"></div>
-</div>
-</section>
-<section class="act v2-light v2-sec v2-report" id="report" aria-labelledby="h-report">
-<div class="wide v2-two v2-two-r">
-<div class="v2-say">
-<p class="eyebrow" data-in>Your personal Kundali report</p>
-<h2 id="h-report" data-in>Your chart. The fuller picture.</h2>
-<p class="lede" data-in>Fifty pages that explain your strengths, relationships and life chapters, in a reading you can return to.</p>
-<ul class="v2-list" data-in>
-<li>Every house read with its lord, its occupants and its aspects</li>
-<li>Your year ahead, month by month, from your dashas and transits</li>
-<li>A prioritised remedy plan and a 90-day action plan</li>
-</ul>
-<div class="v2-actions" data-in>
-<button class="btn" type="button" id="previewReport">Preview the report</button>
-<a class="btn line" href="../reports/complete-vedic-kundali/">₹499 · What it includes</a>
-</div>
-<p class="v2-small" data-in>Free Essential report by email. The Complete Kundali and the Kundali Milan are bought in the app.</p>
-</div>
-<div class="v2-stage v2-shelf" id="reportStage">
-<div class="shelf rp-shelf">
-<article class="book" data-report="complete">
-<button class="cover" type="button" aria-label="Open the Complete Vedic Kundali and turn its pages">
-<img src="../assets/covers/complete.webp" alt="">
-<span class="open-hint">Open it</span>
-</button>
-</article>
-</div>
-</div>
-</div>
-</section>
-<section class="act v2-light v2-sec" id="timeline" aria-labelledby="h-time">
-<div class="wide">
-<div class="act-head">
-<p class="eyebrow" data-in>Your timeline</p>
-<h2 id="h-time" data-in>See your life in chapters.</h2>
-<p class="lede" data-in>Each planetary period has its own themes. Drag the timeline to explore a chapter.</p>
-</div>
-<div class="v2-stage v2-wide" id="timelineHost"></div>
-<p class="v2-hint">Drag the timeline to explore a life chapter.</p>
-</div>
-</section>
-<section class="act v2-light v2-sec v2-more" id="more" aria-labelledby="moreHead">
-<div class="wide">
-<div class="act-head">
-<p class="eyebrow" data-in>More to explore</p>
-<h2 id="moreHead" data-in>Talk to your Kundali.</h2>
-<p class="lede" id="moreLine" data-in>Ask the questions that matter. Answers grounded in your birth chart and today's sky.</p>
-</div>
-<div class="v2-tabs" id="moreTabs" role="tablist" aria-label="More features"></div>
-<div class="v2-stage v2-wide prod"><div class="panel" id="moreStage"></div></div>
-<p class="v2-hint">Demonstrations on a sample chart. Every one of them is yours in the app.</p>
-</div>
-</section>
-<section class="act v2-light v2-sec v2-trust" id="trust" aria-labelledby="h-trust">
-<div class="wide">
-<div class="act-head">
-<p class="eyebrow" data-in>How it works</p>
-<h2 id="h-trust" data-in>Calculated, then explained.</h2>
-</div>
-<div class="v2-grid4">
-<div data-in><b>The method</b><p>The sidereal zodiac with the Lahiri ayanamsa, the Vimshottari dasha and the North Indian chart. Every chart and date on this site is computed, never drawn.</p></div>
-<div data-in><b>Your privacy</b><p>Birth details are kept to cast your report and place it in the app when you sign in with the same email. Every report email carries a link to set it aside.</p></div>
-<div data-in><b>Where it runs</b><p>Astra is on iPhone and Android. The free Kundali arrives by email and is already in the app when you sign in.</p></div>
-<div data-in><b>What a reading is</b><p>What the tradition associates with a placement, in plain language, with the working shown. Never a promise that something will happen.</p></div>
-</div>
-</div>
-</section>
-<section class="act close-act v2-light" id="close" aria-labelledby="h-close">
+<section class="act close-act" id="close" aria-labelledby="h-close">
 <div class="shell">
 <p class="eyebrow" data-in>Astra · iPhone &amp; Android</p>
-<h2 id="h-close" data-in>Get to know your chart.</h2>
-<p class="lede" data-in style="max-width:44ch">Your birth chart, daily guidance and traditional practices, together in one app. Start with the free Kundali.</p>
+<h2 id="h-close" data-in>Unlock your potential with Astra.</h2>
+<p class="lede" data-in style="max-width:44ch">Bring your chart, daily guidance and traditional remedies together. Put personal insight into practice.</p>
 <div class="close-actions" data-in>
-<a class="btn" href="../download/">Download Astra</a>
-<a class="btn line" href="../reports/essential-vedic-kundali/">Create my free Kundali</a>
+<button class="btn" type="button" data-pop="get">Download Astra</button>
+<a class="btn line" href="#free">Create my free Kundali</a>
 </div>
 </div>
 </section>
 </main>
-<footer class="foot v2-foot" id="contact">
+<footer class="foot" id="contact">
 <div class="shell">
 <div class="foot-grid">
 <div class="foot-brand">
@@ -221,9 +213,23 @@
 <a class="store" href="https://play.google.com/store/apps/details?id=com.rdf.astra" aria-label="Get Astra on Google Play"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M1 .4l9.3 9.5L1 19.5c-.4-.2-.7-.7-.7-1.2V1.6C.3 1.1.6.6 1 .4zm10.4 10.6l2.6 2.6-11 6.3 8.4-8.9zm0-2L3 .1l11 6.3-2.6 2.6zm3.8.1l2.6 1.5c.8.5.8 1.3 0 1.8l-2.6 1.5-2.8-2.8 2.8-2z"/></svg><span><small>Get it on</small>Google Play</span></a>
 </div>
 </div>
-<nav class="foot-col" aria-label="Product"><h4>Product</h4><a href="../v2/#born">The App</a><a href="../download/">Download</a><a href="../reports/">All Reports</a><a href="../reports/essential-vedic-kundali/">Free Essential Kundali</a><a href="../reports/complete-vedic-kundali/">Complete Kundali</a><a href="../reports/kundali-milan/">Kundali Milan</a></nav>
-<nav class="foot-col" aria-label="Explore"><h4>Explore</h4><a href="../learn/">Learn</a><a href="../learn/famous-charts/">Famous Kundalis</a><a href="../learn/sade-sati/">Sade Sati</a></nav>
-<nav class="foot-col" aria-label="About and support"><h4>About &amp; Support</h4><span>Reality Distortion Field</span><a href="../#contactForm">Contact Us</a><a href="../terms.html">Privacy &amp; Terms</a></nav>
+<nav class="foot-col" aria-label="Astra">
+<h4>Astra</h4><a href="#tour">The app</a><a href="#more">More features</a><a href="#reports">Reports</a><a href="#free">Free Kundali</a>
+</nav>
+<nav class="foot-col" aria-label="Read">
+<h4>Learn</h4><a href="../learn/learn-astrology/">Learn Astrology</a><a href="../learn/sade-sati/">Sade Sati</a><a href="../learn/life-questions/">Life Questions</a><a href="../learn/famous-charts/">Famous Charts</a>
+</nav>
+<nav class="foot-col" aria-label="Company">
+<h4>Company</h4><span>Reality Distortion Field</span><a href="#contactForm">Contact us</a><a href="../terms.html">Terms &amp; privacy</a>
+</nav>
+<form class="foot-form" id="contactForm">
+<h4>Write to us</h4>
+<label class="sr" for="cfName">Name</label><input id="cfName" autocomplete="name" placeholder="Name" required>
+<label class="sr" for="cfMail">Email</label><input id="cfMail" type="email" autocomplete="email" placeholder="Email" required>
+<label class="sr" for="cfMsg">Message</label><textarea id="cfMsg" rows="3" placeholder="Message" required></textarea>
+<button class="btn" type="submit">Send</button>
+<p class="foot-status" id="cfStatus" aria-live="polite"></p>
+</form>
 </div>
 <div class="foot-base">
 <span>© 2026 Reality Distortion Field · Astra</span>
